@@ -1,0 +1,24 @@
+--- orig\StatisticForm.xml	2014-05-29 23:19:09.537048100 +0300
++++ StatisticForm.xml	2014-05-29 23:19:09.718058500 +0300
+@@ -15,4 +15,7 @@
+         </color>
+       </SetBackgroundColor>
++      <ImportAssets2 url="xvm.swf" reserved1="1" reserved2="0">
++        <symbols/>
++      </ImportAssets2>
+       <DefineShape3 objectID="1">
+         <bounds>
+@@ -40147,5 +40150,5 @@
+           <PushData>
+             <items>
+-              <StackString value="net.wargaming.BattleStatItemRenderer"/>
++              <StackString value="wot.wrapper.StatisticForm.BattleStatItemRenderer"/>
+             </items>
+           </PushData>
+@@ -40173,5 +40176,5 @@
+           <PushData>
+             <items>
+-              <StackString value="net.wargaming.BattleStatItemRenderer"/>
++              <StackString value="wot.wrapper.StatisticForm.BattleStatItemRenderer"/>
+             </items>
+           </PushData>
