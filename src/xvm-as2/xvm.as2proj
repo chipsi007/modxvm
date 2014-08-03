@@ -59,6 +59,8 @@
     <compile path="src\wot\VehicleMarkersManager\VehicleMarkerProxy.as" />
     <compile path="src\wot\PlayersPanel\PlayersPanel.as" />
     <compile path="src\wot\PlayersPanel\PlayerListItemRenderer.as" />
+    <compile path="src\wot\BattleMessenger\BattleMessenger.as" />
+    <compile path="src\wot\BattleMessenger\BattleMessageRenderer.as" />
   </compileTargets>
   <!-- Assets to embed into the output SWF -->
   <library>
