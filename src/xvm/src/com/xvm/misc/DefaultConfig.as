@@ -42,6 +42,7 @@ package com.xvm.misc
             c.iconset = getIconsetSection();
             c.vehicleNames = new Object();
             c.consts = getConstsSection();
+            c.battleMessenger = getBattleMessengerSection();
             return c;
         }
 
@@ -1201,6 +1202,44 @@ package com.xvm.misc
                 VM_COEFF_MM_BASE: 0.8, // minimap (base)
                 VM_COEFF_FC: 0.93 // frag correlation
             };
+        }
+
+        private static function getBattleMessengerSection():CBattleMessenger
+        {
+            var c:CBattleMessenger = new CBattleMessenger();
+            c.enabled = true;
+            c.messageLifeTime = 10;
+            c.chatLength = 10;
+            c.backgroundAlpha = 100;
+            c.ignore = {
+                clan: true,
+                squad: true,
+                companyBattle: true,
+                specialBattle: true,
+                trainingBattle: true,
+                randomBattle: true
+            };
+            c.blockAlly = {
+                dead: false,
+                alive: false
+            };
+            c.blockEnemy = {
+                dead: false,
+                alive: false
+            };
+            c.antispam = {
+                enabled: false,
+                duplicateCount: 2,
+                duplicateInterval: 7,
+                playerCount: 3,
+                playerInterval: 7,
+                WG_Filters: false,
+                customFilters: []
+            };
+            c.enableRatingFilter = false;
+            c.minRating = 0;
+            c.debugMode = false;
+            return c;
         }
 
         /////////////////////

@@ -109,6 +109,10 @@
   // Параметры экрана загрузки боя.
   "battleLoading": ${"battleLoading.xc":"battleLoading"},
 
+  // Parameters of the battle chat.
+  // Параметры боевого чата.
+  "battleMessenger": ${"battleMessenger.xc":"battleMessenger"},
+
   // Parameters of the Battle Statistics form.
   // Параметры окна статистики по клавише Tab.
   "statisticForm": ${"statisticForm.xc":"statisticForm"},
