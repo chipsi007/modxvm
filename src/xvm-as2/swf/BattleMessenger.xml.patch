@@ -1,0 +1,24 @@
+--- orig\BattleMessenger.xml	2014-07-30 14:52:44 +0300
++++ BattleMessenger.xml	2014-07-30 14:55:10 +0300
+@@ -12,4 +12,7 @@
+         </color>
+       </SetBackgroundColor>
++      <ImportAssets2 url="xvm.swf" reserved1="1" reserved2="0">
++        <symbols/>
++      </ImportAssets2>
+       <DefineBitsLossless2 objectID="1" format="5" width="15" height="15">
+         <data>
+@@ -59252,5 +59255,5 @@
+           <PushData>
+             <items>
+-              <StackString value="net.wargaming.messenger.BattleMessenger"/>
++              <StackString value="wot.wrapper.BattleMessenger.BattleMessenger"/>
+             </items>
+           </PushData>
+@@ -59278,5 +59281,5 @@
+           <PushData>
+             <items>
+-              <StackString value="net.wargaming.messenger.controls.BattleMessageRenderer"/>
++              <StackString value="wot.wrapper.BattleMessenger.BattleMessageRenderer"/>
+             </items>
+           </PushData>
