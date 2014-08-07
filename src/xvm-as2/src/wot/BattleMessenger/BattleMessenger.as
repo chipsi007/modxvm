@@ -94,7 +94,7 @@ class wot.BattleMessenger.BattleMessenger
     private var lastReason:String = null;
 
     private function onConfigLoaded() {
-        Logger.add("onConfigLoaded()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]onConfigLoaded()");
         if(Config.config.battleMessenger.antispam.enabled)
             this.antispam = new Antispam();
     }
@@ -102,11 +102,7 @@ class wot.BattleMessenger.BattleMessenger
     public function onGuiInit() {
         Logger.add("onGuiInit()");
         if(Config.config.battleMessenger.enabled){
-            /**
-             * this.messageList = child of net.wargaming.notification.FadingMessageList
-             * this.messageList.stackLength not working, need _stackLength
-             */
-            this.base.messageList._stackLength = Config.config.battleMessenger.chatLength;
+            this.wrapper.messageList._stackLength = Config.config.battleMessenger.chatLength;
             this.self = StatsDataProxy.getSelf();
             if (!this.self) {
                 this.sendDebugMessage("Error: can't found own identity");
