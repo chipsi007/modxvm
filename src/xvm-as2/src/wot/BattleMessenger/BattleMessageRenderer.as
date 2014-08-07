@@ -13,42 +13,40 @@ class wot.BattleMessenger.BattleMessageRenderer
     private var wrapper:net.wargaming.messenger.controls.BattleMessageRenderer;
     private var base:net.wargaming.messenger.controls.BattleMessageRenderer;
 
-    public function BattleMessageRenderer(wrapper:net.wargaming.messenger.controls.BattleMessageRenderer, base:net.wargaming.messenger.controls.BattleMessageRenderer)
-    {
+    private var m_backgroundAlpha:Number = 0;
+    private var m_messageLifeTime:Number = 0;
+
+    public function BattleMessageRenderer(wrapper:net.wargaming.messenger.controls.BattleMessageRenderer, base:net.wargaming.messenger.controls.BattleMessageRenderer) {
         Logger.add("BattleMessageRenderer()");
         this.wrapper = wrapper;
         this.base = base;
         BattleMessageRendererCtor();
     }
 
-    function populateData(initData)
-    {
+    function populateData(initData) {
         Logger.add("populateData()");
         return this.populateDataImpl.apply(this, arguments);
-    }   
+    }
 
     // wrapped methods
     /////////////////////////////////////////////////////////////////
-    
-    //Ctor
+
     public function BattleMessageRendererCtor() {
         Logger.add("BattleMessageRendererCtor()");
         Utils.TraceXvmModule("BattleMessenger");
+
+        c_backgroundAlpha = Config.config.battleMessenger.backgroundAlpha;
+        c_messageLifeTime = Config.config.battleMessenger.messageLifeTime;
     }
 
     //Impl
-    function populateDataImpl(initData)
-    {   
-        Logger.add("populateDataImpl()");
+    function populateDataImpl(initData) {
+        Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]populateDataImpl()");
+        Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]c_backgroundAlpha="+c_backgroundAlpha+",c_messageLifeTime="+c_messageLifeTime);
 
-        //FIXME: I don't known what is the right strings
-        this.wrapper.background._alpha = Config.config.battleMessenger.backgroundAlpha;
-        this.wrapper._lifeTime = Config.config.battleMessenger.messageLifeTime;
-        this.base.background._alpha = Config.config.battleMessenger.backgroundAlpha;
-        this.base._lifeTime = Config.config.battleMessenger.messageLifeTime;
-        base.background._alpha = Config.config.battleMessenger.backgroundAlpha;
-        base._lifeTime = Config.config.battleMessenger.messageLifeTime;
+        wrapper.background._alpha = c_backgroundAlpha;
+        wrapper._lifeTime = c_messageLifeTime;
 
-        this.base.populateData(initData);
+        base.populateData(initData);
     }
 }
