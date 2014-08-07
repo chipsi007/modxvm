@@ -168,8 +168,8 @@ class wot.BattleMessenger.BattleMessenger
             return true;
         }
 
-        /** Ignore by battle type, skip self */
-        if (isSameTeam(sender) && !himself) {
+        /** Ignore by battle type */
+        if (isSameTeam(sender)) {
             switch(battleType) {
                 case StatsDataProxy.BATTLE_RANDOM:
                     if (Config.config.battleMessenger.ignore.randomBattle) {

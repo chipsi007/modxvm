@@ -1219,12 +1219,12 @@ package com.xvm.misc
             c.chatLength = 10;
             c.backgroundAlpha = 100;
             c.ignore = {
-                clan: true,
-                squad: true,
-                companyBattle: true,
-                specialBattle: true,
-                trainingBattle: true,
-                randomBattle: true
+                clan: false,
+                squad: false,
+                companyBattle: false,
+                specialBattle: false,
+                trainingBattle: false,
+                randomBattle: false
             };
             c.blockAlly = {
                 dead: false,

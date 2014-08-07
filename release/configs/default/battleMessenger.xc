@@ -6,7 +6,7 @@
 
     // Enable debug mode.
     // Режим отладки.
-    "debugMode": true,
+    "debugMode": false,
 
     // Enable rating filters
     // Включение фильтра по рейтингу
@@ -28,15 +28,15 @@
     // Прозрачность фона (от 0 до 100)
     "backgroundAlpha": 100,
 
-    // Mod will not hide any message from:
-    // Мод не будет скрывать сообщения в следующих типах боёв:
+    // Mod will hide any messages from allies in next battle types:
+    // Мод будет скрывать сообщения от союзников в следующих типах боёв:
     "ignore": {
-      "clan": true,
-      "squad": true,
-      "companyBattle": true,
-      "specialBattle": true,
-      "trainingBattle": true,
-      "randomBattle": true
+      "clan": false,
+      "squad": false,
+      "companyBattle": false,
+      "specialBattle": false,
+      "trainingBattle": false,
+      "randomBattle": false
     },
 
     // Hide messages from allies. true - hide, false - show.
