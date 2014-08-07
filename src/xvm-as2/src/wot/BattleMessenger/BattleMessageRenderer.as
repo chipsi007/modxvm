@@ -13,8 +13,8 @@ class wot.BattleMessenger.BattleMessageRenderer
     private var wrapper:net.wargaming.messenger.controls.BattleMessageRenderer;
     private var base:net.wargaming.messenger.controls.BattleMessageRenderer;
 
-    private var m_backgroundAlpha:Number = 0;
-    private var m_messageLifeTime:Number = 0;
+    private var c_backgroundAlpha:Number = 0;
+    private var c_messageLifeTime:Number = 0;
 
     public function BattleMessageRenderer(wrapper:net.wargaming.messenger.controls.BattleMessageRenderer, base:net.wargaming.messenger.controls.BattleMessageRenderer) {
         Logger.add("BattleMessageRenderer()");
@@ -42,7 +42,6 @@ class wot.BattleMessenger.BattleMessageRenderer
     //Impl
     function populateDataImpl(initData) {
         Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]populateDataImpl()");
-        Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]c_backgroundAlpha="+c_backgroundAlpha+",c_messageLifeTime="+c_messageLifeTime);
 
         wrapper.background._alpha = c_backgroundAlpha;
         wrapper._lifeTime = c_messageLifeTime;
