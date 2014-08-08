@@ -1215,24 +1215,27 @@ package com.xvm.misc
         {
             var c:CBattleMessenger = new CBattleMessenger();
             c.enabled = true;
+            c.debugMode = false;
             c.messageLifeTime = 10;
             c.chatLength = 10;
             c.backgroundAlpha = 100;
-            c.ignore = {
-                clan: false,
-                squad: false,
-                companyBattle: false,
-                specialBattle: false,
-                trainingBattle: false,
-                randomBattle: false
-            };
-            c.blockAlly = {
-                dead: false,
-                alive: false
-            };
-            c.blockEnemy = {
-                dead: false,
-                alive: false
+            c.block = {
+                "ally": {
+                    "clan": none,
+                    "squad": none,
+                    "companyBattle": none,
+                    "specialBattle": none,
+                    "trainingBattle": none,
+                    "randomBattle": none
+                },
+                "enemy": {
+                    "clan": none,
+                    "squad": none,
+                    "companyBattle": none,
+                    "specialBattle": none,
+                    "trainingBattle": none,
+                    "randomBattle": none
+                }
             };
             c.antispam = {
                 enabled: false,
@@ -1247,7 +1250,7 @@ package com.xvm.misc
                 enabled: false,
                 minWN8: 0
             };
-            c.debugMode = false;
+            
             return c;
         }
 
