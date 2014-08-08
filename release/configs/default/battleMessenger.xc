@@ -8,14 +8,6 @@
     // Режим отладки.
     "debugMode": false,
 
-    // Enable rating filters
-    // Включение фильтра по рейтингу
-    "enableRatingFilter": false,
-
-    // Minimum WN8 rating of sender for displaying message.
-    // Минимальное значение рейтинга у игрока, при котором отображается его сообщение.
-    "minRating": 0,
-
     // Message display time in seconds.
     // Время отображения сообщения в секундах.
     "messageLifeTime": 10,
@@ -77,6 +69,18 @@
       //Custom filters: block all messages containing these mask
       //Пользовательский фильтр: блокировка всех сообщений, которые попадают под эти маски.
       "customFilters": []
+    },
+
+    // Rating filters
+    // Фильтры по рейтингу
+    "ratingFilters": {
+      // Enable rating filters
+      // Включение фильтров по рейтингу
+      "enabled": false,
+      
+      // Minimum WN8 rating of sender for displaying message.
+      // Минимальное значение рейтинга у игрока, при котором отображается его сообщение.
+      "minWN8": 0
     }
   }
 }

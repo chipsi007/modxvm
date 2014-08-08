@@ -196,7 +196,7 @@ class wot.BattleMessenger.BattleMessenger
         }
 
         /** XVM */
-        if (Config.config.battleMessenger.enableRatingFilter && Config.config.ratings.showPlayersStatistics && !isXvmRatingHigher(sender) ) 
+        if (Config.config.battleMessenger.RatingFilters.enabled && Config.config.ratings.showPlayersStatistics && !isXvmRatingHigher(sender) ) 
 			return false;
 
         /** Dead/Alive */
@@ -292,9 +292,9 @@ class wot.BattleMessenger.BattleMessenger
             /** stats must be loaded */
             if (com.xvm.Stat.s_data[xvmKey].loadstate == com.xvm.Defines.LOADSTATE_DONE) 
             {
-                if (com.xvm.Stat.s_data[xvmKey].stat.wn8 < Config.config.battleMessenger.minRating) 
+                if (com.xvm.Stat.s_data[xvmKey].stat.wn8 < Config.config.battleMessenger.ratingFilters.minWN8) 
                 {
-                    this.lastReason = "XVM rating: " + com.xvm.Stat.s_data[xvmKey].stat.wn8;
+                    this.lastReason = "WN8 rating: " + com.xvm.Stat.s_data[xvmKey].stat.wn8;
                     return false;
                 }
             }

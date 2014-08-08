@@ -1243,8 +1243,10 @@ package com.xvm.misc
                 WG_Filters: false,
                 customFilters: []
             };
-            c.enableRatingFilter = false;
-            c.minRating = 0;
+            c.ratingFilters = {
+                enabled: false,
+                minWN8: 0
+            };
             c.debugMode = false;
             return c;
         }
