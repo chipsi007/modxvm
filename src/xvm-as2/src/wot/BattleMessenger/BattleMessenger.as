@@ -122,6 +122,7 @@ class wot.BattleMessenger.BattleMessenger
 
     public function getDisplayStatus(message:String, himself:Boolean):Boolean {
         Logger.add("[AS2][BattleMessenger/BattleMessenger]getDisplayStatus()");
+
         /** ignore own msg (not in debug mode)*/
         if (himself && !Config.config.battleMessenger.debugMode) {
             return true;
@@ -158,76 +159,12 @@ class wot.BattleMessenger.BattleMessenger
         }
         /** /split */
 
-        /** Ignore */
-        if (ignoreForClan(sender)) {
-            this.lastReason = "Ignore: own clan";
-            return false;
-        }
-        if (ignoreForSquad(sender)) {
-            this.lastReason = "Ignore: own squad";
-            return false;
-        }
+        /** Call blocker function */
+        if (!blocker(sender)){
+            return false; } 
 
-        /** Ignore by battle type */
-        if (isSameTeam(sender)) {
-            switch(battleType) {
-                case StatsDataProxy.BATTLE_RANDOM:
-                    if (Config.config.battleMessenger.ignore.randomBattle) {
-                        this.lastReason = "Ignore: ally in Random battle";
-                        return false;
-                    } break;
-                case StatsDataProxy.BATTLE_COMPANY:
-                case StatsDataProxy.BATTLE_TEAM_7x7:
-                    if (Config.config.battleMessenger.ignore.companyBattle) {
-                        this.lastReason = "Ignore: ally in Company battle";
-                        return false;
-                    } break;
-                case StatsDataProxy.BATTLE_SPECIAL:
-                    if (Config.config.battleMessenger.ignore.specialBattle) {
-                        this.lastReason = "Ignore: ally in Special battle";
-                        return false;
-                    } break;
-                case StatsDataProxy.BATTLE_TRAINING:
-                    if (Config.config.battleMessenger.ignore.trainingBattle) {
-                        this.lastReason = "Ignore: ally in Training battle";
-                        return false;
-                    } break;
-            }
-        }
-        else
-        {
-            switch(battleType) {
-                case StatsDataProxy.BATTLE_RANDOM:
-                    if (Config.config.battleMessenger.ignore.randomBattle) {
-                        this.lastReason = "Ignore: ally in Random battle";
-                        return false;
-                    } break;
-                case StatsDataProxy.BATTLE_COMPANY:
-                case StatsDataProxy.BATTLE_TEAM_7x7:
-                    if (Config.config.battleMessenger.ignore.companyBattle) {
-                        this.lastReason = "Ignore: ally in Company battle";
-                        return false;
-                    } break;
-                case StatsDataProxy.BATTLE_SPECIAL:
-                    if (Config.config.battleMessenger.ignore.specialBattle) {
-                        this.lastReason = "Ignore: ally in Special battle";
-                        return false;
-                    } break;
-                case StatsDataProxy.BATTLE_TRAINING:
-                    if (Config.config.battleMessenger.ignore.trainingBattle) {
-                        this.lastReason = "Ignore: ally in Training battle";
-                        return false;
-                    } break;
-            }
-        }
-
-        /** XVM */
-        if (Config.config.battleMessenger.ratingFilters.enabled && Config.config.rating.showPlayersStatistics && !isXvmRatingHigher(sender)) {
-            return false;
-        }
-
-        /** Dead/Alive */
-        if (isTeamStatusBlock(sender)) {
+        /** Block by rating */
+        if (Config.config.battleMessenger.ratingFilters.enabled && Config.config.rating.showPlayersStatistics && !isPlayerRatingHigher(sender)) {
             return false;
         }
 
@@ -250,24 +187,94 @@ class wot.BattleMessenger.BattleMessenger
     }
 
     /**
+     * Check if we should block player by block section in config
+     * @param   player
+     * @return  true for blocking situation, false if player is clean
+     */
+    private function blocker(player:Player):Boolean {
+        var toBlock:Boolean = false;
+        //By battle type
+        switch(battleType) {
+            case StatsDataProxy.BATTLE_RANDOM:
+                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.randomBattle", "Block: ALLYORENEMY in random battle")
+                break;
+            case StatsDataProxy.BATTLE_COMPANY:
+            case StatsDataProxy.BATTLE_TEAM_7x7:
+                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.companyBattle", "Block: ALLYORENEMY in company battle")
+                break;
+            case StatsDataProxy.BATTLE_SPECIAL:
+                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.specialBattle", "Block: ALLYORENEMY in special battle")
+                break;
+            case StatsDataProxy.BATTLE_TRAINING:
+                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.trainingBattle", "Block: ALLYORENEMY in training battle")
+                break;
+        }
+        
+        //By clan
+        if (isPlayerInClan(player) && !toBlock) {
+            toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.clan", "Block: ALLYORENEMY in clan");
+        }
+
+        //By squad
+        if (isPlayerInSquad(player) && !toBlock) {
+            toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.squad", "Block: ALLYORENEMY in squad");
+        }
+        
+        return toBlock;
+    }
+    
+    /**
+     * Helper function to blocker function
+     * @param   player
+     * @param   type - name of config section, none/alive/dead/both
+     * @param   reason - reason of blocking
+     * @return  true for blocking situation, false if player is clean
+     */
+    private function blockerHelper(player:Player, type:String, reason:String) {
+        var dead:Boolean = StatsDataProxy.isPlayerDead(player.uid);
+        var toBlock = false;
+
+        if (isPlayerInAllyTeam){
+            reason = Utils.strReplace(type, "ALLYORENEMY", "ally");
+            type = Utils.strReplace(type, "ALLYORENEMY", "ally");
+        } else {
+            reason = Utils.strReplace(type, "ALLYORENEMY", "ally");
+            type = Utils.strReplace(type, "ALLYORENEMY", "enemy");
+        }
+            
+        type = this[type]();
+        Logger.add("NOTABENE:" + type);
+
+        if ( type == "none") { toBlock = false; }
+        else if (type == "both") { toBlock = true;  }
+        else if (type == "alive" && !dead) { toBlock = true;  }
+        else if (type == "dead"  && dead) { toBlock = true;  }
+        else { toBlock = false; }
+
+        if (toBlock)
+            this.lastReason = reason;
+
+        return toBlock;
+    }
+        
+    /**
      * @return  null on empty reason
      */
     public function popReason():String {
-        Logger.add("popReason()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]popReason()");
         var ret = this.lastReason;;
         this.lastReason = null;
         return ret;
     }
 
     private function sendDebugMessage(text:String, ignoreDebugMode:Boolean) {
-        Logger.add("sendDebugMessage()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]sendDebugMessage()");
         if (Config.config.battleMessenger.enabled && (Config.config.battleMessenger.debugMode || ignoreDebugMode) && text.length > 0) {
             Logger.add("[AS2][BattleMessenger/BattleMessenger] " + text);
             base._onRecieveChannelMessage(null, "<font color='" + DEBUG_COLOR + "'>" + text + "</font>", true, false);
         }
     }
 
-    /** <font color='#FFC697'>UserName[clan] (vehicle) */
     private function getPlayerFromMessage(message:String):Player {
         Logger.add("[AS2][BattleMessenger/BattleMessenger]getPlayerFromMessage()");
         var endOfFirtsTag:Number = message.indexOf(">");
@@ -281,13 +288,23 @@ class wot.BattleMessenger.BattleMessenger
 
         return StatsDataProxy.getPlayerByName(userName);
     }
-
+    
+    /**
+     * Check player team and return in what team player ally or enemy
+     * @param   player
+     * @return  true for ally team, false for enemy team
+     */
+    private function isPlayerInAllyTeam(player:Player):Boolean {
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]isPlayerInAllyTeam()");
+        return (self.team == player.team);
+    }
+    
     /**
      * @param   player
      * @return  true when player is from same clan, always false on own messages
      */
-    private function ignoreForClan(player:Player):Boolean {
-        Logger.add("[AS2][BattleMessenger/BattleMessenger]ignoreForClan()");
+    private function isPlayerInClan(player:Player):Boolean {
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]isPlayerInClan()");
         if (Config.config.battleMessenger.ignore.clan && this.self.clanAbbrev.length > 0) {
             return (player.clanAbbrev == this.self.clanAbbrev);
         }
@@ -298,16 +315,21 @@ class wot.BattleMessenger.BattleMessenger
      * @param   player
      * @return  true when player is from same squad, always false on own messages
      */
-    private function ignoreForSquad(player:Player):Boolean {
-        Logger.add("ignoreForSquad()");
+    private function isPlayerInSquad(player:Player):Boolean {
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]isPlayerInSquad()");
         if (Config.config.battleMessenger.ignore.squad && self.squad != 0) {
             return (player.squad == this.self.squad);
         }
         return false;
     }
 
-    private function isXvmRatingHigher(player:Player):Boolean {
-        Logger.add("[AS2][BattleMessenger/BattleMessenger]isXvmRatingHigher()");
+    /**
+     * Check player rating and compare it with minRating in config
+     * @param   player
+     * @return  true for player.rating > minRating, false for <
+     */
+    private function isPlayerRatingHigher(player:Player):Boolean {
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]isPlayerRatingHigher()");
 
         var xvmKey:String = com.xvm.Utils.GetPlayerName(player.userName);
         /** check if data are presend */
@@ -325,40 +347,14 @@ class wot.BattleMessenger.BattleMessenger
             }
             else 
             {
-                this.sendDebugMessage("XVM data not loaded");
+                this.sendDebugMessage("Rating data not loaded");
             }
         }
         else if (Config.config.battleMessenger.enableRatingFilter && Config.config.ratings.showPlayersStatistics) 
         {
-            this.sendDebugMessage("XVM data not found: " + xvmKey);
+            this.sendDebugMessage("Rating data not found: " + xvmKey);
         }
         return true;
     }
     
-    /**
-     * Check player team and alive status against config
-     * @param   player
-     * @return  true for hide msg, false for display
-     */
-    private function isTeamStatusBlock(player:Player):Boolean {
-        Logger.add("[AS2][BattleMessenger/BattleMessenger]isTeamStatusBlock()");
-        var isDead:Boolean = StatsDataProxy.isPlayerDead(player.uid);
-        var hide:Boolean;
-
-        if (isSameTeam(player)) {
-            hide = (isDead ? Config.config.battleMessenger.blockAlly.dead : Config.config.battleMessenger.blockAlly.alive);
-        }else {
-            hide = (isDead ? Config.config.battleMessenger.blockEnemy.dead : Config.config.battleMessenger.blockEnemy.alive);
-        }
-
-        if (hide) {
-            lastReason = (isSameTeam(player) ? "Ally" : "Enemy") + " - " + (isDead ? "dead" : "alive");
-        }
-        return hide;
-    }
-
-    private function isSameTeam(player:Player):Boolean {
-        Logger.add("[AS2][BattleMessenger/BattleMessenger]isSameTeam()");
-        return (self.team == player.team);
-    }
 }

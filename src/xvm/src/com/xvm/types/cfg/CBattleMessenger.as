@@ -7,13 +7,11 @@ package com.xvm.types.cfg
     public dynamic class CBattleMessenger extends Object
     {
         public var enabled:Boolean;
+        public var debugMode:Boolean;
         public var messageLifeTime:Number;
         public var chatLength:Number;
         public var backgroundAlpha:Number;
-        public var debugMode:Boolean;
-        public var ignore:Object;
-        public var blockAlly:Object;
-        public var blockEnemy:Object;
+        public var block:Object;
         public var antispam:Object;
         public var ratingFilters:Object;
     }

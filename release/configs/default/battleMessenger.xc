@@ -20,29 +20,25 @@
     // Прозрачность фона (от 0 до 100)
     "backgroundAlpha": 100,
 
-    // Mod will hide any messages from allies in next battle types:
-    // Мод будет скрывать сообщения от союзников в следующих типах боёв:
-    "ignore": {
-      "clan": false,
-      "squad": false,
-      "companyBattle": false,
-      "specialBattle": false,
-      "trainingBattle": false,
-      "randomBattle": false
-    },
-
-    // Hide messages from allies. true - hide, false - show.
-    // Скрытие сообщений от союзников. true - скрывать, false - показывать.
-    "blockAlly": {
-      "dead": false,
-      "alive": false
-    },
-
-    // Hide messages from enemies. true - hide, false - show.
-    // Скрытие сообщений от противников. true - скрывать, false - показывать.
-    "blockEnemy": {
-      "dead": false,
-      "alive": false
+    // Mod will hide any messages from players. Available values: none, alive, dead, both
+    // Мод будет скрывать сообщения от игроков, которые попадают под следующие фильтры. Доступные значения: none, alive, dead, both
+    "block": {
+      "ally": {
+        "clan": none,
+        "squad": none,
+        "companyBattle": none,
+        "specialBattle": none,
+        "trainingBattle": none,
+        "randomBattle": none
+      },
+      "enemy": {
+        "clan": none,
+        "squad": none,
+        "companyBattle": none,
+        "specialBattle": none,
+        "trainingBattle": none,
+        "randomBattle": none
+      }
     },
 
     // Antispam
