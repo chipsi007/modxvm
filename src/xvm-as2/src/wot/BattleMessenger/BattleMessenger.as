@@ -97,7 +97,7 @@ class wot.BattleMessenger.BattleMessenger
     }
 
     public function onGuiInit() {
-        Logger.add("onGuiInit()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]onGuiInit()");
         if(Config.config.battleMessenger.enabled){
             this.wrapper.messageList._stackLength = Config.config.battleMessenger.chatLength;
             this.self = StatsDataProxy.getSelf();
@@ -121,9 +121,9 @@ class wot.BattleMessenger.BattleMessenger
     }
 
     public function getDisplayStatus(message:String, himself:Boolean):Boolean {
-        Logger.add("getDisplayStatus()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]getDisplayStatus()");
         /** ignore own msg (not in debug mode)*/
-        if (!this.self || (himself && !Config.config.battleMessenger.debugMode)) {
+        if (himself && !Config.config.battleMessenger.debugMode) {
             return true;
         }
 
@@ -159,13 +159,13 @@ class wot.BattleMessenger.BattleMessenger
         /** /split */
 
         /** Ignore */
-        if ( ignoreForClan(sender) && !himself ) {
+        if (ignoreForClan(sender)) {
             this.lastReason = "Ignore: own clan";
-            return true;
+            return false;
         }
-        if ( ignoreForSquad(sender) && !himself) {
+        if (ignoreForSquad(sender)) {
             this.lastReason = "Ignore: own squad";
-            return true;
+            return false;
         }
 
         /** Ignore by battle type */
@@ -174,34 +174,62 @@ class wot.BattleMessenger.BattleMessenger
                 case StatsDataProxy.BATTLE_RANDOM:
                     if (Config.config.battleMessenger.ignore.randomBattle) {
                         this.lastReason = "Ignore: ally in Random battle";
-                        return true;
+                        return false;
                     } break;
                 case StatsDataProxy.BATTLE_COMPANY:
                 case StatsDataProxy.BATTLE_TEAM_7x7:
                     if (Config.config.battleMessenger.ignore.companyBattle) {
                         this.lastReason = "Ignore: ally in Company battle";
-                        return true;
+                        return false;
                     } break;
                 case StatsDataProxy.BATTLE_SPECIAL:
                     if (Config.config.battleMessenger.ignore.specialBattle) {
                         this.lastReason = "Ignore: ally in Special battle";
-                        return true;
+                        return false;
                     } break;
                 case StatsDataProxy.BATTLE_TRAINING:
                     if (Config.config.battleMessenger.ignore.trainingBattle) {
                         this.lastReason = "Ignore: ally in Training battle";
-                        return true;
+                        return false;
+                    } break;
+            }
+        }
+        else
+        {
+            switch(battleType) {
+                case StatsDataProxy.BATTLE_RANDOM:
+                    if (Config.config.battleMessenger.ignore.randomBattle) {
+                        this.lastReason = "Ignore: ally in Random battle";
+                        return false;
+                    } break;
+                case StatsDataProxy.BATTLE_COMPANY:
+                case StatsDataProxy.BATTLE_TEAM_7x7:
+                    if (Config.config.battleMessenger.ignore.companyBattle) {
+                        this.lastReason = "Ignore: ally in Company battle";
+                        return false;
+                    } break;
+                case StatsDataProxy.BATTLE_SPECIAL:
+                    if (Config.config.battleMessenger.ignore.specialBattle) {
+                        this.lastReason = "Ignore: ally in Special battle";
+                        return false;
+                    } break;
+                case StatsDataProxy.BATTLE_TRAINING:
+                    if (Config.config.battleMessenger.ignore.trainingBattle) {
+                        this.lastReason = "Ignore: ally in Training battle";
+                        return false;
                     } break;
             }
         }
 
         /** XVM */
-        if (Config.config.battleMessenger.RatingFilters.enabled && Config.config.ratings.showPlayersStatistics && !isXvmRatingHigher(sender) ) 
-			return false;
+        if (Config.config.battleMessenger.ratingFilters.enabled && Config.config.rating.showPlayersStatistics && !isXvmRatingHigher(sender)) {
+            return false;
+        }
 
         /** Dead/Alive */
-        if ( isTeamStatusBlock(sender) ) 
-			return false;
+        if (isTeamStatusBlock(sender)) {
+            return false;
+        }
 
         /** Antispam */
         if (Config.config.battleMessenger.antispam.enabled) {
@@ -279,20 +307,17 @@ class wot.BattleMessenger.BattleMessenger
     }
 
     private function isXvmRatingHigher(player:Player):Boolean {
-        Logger.add("isXvmRatingHigher()");
-        if (!com.xvm.Stat) {
-            this.sendDebugMessage("Stats off");
-            return true;
-        }
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]isXvmRatingHigher()");
 
         var xvmKey:String = com.xvm.Utils.GetPlayerName(player.userName);
         /** check if data are presend */
-        if (Config.config.battleMessenger.enableRatingFilter && Config.config.ratings.showPlayersStatistics && com.xvm.Stat.s_data[xvmKey]) 
+        if (Config.config.battleMessenger.ratingFilters.enabled && Config.config.rating.showPlayersStatistics && Stat.s_data[xvmKey]) 
         {
+            //this.sendDebugMessage("Player:"+xvmKey+"| Rating:"+Stat.s_data[xvmKey].stat.wn8+"| minRating:"+Config.config.battleMessenger.ratingFilters.minWN8);
             /** stats must be loaded */
-            if (com.xvm.Stat.s_data[xvmKey].loadstate == com.xvm.Defines.LOADSTATE_DONE) 
+            if (Stat.s_data[xvmKey].loadstate == Defines.LOADSTATE_DONE) 
             {
-                if (com.xvm.Stat.s_data[xvmKey].stat.wn8 < Config.config.battleMessenger.ratingFilters.minWN8) 
+                if (Stat.s_data[xvmKey].stat.wn8 < Config.config.battleMessenger.ratingFilters.minWN8) 
                 {
                     this.lastReason = "WN8 rating: " + com.xvm.Stat.s_data[xvmKey].stat.wn8;
                     return false;
@@ -333,7 +358,7 @@ class wot.BattleMessenger.BattleMessenger
     }
 
     private function isSameTeam(player:Player):Boolean {
-        Logger.add("isSameTeam()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]isSameTeam()");
         return (self.team == player.team);
     }
 }

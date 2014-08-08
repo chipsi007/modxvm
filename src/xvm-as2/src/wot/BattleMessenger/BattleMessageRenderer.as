@@ -17,14 +17,14 @@ class wot.BattleMessenger.BattleMessageRenderer
     private var c_messageLifeTime:Number = 0;
 
     public function BattleMessageRenderer(wrapper:net.wargaming.messenger.controls.BattleMessageRenderer, base:net.wargaming.messenger.controls.BattleMessageRenderer) {
-        Logger.add("BattleMessageRenderer()");
+        //Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]BattleMessageRenderer()");
         this.wrapper = wrapper;
         this.base = base;
         BattleMessageRendererCtor();
     }
 
     function populateData(initData) {
-        Logger.add("populateData()");
+        //Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]populateData()");
         return this.populateDataImpl.apply(this, arguments);
     }
 
@@ -32,7 +32,7 @@ class wot.BattleMessenger.BattleMessageRenderer
     /////////////////////////////////////////////////////////////////
 
     public function BattleMessageRendererCtor() {
-        Logger.add("BattleMessageRendererCtor()");
+        //Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]BattleMessageRendererCtor()");
         Utils.TraceXvmModule("BattleMessenger");
 
         c_backgroundAlpha = Config.config.battleMessenger.backgroundAlpha;
@@ -41,8 +41,7 @@ class wot.BattleMessenger.BattleMessageRenderer
 
     //Impl
     function populateDataImpl(initData) {
-        Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]populateDataImpl()");
-
+        //Logger.add("[AS2][BattleMessenger/BattleMessageRenderer]populateDataImpl()");
         wrapper.background._alpha = c_backgroundAlpha;
         wrapper._lifeTime = c_messageLifeTime;
 
