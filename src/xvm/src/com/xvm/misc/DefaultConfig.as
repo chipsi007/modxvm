@@ -1223,20 +1223,20 @@ package com.xvm.misc
             c.backgroundAlpha = 100;
             c.block = {
                 "ally": {
-                    "clan": none,
-                    "squad": none,
-                    "companyBattle": none,
-                    "specialBattle": none,
-                    "trainingBattle": none,
-                    "randomBattle": none
+                    "clan": "none",
+                    "squad": "none",
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
                 },
                 "enemy": {
-                    "clan": none,
-                    "squad": none,
-                    "companyBattle": none,
-                    "specialBattle": none,
-                    "trainingBattle": none,
-                    "randomBattle": none
+                    "clan": "none",
+                    "squad": "none",
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
                 }
             };
             c.antispam = {
