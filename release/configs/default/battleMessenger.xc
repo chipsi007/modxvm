@@ -24,20 +24,20 @@
     // Мод будет скрывать сообщения от игроков, которые попадают под следующие фильтры. Доступные значения: none, alive, dead, both
     "block": {
       "ally": {
-        "clan": none,
-        "squad": none,
-        "companyBattle": none,
-        "specialBattle": none,
-        "trainingBattle": none,
-        "randomBattle": none
+        "clan": "none",
+        "squad": "none",
+        "companyBattle": "none",
+        "specialBattle": "none",
+        "trainingBattle": "none",
+        "randomBattle": "none"
       },
       "enemy": {
-        "clan": none,
-        "squad": none,
-        "companyBattle": none,
-        "specialBattle": none,
-        "trainingBattle": none,
-        "randomBattle": none
+        "clan": "none",
+        "squad": "none",
+        "companyBattle": "none",
+        "specialBattle": "none",
+        "trainingBattle": "none",
+        "randomBattle": "none"
       }
     },
 
