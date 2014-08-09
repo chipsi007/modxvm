@@ -34,6 +34,10 @@
         // Players of Your platoon
         // Игроки Вашего взвода
         "squad": "none",
+
+        // Filters by battle types. Nota bene, clan and squad have higher priority.
+        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
+
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
@@ -56,6 +60,10 @@
         // Players of Your platoon
         // Игроки Вашего взвода
         "squad": "none",
+
+        // Filters by battle types. Nota bene, clan and squad have higher priority.
+        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
+
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
@@ -85,6 +93,10 @@
         // Players of Your platoon
         // Игроки Вашего взвода
         "squad": "none",
+
+        // Filters by battle types. Nota bene, clan and squad have higher priority.
+        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
+
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
@@ -107,6 +119,10 @@
         // Players of Your platoon
         // Игроки Вашего взвода
         "squad": "none",
+
+        // Filters by battle types. Nota bene, clan and squad have higher priority.
+        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
+
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
