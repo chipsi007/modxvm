@@ -21,9 +21,9 @@
     "backgroundAlpha": 100,
 
     // Mod will hide any messages from players, that satisfy following criteria. 
-    // Available values: none, alive, dead, both
+    // Available values: none, alive, dead, all
     // Мод будет скрывать сообщения от игроков, которые попадают под следующие критерии. 
-    // Доступные значения: none(отключено), alive(блокировать живых), dead(блокировать мертвых), both(блокировать всех)
+    // Доступные значения: none(отключено), alive(блокировать живых), dead(блокировать мертвых), all(блокировать всех)
     "block": {
       // Ally team members
       // Члены команды союзников
@@ -71,10 +71,10 @@
       }
     },
 
-    // Mod will apply rating filter and antispam to messages from players, that satisfy following criteria. Available values: none, alive, dead, both
-    // Available values: none, alive, dead, both
+    // Mod will apply rating filter and antispam to messages from players, that satisfy following criteria.
+    // Available values: none, alive, dead, all
     // Мод будет применять фильтр по рейтингу и антиспам к сообщениям игроков, которые попадают под следующие критерии.
-    // Доступные значения: none(отключено), alive(блокировать живых), dead(блокировать мертвых), both(блокировать всех)
+    // Доступные значения: none(отключено), alive(блокировать живых), dead(блокировать мертвых), all(блокировать всех)
     "filter": {
       // Ally team members
       // Члены команды союзников
