@@ -230,7 +230,7 @@ class wot.BattleMessenger.BattleMessenger
     /**
      * Helper function to blocker function
      * @param player
-     * @param type name of config section, none/alive/dead/both
+     * @param type name of config section, none/alive/dead/all
      * @param reason reason of blocking
      * @param block true if we decide to block, false if we check to filter
      * @return  true for blocking/filteting situation, false if player is clean
@@ -255,7 +255,7 @@ class wot.BattleMessenger.BattleMessenger
         type = String(Utils.getObjectProperty(Config.config, type));
 
         if ( type == "none") { toBlock = false; }
-        else if (type == "both") { toBlock = true;  }
+        else if (type == "all") { toBlock = true;  }
         else if (type == "alive" && !dead) { toBlock = true;  }
         else if (type == "dead"  && dead) { toBlock = true;  }
         else { toBlock = false; }
