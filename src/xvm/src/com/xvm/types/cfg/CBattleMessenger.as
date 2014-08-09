@@ -12,6 +12,7 @@ package com.xvm.types.cfg
         public var chatLength:Number;
         public var backgroundAlpha:Number;
         public var block:Object;
+        public var filter:Object;
         public var antispam:Object;
         public var ratingFilters:Object;
     }

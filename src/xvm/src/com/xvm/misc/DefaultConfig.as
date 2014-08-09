@@ -1239,6 +1239,24 @@ package com.xvm.misc
                     "randomBattle": "none"
                 }
             };
+            c.filter = {
+                "ally": {
+                    "clan": "none",
+                    "squad": "none",
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
+                },
+                "enemy": {
+                    "clan": "none",
+                    "squad": "none",
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
+                }
+            };
             c.antispam = {
                 enabled: false,
                 duplicateCount: 2,
@@ -1252,7 +1270,6 @@ package com.xvm.misc
                 enabled: false,
                 minWN8: 0
             };
-            
             return c;
         }
 

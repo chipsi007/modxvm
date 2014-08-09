@@ -21,8 +21,29 @@
     "backgroundAlpha": 100,
 
     // Mod will hide any messages from players. Available values: none, alive, dead, both
-    // Мод будет скрывать сообщения от игроков, которые попадают под следующие фильтры. Доступные значения: none, alive, dead, both
+    // Мод будет скрывать сообщения от игроков, которые попадают под следующие критерии. Доступные значения: none, alive, dead, both
     "block": {
+      "ally": {
+        "clan": "none",
+        "squad": "none",
+        "companyBattle": "none",
+        "specialBattle": "none",
+        "trainingBattle": "none",
+        "randomBattle": "none"
+      },
+      "enemy": {
+        "clan": "none",
+        "squad": "none",
+        "companyBattle": "none",
+        "specialBattle": "none",
+        "trainingBattle": "none",
+        "randomBattle": "none"
+      }
+    },
+
+    // Mod will apply rating filter and antispam to messages from players. Available values: none, alive, dead, both
+    // Мод будет применять фильтр по рейтингу и антиспам к сообщениям игроков, которые попадают под следующие критерии. Доступные значения: none, alive, dead, both
+    "filter": {
       "ally": {
         "clan": "none",
         "squad": "none",
@@ -75,7 +96,7 @@
       "enabled": false,
       
       // Minimum WN8 rating of sender for displaying message.
-      // Минимальное значение рейтинга у игрока, при котором отображается его сообщение.
+      // Минимальное значение рейтинга WN8 у игрока, при котором отображается его сообщение.
       "minWN8": 0
     }
   }
