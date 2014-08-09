@@ -124,9 +124,8 @@ class wot.BattleMessenger.BattleMessenger
         Logger.add("[AS2][BattleMessenger/BattleMessenger]getDisplayStatus()");
 
         /** ignore own msg (not in debug mode)*/
-        if (himself && !Config.config.battleMessenger.debugMode) {
+        if (himself && !Config.config.battleMessenger.debugMode)
             return true;
-        }
 
         /** sender */
         var sender:Player;
@@ -159,9 +158,13 @@ class wot.BattleMessenger.BattleMessenger
         }
         /** /split */
 
-        /** Call blocker function */
-        if (!blocker(sender)){
-            return false; } 
+        /** try to block */
+        if (blocker(sender, true))
+            return false;
+
+        /** check for filtering */
+        if (!blocker(sender, false))
+            return true;
 
         /** Block by rating */
         if (Config.config.battleMessenger.ratingFilters.enabled && Config.config.rating.showPlayersStatistics && !isPlayerRatingHigher(sender)) {
@@ -182,66 +185,73 @@ class wot.BattleMessenger.BattleMessenger
                 return false;
             }
         }
-
         return true;
     }
 
     /**
-     * Check if we should block player by block section in config
+     * Check if we should block/filtet player by block/filter section in config
      * @param   player
-     * @return  true for blocking situation, false if player is clean
+     * @param   block true if we decide to block, false if we check to filter
+     * @return  true for blocking/filtering situation, false if player is clean
      */
-    private function blocker(player:Player):Boolean {
+    private function blocker(player:Player, block:Boolean):Boolean {
         var toBlock:Boolean = false;
         //By battle type
         switch(battleType) {
             case StatsDataProxy.BATTLE_RANDOM:
-                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.randomBattle", "Block: ALLYORENEMY in random battle")
+                toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.randomBattle", "DECISION: ALLYORENEMY in random battle", block)
                 break;
             case StatsDataProxy.BATTLE_COMPANY:
             case StatsDataProxy.BATTLE_TEAM_7x7:
-                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.companyBattle", "Block: ALLYORENEMY in company battle")
+                toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.companyBattle", "DECISION: ALLYORENEMY in company battle", block)
                 break;
             case StatsDataProxy.BATTLE_SPECIAL:
-                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.specialBattle", "Block: ALLYORENEMY in special battle")
+                toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.specialBattle", "DECISION: ALLYORENEMY in special battle", block)
                 break;
             case StatsDataProxy.BATTLE_TRAINING:
-                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.trainingBattle", "Block: ALLYORENEMY in training battle")
+                toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.trainingBattle", "DECISION: ALLYORENEMY in training battle", block)
                 break;
         }
         
         //By clan
         if (isPlayerInClan(player) && !toBlock) {
-            toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.clan", "Block: ALLYORENEMY in clan");
+            toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.clan", "DECISION: ALLYORENEMY in clan", block);
         }
 
         //By squad
         if (isPlayerInSquad(player) && !toBlock) {
-            toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.squad", "Block: ALLYORENEMY in squad");
+            toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.squad", "DECISION: ALLYORENEMY in squad", block);
         }
         
+        this.sendDebugMessage("blocker, Block mode:"+block+", Decision:"+toBlock, false)
         return toBlock;
     }
     
     /**
      * Helper function to blocker function
-     * @param   player
-     * @param   type - name of config section, none/alive/dead/both
-     * @param   reason - reason of blocking
-     * @return  true for blocking situation, false if player is clean
+     * @param player
+     * @param type name of config section, none/alive/dead/both
+     * @param reason reason of blocking
+     * @param block true if we decide to block, false if we check to filter
+     * @return  true for blocking/filteting situation, false if player is clean
      */
-    private function blockerHelper(player:Player, type:String, reason:String) {
+    private function blockerHelper(player:Player, type:String, reason:String, block:Boolean) {
         var dead:Boolean = StatsDataProxy.isPlayerDead(player.uid);
         var toBlock = false;
 
-        if (isPlayerInAllyTeam){
+        if (isPlayerInAllyTeam(player)){
             reason = Utils.strReplace(reason, "ALLYORENEMY", "ally");
             type = Utils.strReplace(type, "ALLYORENEMY", "ally");
         } else {
             reason = Utils.strReplace(reason, "ALLYORENEMY", "enemy");
             type = Utils.strReplace(type, "ALLYORENEMY", "enemy");
         }
-
+        
+        if (block)
+            type = Utils.strReplace(type, "BLOCKORFILTER", "block");
+        else
+            type = Utils.strReplace(type, "BLOCKORFILTER", "filter");
+        
         type = String(Utils.getObjectProperty(Config.config, type));
 
         if ( type == "none") { toBlock = false; }
@@ -250,30 +260,46 @@ class wot.BattleMessenger.BattleMessenger
         else if (type == "dead"  && dead) { toBlock = true;  }
         else { toBlock = false; }
 
-        if (toBlock)
-            this.lastReason = reason;
-
+        if (toBlock && block)
+            reason = Utils.strReplace(reason, "DECISION", "Block");
+        else if (toBlock && !block)
+            reason = Utils.strReplace(reason, "DECISION", "Apply filters");
+        else
+            reason = Utils.strReplace(reason, "DECISION", "Clear");
+            
+        this.lastReason = reason; 
         return toBlock;
     }
         
     /**
+     * Returns last block reason.
      * @return  null on empty reason
      */
     public function popReason():String {
         Logger.add("[AS2][BattleMessenger/BattleMessenger]popReason()");
-        var ret = this.lastReason;;
+        var ret = this.lastReason;
         this.lastReason = null;
         return ret;
     }
 
-    private function sendDebugMessage(text:String, ignoreDebugMode:Boolean) {
+    /**
+     * Write debug message to chat and xvm.log
+     * @param   text text to write
+     * @param   ignoreDebugMode true if we should ignore battleMessenger.debugMode setting.
+     */
+    public function sendDebugMessage(text:String, ignoreDebugMode:Boolean) {
         Logger.add("[AS2][BattleMessenger/BattleMessenger]sendDebugMessage()");
         if (Config.config.battleMessenger.enabled && (Config.config.battleMessenger.debugMode || ignoreDebugMode) && text.length > 0) {
-            Logger.add("[AS2][BattleMessenger/BattleMessenger] " + text);
+            Logger.add(text);
             base._onRecieveChannelMessage(null, "<font color='" + DEBUG_COLOR + "'>" + text + "</font>", true, false);
         }
     }
 
+    /**
+     * Returns player name from chat message string
+     * @param message   chat message with player name
+     * @return player name
+     */
     private function getPlayerFromMessage(message:String):Player {
         Logger.add("[AS2][BattleMessenger/BattleMessenger]getPlayerFromMessage()");
         var endOfFirtsTag:Number = message.indexOf(">");
