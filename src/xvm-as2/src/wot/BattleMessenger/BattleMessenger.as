@@ -196,28 +196,28 @@ class wot.BattleMessenger.BattleMessenger
         //By battle type
         switch(battleType) {
             case StatsDataProxy.BATTLE_RANDOM:
-                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.randomBattle", "Block: ALLYORENEMY in random battle")
+                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.randomBattle", "Block: ALLYORENEMY in random battle")
                 break;
             case StatsDataProxy.BATTLE_COMPANY:
             case StatsDataProxy.BATTLE_TEAM_7x7:
-                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.companyBattle", "Block: ALLYORENEMY in company battle")
+                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.companyBattle", "Block: ALLYORENEMY in company battle")
                 break;
             case StatsDataProxy.BATTLE_SPECIAL:
-                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.specialBattle", "Block: ALLYORENEMY in special battle")
+                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.specialBattle", "Block: ALLYORENEMY in special battle")
                 break;
             case StatsDataProxy.BATTLE_TRAINING:
-                toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.trainingBattle", "Block: ALLYORENEMY in training battle")
+                toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.trainingBattle", "Block: ALLYORENEMY in training battle")
                 break;
         }
         
         //By clan
         if (isPlayerInClan(player) && !toBlock) {
-            toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.clan", "Block: ALLYORENEMY in clan");
+            toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.clan", "Block: ALLYORENEMY in clan");
         }
 
         //By squad
         if (isPlayerInSquad(player) && !toBlock) {
-            toBlock = blockerHelper(player, "Config.config.battleMessenger.block.ALLYORENEMY.squad", "Block: ALLYORENEMY in squad");
+            toBlock = blockerHelper(player, "battleMessenger.block.ALLYORENEMY.squad", "Block: ALLYORENEMY in squad");
         }
         
         return toBlock;
@@ -235,15 +235,14 @@ class wot.BattleMessenger.BattleMessenger
         var toBlock = false;
 
         if (isPlayerInAllyTeam){
-            reason = Utils.strReplace(type, "ALLYORENEMY", "ally");
+            reason = Utils.strReplace(reason, "ALLYORENEMY", "ally");
             type = Utils.strReplace(type, "ALLYORENEMY", "ally");
         } else {
-            reason = Utils.strReplace(type, "ALLYORENEMY", "ally");
+            reason = Utils.strReplace(reason, "ALLYORENEMY", "enemy");
             type = Utils.strReplace(type, "ALLYORENEMY", "enemy");
         }
-            
-        type = this[type]();
-        Logger.add("NOTABENE:" + type);
+
+        type = String(Utils.getObjectProperty(Config.config, type));
 
         if ( type == "none") { toBlock = false; }
         else if (type == "both") { toBlock = true;  }

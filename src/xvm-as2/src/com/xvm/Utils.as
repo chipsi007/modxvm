@@ -473,4 +473,30 @@ class com.xvm.Utils
             input = input.split(find).join(replace);
         return input.split(find).join(replace);
     }
+    
+    /**
+     * Helper that get access object dot-separated property
+     * http://stackoverflow.com/questions/17383300/
+     * @param   object
+     * @param   string
+     * @return
+     */
+    public static function getObjectProperty(object:Object, property:String):Object
+    {
+        var parts:Array = property.split(".");
+        var returnProp:Object = null;
+
+        for (var i = 0; i < parts.length; i++) 
+        {
+             if(object[parts[i]]) 
+             {             
+                 returnProp = object[parts[i]];
+                 object = returnProp;
+             } 
+             else
+                 return null;
+        }
+
+        return returnProp;
+    }
 }
