@@ -25,19 +25,19 @@
     // Мод будет скрывать сообщения от игроков, которые попадают под следующие критерии. 
     // Доступные значения: none(отключено), alive(блокировать живых), dead(блокировать мертвых), all(блокировать всех)
     "block": {
+      // Your clanmates
+      // Ваши соклановцы
+      "ourClan": "none",
+      // Players of Your platoon
+      // Игроки Вашего взвода
+      "ourSquad": "none",
+
+      // Filters by battle types. Nota bene, ourClan and ourSquad have higher priority.
+      // Фильтры по типам боев. Обратите внимание, ourClan и ourSquad приоритетнее.
+
       // Ally team members
       // Члены команды союзников
       "ally": {
-        // Your clanmates
-        // Ваши соклановцы
-        "clan": "none",
-        // Players of Your platoon
-        // Игроки Вашего взвода
-        "squad": "none",
-
-        // Filters by battle types. Nota bene, clan and squad have higher priority.
-        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
-
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
@@ -54,16 +54,6 @@
       // Enemy team members
       // Члены команды противников
       "enemy": {
-        // Your clanmates
-        // Ваши соклановцы
-        "clan": "none",
-        // Players of Your platoon
-        // Игроки Вашего взвода
-        "squad": "none",
-
-        // Filters by battle types. Nota bene, clan and squad have higher priority.
-        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
-
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
@@ -84,19 +74,19 @@
     // Мод будет применять фильтр по рейтингу и антиспам к сообщениям игроков, которые попадают под следующие критерии.
     // Доступные значения: none(отключено), alive(блокировать живых), dead(блокировать мертвых), all(блокировать всех)
     "filter": {
+      // Your clanmates
+      // Ваши соклановцы
+      "ourClan": "none",
+      // Players of Your platoon
+      // Игроки Вашего взвода
+      "ourSquad": "none",
+
+      // Filters by battle types. Nota bene, ourClan and ourSquad have higher priority.
+      // Фильтры по типам боев. Обратите внимание, ourClan и ourSquad приоритетнее.
+
       // Ally team members
       // Члены команды союзников
       "ally": {
-        // Your clanmates
-        // Ваши соклановцы
-        "clan": "none",
-        // Players of Your platoon
-        // Игроки Вашего взвода
-        "squad": "none",
-
-        // Filters by battle types. Nota bene, clan and squad have higher priority.
-        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
-
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
@@ -113,16 +103,6 @@
       // Enemy team members
       // Члены команды противников
       "enemy": {
-        // Your clanmates
-        // Ваши соклановцы
-        "clan": "none",
-        // Players of Your platoon
-        // Игроки Вашего взвода
-        "squad": "none",
-
-        // Filters by battle types. Nota bene, clan and squad have higher priority.
-        // Фильтры по типам боев. Обратите внимание, clan и squad приоритетнее
-
         // Filter while playing company battles
         // Фильтр для ротных боёв
         "companyBattle": "none",
@@ -179,7 +159,7 @@
       // true - Enable rating filters
       // true - Включение фильтров по рейтингу
       "enabled": false,
-      
+
       // Minimum WN8 rating of sender for display message.
       // Минимальное значение рейтинга WN8 у игрока, при котором отображается его сообщение.
       "minWN8": 0
