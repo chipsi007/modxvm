@@ -1222,17 +1222,15 @@ package com.xvm.misc
             c.chatLength = 10;
             c.backgroundAlpha = 100;
             c.block = {
+                ourClan: "none",
+                ourSquad: "none",
                 "ally": {
-                    "clan": "none",
-                    "squad": "none",
                     "companyBattle": "none",
                     "specialBattle": "none",
                     "trainingBattle": "none",
                     "randomBattle": "none"
                 },
                 "enemy": {
-                    "clan": "none",
-                    "squad": "none",
                     "companyBattle": "none",
                     "specialBattle": "none",
                     "trainingBattle": "none",
@@ -1240,17 +1238,15 @@ package com.xvm.misc
                 }
             };
             c.filter = {
+                ourClan: "none",
+                ourSquad: "none",
                 "ally": {
-                    "clan": "none",
-                    "squad": "none",
                     "companyBattle": "none",
                     "specialBattle": "none",
                     "trainingBattle": "none",
                     "randomBattle": "none"
                 },
                 "enemy": {
-                    "clan": "none",
-                    "squad": "none",
                     "companyBattle": "none",
                     "specialBattle": "none",
                     "trainingBattle": "none",

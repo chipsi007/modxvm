@@ -3,7 +3,6 @@ import wot.BattleMessenger.*;
 import wot.BattleMessenger.Antispam.*;
 import wot.BattleMessenger.models.*;
 
-
 /**
  * XVM BattleMessenger module
  * @author Pavel Máca
@@ -18,35 +17,55 @@ class wot.BattleMessenger.BattleMessenger
     public var base:net.wargaming.messenger.BattleMessenger;
 
     public function BattleMessenger(wrapper:net.wargaming.messenger.BattleMessenger, base:net.wargaming.messenger.BattleMessenger) {
-        Logger.add("BattleMessenger()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]BattleMessenger()");
         this.wrapper = wrapper;
         this.base = base;
         BattleMessengerCtor();
     }
 
     function _onPopulateUI() {
-        Logger.add("_onPopulateUI()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]_onPopulateUI()");
         return this._onPopulateUIImpl.apply(this, arguments);
     }
     
     function _onRecieveChannelMessage(cid:Number, message:String, himself:Boolean, targetIsCurrentPlayer:Boolean) {
-        Logger.add("_onRecieveChannelMessage()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]_onRecieveChannelMessage()");
         return this._onRecieveChannelMessageImpl.apply(this, arguments);
     }
 
     // wrapped methods
     /////////////////////////////////////////////////////////////////
 
+    //Ctor
     public function BattleMessengerCtor() {
-        Logger.add("BattleMessengerCtor()");
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]BattleMessengerCtor()");
         Utils.TraceXvmModule("BattleMessenger");
         GlobalEventDispatcher.addEventListener(Defines.E_CONFIG_LOADED, this, onConfigLoaded);
     }
 
     //Impl
     function _onPopulateUIImpl() {
-        Logger.add("_onPopulateUIImpl()");
-        this.onGuiInit();
+        Logger.add("[AS2][BattleMessenger/BattleMessenger]_onPopulateUIImpl()");
+        if(Config.config.battleMessenger.enabled){
+            this.wrapper.messageList._stackLength = Config.config.battleMessenger.chatLength;
+            this.self = StatsDataProxy.getSelf();
+            if (!this.self) {
+                this.sendDebugMessage("Error: can't found own identity");
+                Logger.add("Error: can't found own identity");
+            }
+
+            if(Config.config.battleMessenger.antispam.enabled) {
+                /** Ignore player and vehicle names */
+                this.antispam.createIgnoreList();
+            }
+
+            /** Get battle type */
+            battleType = StatsDataProxy.getBattleType();
+
+            /** Debug mode info */
+            this.sendDebugMessage("Debug mode active, " + battleType + " battle");
+
+        }
     }
 
     //Impl
@@ -90,36 +109,21 @@ class wot.BattleMessenger.BattleMessenger
     private var antispam:Antispam;
     private var lastReason:String = null;
 
+    /**
+     * Perform actions after XVM config load.
+     */
     private function onConfigLoaded() {
         Logger.add("[AS2][BattleMessenger/BattleMessenger]onConfigLoaded()");
         if(Config.config.battleMessenger.antispam.enabled)
             this.antispam = new Antispam();
     }
 
-    public function onGuiInit() {
-        Logger.add("[AS2][BattleMessenger/BattleMessenger]onGuiInit()");
-        if(Config.config.battleMessenger.enabled){
-            this.wrapper.messageList._stackLength = Config.config.battleMessenger.chatLength;
-            this.self = StatsDataProxy.getSelf();
-            if (!this.self) {
-                this.sendDebugMessage("Error: can't found own identity");
-                Logger.add("Error: can't found own identity");
-            }
-
-            if(Config.config.battleMessenger.antispam.enabled) {
-                /** Ignore player and vehicle names */
-                this.antispam.createIgnoreList();
-            }
-
-            /** Get battle type */
-            battleType = StatsDataProxy.getBattleType();
-
-            /** Debug mode info */
-            this.sendDebugMessage("Debug mode active, " + battleType + " battle");
-
-        }
-    }
-
+    /**
+     * Returns decision about message: show it or hide it.
+     * @param message   message text    
+     * @param himself   true if message from player, false if message from ally or enemy
+     * @return  true if message should be show, false if message should be hide.
+     */
     public function getDisplayStatus(message:String, himself:Boolean):Boolean {
         Logger.add("[AS2][BattleMessenger/BattleMessenger]getDisplayStatus()");
 
@@ -215,12 +219,12 @@ class wot.BattleMessenger.BattleMessenger
         
         //By clan
         if (isPlayerInClan(player) && !toBlock) {
-            toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.clan", "DECISION: ALLYORENEMY in clan", block);
+            toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ourClan", "DECISION: In our clan", block);
         }
 
         //By squad
         if (isPlayerInSquad(player) && !toBlock) {
-            toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ALLYORENEMY.squad", "DECISION: ALLYORENEMY in squad", block);
+            toBlock = blockerHelper(player, "battleMessenger.BLOCKORFILTER.ourSquad", "DECISION: In our squad", block);
         }
         
         this.sendDebugMessage("blocker, Block mode:"+block+", Decision:"+toBlock, false)
@@ -247,11 +251,14 @@ class wot.BattleMessenger.BattleMessenger
             type = Utils.strReplace(type, "ALLYORENEMY", "enemy");
         }
         
-        if (block)
+        if (block){
+            reason = Utils.strReplace(reason, "BLOCKORFILTER", "block");
             type = Utils.strReplace(type, "BLOCKORFILTER", "block");
-        else
+        } else {
+            reason = Utils.strReplace(reason, "BLOCKORFILTER", "filter");
             type = Utils.strReplace(type, "BLOCKORFILTER", "filter");
-        
+        }
+
         type = String(Utils.getObjectProperty(Config.config, type));
 
         if ( type == "none") { toBlock = false; }
