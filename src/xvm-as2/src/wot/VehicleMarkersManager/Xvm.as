@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Main XVM class, implements workflow logic.
  */
 import com.greensock.OverwriteManager;
@@ -333,6 +333,25 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         initializeTextFields();
         vehicleTypeComponent.setVehicleClass();
         XVMUpdateStyle();
+    }
+
+    function invalidateVehicleStatus(vehicleStatus:Number)
+    {
+        //Logger.add('invalidateVehicleStatus: ' + vehicleStatus);
+        var prev = m_isReady;
+        m_isReady = (vehicleStatus & 2) != 0; // 2 - IS_AVATAR_READY
+        if (prev != m_isReady)
+            XVMUpdateStyle();
+    }
+
+    function invalidateVehicleStats(frags:Number)
+    {
+        //Logger.add('invalidateVehicleStats: ' + vehicleStatus);
+        if (m_frags != frags)
+        {
+            m_frags = frags;
+            XVMUpdateStyle();
+        }
     }
 
     function XVMUpdateDynamicTextFields()
