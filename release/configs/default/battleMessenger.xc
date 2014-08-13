@@ -160,9 +160,41 @@
       // true - Включение фильтров по рейтингу
       "enabled": false,
 
+       // Minimum win rate of sender for display message (from 0 to 100).
+      // Минимальный процент побед у игрока, при котором отображается его сообщение. (from 0 to 100)
+      "minWinRate": 0,
+
+      // Minimum EFF rating of sender for display message.
+      // Минимальное значение рейтинга EFF у игрока, при котором отображается его сообщение.
+      "minEFF": 0,
+
+      // Minimum XEFF rating of sender for display message.
+      // Минимальное значение рейтинга XEFF у игрока, при котором отображается его сообщение.
+      "minXEFF": 0,
+
+      // Minimum WN6 rating of sender for display message.
+      // Минимальное значение рейтинга WN6 у игрока, при котором отображается его сообщение.
+      "minWN6": 0,
+
+      // Minimum XWN6 rating of sender for display message.
+      // Минимальное значение рейтинга XWN6 у игрока, при котором отображается его сообщение.
+      "minXWN6": 0,
+
       // Minimum WN8 rating of sender for display message.
       // Минимальное значение рейтинга WN8 у игрока, при котором отображается его сообщение.
-      "minWN8": 0
+      "minWN8": 0,
+
+      // Minimum XWN8 rating of sender for display message.
+      // Минимальное значение рейтинга XWN8 у игрока, при котором отображается его сообщение.
+      "minXWN8": 0,
+
+      // Minimum WGR rating of sender for display message.
+      // Минимальное значение рейтинга WGR у игрока, при котором отображается его сообщение.
+      "minWGR": 0,
+
+      // Minimum XWGR rating of sender for display message.
+      // Минимальное значение рейтинга XWGR у игрока, при котором отображается его сообщение.
+      "minXWGR": 0
     }
   }
 }

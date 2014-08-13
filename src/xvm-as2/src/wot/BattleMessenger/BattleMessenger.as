@@ -365,28 +365,28 @@ class wot.BattleMessenger.BattleMessenger
 
         var xvmKey:String = com.xvm.Utils.GetPlayerName(player.userName);
         /** check if data are presend */
-        if (Config.config.battleMessenger.ratingFilters.enabled && Config.config.rating.showPlayersStatistics && Stat.s_data[xvmKey]) 
-        {
+        if (Stat.s_data[xvmKey]) {
             //this.sendDebugMessage("Player:"+xvmKey+"| Rating:"+Stat.s_data[xvmKey].stat.wn8+"| minRating:"+Config.config.battleMessenger.ratingFilters.minWN8);
             /** stats must be loaded */
             if (Stat.s_data[xvmKey].loadstate == Defines.LOADSTATE_DONE) 
             {
-                if (Stat.s_data[xvmKey].stat.wn8 < Config.config.battleMessenger.ratingFilters.minWN8) 
-                {
-                    this.lastReason = "WN8 rating: " + com.xvm.Stat.s_data[xvmKey].stat.wn8;
+                this.lastReason = "Rating";
+                if ((Stat.s_data[xvmKey].stat.r    < Config.config.battleMessenger.ratingFilters.minWinRate) ||
+                    (Stat.s_data[xvmKey].stat.e    < Config.config.battleMessenger.ratingFilters.minEFF)     ||
+                    (Stat.s_data[xvmKey].stat.xeff < Config.config.battleMessenger.ratingFilters.minXEFF)    ||
+                    (Stat.s_data[xvmKey].stat.wn6  < Config.config.battleMessenger.ratingFilters.minWN6)     ||
+                    (Stat.s_data[xvmKey].stat.xwn6 < Config.config.battleMessenger.ratingFilters.minXWN6)    ||
+                    (Stat.s_data[xvmKey].stat.wn8  < Config.config.battleMessenger.ratingFilters.minWN8)     ||
+                    (Stat.s_data[xvmKey].stat.xwn8 < Config.config.battleMessenger.ratingFilters.minXWN8)    ||
+                    (Stat.s_data[xvmKey].stat.wgr  < Config.config.battleMessenger.ratingFilters.minWGR)     ||
+                    (Stat.s_data[xvmKey].stat.xwgr < Config.config.battleMessenger.ratingFilters.minXWGR))
                     return false;
-                }
-            }
-            else 
-            {
+            } else {
                 this.sendDebugMessage("Rating data not loaded");
             }
-        }
-        else if (Config.config.battleMessenger.enableRatingFilter && Config.config.ratings.showPlayersStatistics) 
-        {
+        } else {
             this.sendDebugMessage("Rating data not found: " + xvmKey);
         }
         return true;
     }
-    
 }
