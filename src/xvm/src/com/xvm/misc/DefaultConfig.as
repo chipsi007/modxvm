@@ -1264,7 +1264,15 @@ package com.xvm.misc
             };
             c.ratingFilters = {
                 enabled: false,
-                minWN8: 0
+                minWinRate: 0,
+                minEFF: 0,
+                minXEFF: 0,
+                minWN6: 0,
+                minXWN6: 0,
+                minWN8: 0,
+                minXWN8: 0,
+                minWGR: 0,
+                minXWGR: 0
             };
             return c;
         }
