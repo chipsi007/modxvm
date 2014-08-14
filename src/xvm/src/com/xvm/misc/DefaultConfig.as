@@ -44,6 +44,7 @@ package com.xvm.misc
             c.iconset = getIconsetSection();
             c.vehicleNames = new Object();
             c.consts = getConstsSection();
+            c.battleMessenger = getBattleMessengerSection();
             return c;
         }
 
@@ -1211,6 +1212,70 @@ package com.xvm.misc
                 VM_COEFF_MM_BASE: 0.8, // minimap (base)
                 VM_COEFF_FC: 0.93 // frag correlation
             };
+        }
+
+        private static function getBattleMessengerSection():CBattleMessenger
+        {
+            var c:CBattleMessenger = new CBattleMessenger();
+            c.enabled = true;
+            c.debugMode = false;
+            c.messageLifeTime = 10;
+            c.chatLength = 10;
+            c.backgroundAlpha = 100;
+            c.block = {
+                ourClan: "none",
+                ourSquad: "none",
+                "ally": {
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
+                },
+                "enemy": {
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
+                }
+            };
+            c.filter = {
+                ourClan: "none",
+                ourSquad: "none",
+                "ally": {
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
+                },
+                "enemy": {
+                    "companyBattle": "none",
+                    "specialBattle": "none",
+                    "trainingBattle": "none",
+                    "randomBattle": "none"
+                }
+            };
+            c.antispam = {
+                enabled: false,
+                duplicateCount: 2,
+                duplicateInterval: 7,
+                playerCount: 3,
+                playerInterval: 7,
+                WG_Filters: false,
+                customFilters: []
+            };
+            c.ratingFilters = {
+                enabled: false,
+                minWinRate: 0,
+                minEFF: 0,
+                minXEFF: 0,
+                minWN6: 0,
+                minXWN6: 0,
+                minWN8: 0,
+                minXWN8: 0,
+                minWGR: 0,
+                minXWGR: 0
+            };
+            return c;
         }
 
         /////////////////////
