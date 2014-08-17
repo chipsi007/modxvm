@@ -30,7 +30,6 @@ package com.xvm.misc
             c.statisticForm = getStatisticFormSection();
             c.playersPanel = getPlayersPanelSection();
             c.battleResults = getBattleResultsSection();
-            c.turretMarkers = getTurretMarkersSection();
             c.expertPanel = getExpertPanelSection();
             c.minimap = getMinimapSection();
             c.minimapAlt = getMinimapSection();
@@ -395,14 +394,6 @@ package com.xvm.misc
             return c;
         }
 
-        private static function getTurretMarkersSection():CTurretMarkers
-        {
-            var c:CTurretMarkers = new CTurretMarkers();
-            c.highVulnerability = "*";
-            c.lowVulnerability = "'";
-            return c;
-        }
-
         private static function getExpertPanelSection():CExpertPanel
         {
             var c:CExpertPanel = new CExpertPanel();
@@ -718,7 +709,12 @@ package com.xvm.misc
         private static function getMarkersSection():CMarkers
         {
             var c:CMarkers = new CMarkers();
+
             c.useStandardMarkers = false;       // Use original WoT markers.
+            c.turretMarkers = {
+                highVulnerability: "*",
+                lowVulnerability: "'"
+            };
             c.ally = {
                 alive: {
                     normal: {
@@ -988,14 +984,13 @@ package com.xvm.misc
                 { value: 2570, color: Defines.C_BLUE },    // very good
                 { value: 9999, color: Defines.C_PURPLE }   // unique
             ];
-            // TODO: update values
             c.wgr = [
-                { value: 410,  color: Defines.C_RED },     // very bad
-                { value: 795,  color: Defines.C_ORANGE },  // bad
-                { value: 1185, color: Defines.C_YELLOW },  // normal
-                { value: 1585, color: Defines.C_GREEN },   // good
-                { value: 1925, color: Defines.C_BLUE },    // very good
-                { value: 9999, color: Defines.C_PURPLE }   // unique
+                { value: 2020,  color: Defines.C_RED },     // very bad
+                { value: 4185,  color: Defines.C_ORANGE },  // bad
+                { value: 6340,  color: Defines.C_YELLOW },  // normal
+                { value: 8525,  color: Defines.C_GREEN },   // good
+                { value: 9930,  color: Defines.C_BLUE },    // very good
+                { value: 99999, color: Defines.C_PURPLE }   // unique
             ];
             c.rating = [
                 { value: 46.5,  color: Defines.C_RED },      // very bad
@@ -1003,7 +998,7 @@ package com.xvm.misc
                 { value: 51.5,  color: Defines.C_YELLOW },   // normal
                 { value: 56.5,  color: Defines.C_GREEN },    // good
                 { value: 64.5,  color: Defines.C_BLUE },     // very good
-                { value: 101, color: Defines.C_PURPLE }    // unique
+                { value: 101, color: Defines.C_PURPLE }      // unique
             ];
             c.e = [
                 { value: 3,    color: Defines.C_RED },     // very bad
@@ -1111,12 +1106,11 @@ package com.xvm.misc
                 { value: 1980, alpha: 60 },
                 { value: 9999, alpha: 40 }
             ];
-            // TODO: update values
             c.wgr = [
-                { value: 795,  alpha: 100 },
-                { value: 1185, alpha: 80 },
-                { value: 1585, alpha: 60 },
-                { value: 9999, alpha: 40 }
+                { value: 4185,  alpha: 100 },
+                { value: 6340,  alpha: 80 },
+                { value: 8525,  alpha: 60 },
+                { value: 99999, alpha: 40 }
             ];
             c.rating = [
                 { value: 49,  alpha: 100 },
@@ -1175,13 +1169,20 @@ package com.xvm.misc
         private static function getTextsSection():CTexts
         {
             var c:CTexts = new CTexts();
-            // Text for {{vtype}} macro
+
             c.vtype = new CTextsVType();
             c.vtype.LT =  "{{l10n:LT}}",   // Text for light tanks
             c.vtype.MT =  "{{l10n:MT}}",   // Text for medium tanks
             c.vtype.HT =  "{{l10n:HT}}",   // Text for heavy tanks
             c.vtype.SPG = "{{l10n:SPG}}",  // Text for arty
             c.vtype.TD =  "{{l10n:TD}}"    // Text for tank destroyers
+
+            c.gunMarks = new CTextsGunMarks();
+            c.gunMarks._0 = "0";
+            c.gunMarks._1 = "1";
+            c.gunMarks._2 = "2";
+            c.gunMarks._3 = "3";
+
             return c;
         }
 

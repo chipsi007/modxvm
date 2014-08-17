@@ -58,7 +58,7 @@
 
     // Config last modified.
     // Дата последней модификации конфига.
-    "date": "31.07.2014",
+    "date": "16.08.2014",
 
     // Supported version of the game.
     // Поддерживаемая версия игры.
@@ -124,10 +124,6 @@
   // Parameters of the After Battle Screen.
   // Параметры окна послебоевой статистики.
   "battleResults": ${"battleResults.xc":"battleResults"},
-
-  // {{turret}} marker display strings.
-  // Отображаемые строки {{turret}} маркера.
-  "turretMarkers": ${"turretMarkers.xc":"turretMarkers"},
 
   // Hit log (my hits calculator).
   // Лог попаданий (счетчик своих попаданий).
