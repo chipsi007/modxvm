@@ -4,6 +4,7 @@
       {{gun-marks}}, return count of the marks on gun for spotted vehicles
   * new option battle/allowGunMarksInPanelsAndMinimap - enable {{gun-marks}}
     macro in players panels and minimap. WARNING: performance expensive
+  * added texts/gunMarks config section
   * added ability to disable some modes in the players panels
   * new section "minimapAlt" for alternative minimap mode (disabled by default)
   * localization:
@@ -11,9 +12,11 @@
   * "hotkeys" section updated:
      - added key bindings for minimap and players panel alt mode
      - full keyboard can be used
+     ATTENTION: key codes were changed
   * disabled color fogging of {{c:*}} macros for dead vehicles
     use {{alive}} macro with alpha:
       <font color='{{c:xwn}}' alpha='{{alive?#FF|#80}}'>{{xwn}}</font>
+  * section turretMarkers moved to markers/turretMarkers
 
 XVM-5.3.3:
   * adaptation to WoT 0.9.2
@@ -34,7 +37,7 @@ XVM-5.3.2:
 XVM-5.3.1:
   * adaptation to WoT 0.9.1
   * show actual view range, gun reload time and signal range in the tank params in hangar
-  
+
 XVM-5.3.0:
   [MAJOR UPDATES]
   * new macros formatting (see readme-en.txt)

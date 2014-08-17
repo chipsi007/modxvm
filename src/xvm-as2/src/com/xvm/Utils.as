@@ -2,10 +2,8 @@
  * ...
  * @author sirmax2
  */
-import flash.filters.DropShadowFilter;
-import com.xvm.Defines;
-import com.xvm.Logger;
-import com.xvm.Strings;
+import com.xvm.*;
+import flash.filters.*;
 
 class com.xvm.Utils
 {
@@ -70,6 +68,16 @@ class com.xvm.Utils
             case "AT-SPG": return "TD";
             default: return vclass;
         }
+    }
+
+    public static function getGunMarksText(value:Number):String
+    {
+        if (value == null || !Config.config.texts.gunMarks["_" + value])
+            return null;
+        var v:String = Config.config.texts.gunMarks["_" + value];
+        if (v.indexOf("{{l10n:") >= 0)
+            v = Locale.get(v);
+        return v;
     }
 
     ////////////////////
@@ -421,25 +429,31 @@ class com.xvm.Utils
 
     public static function XWN8(WN8:Number):Number
     {
-        return WN8 > 3250 ? 100 :
+        return WN8 > 3300 ? 100 :
             Math.round(Math.max(0, Math.min(100,
                 WN8*(WN8*(WN8*(WN8*(WN8*(WN8*
-                0.0000000000000000000812
-                + 0.0000000000000001616)
-                - 0.000000000006736)
-                + 0.000000028057)
-                - 0.00004536)
-                + 0.06563)
-                - 0.01
+                0.000000000000000000071
+                + 0.0000000000000002455)
+                - 0.000000000006785)
+                + 0.00000002708)
+                - 0.000042707)
+                + 0.06319)
+                + 0.348
             )));
     }
 
-    // TODO: update formula
     public static function XWGR(WGR:Number):Number
     {
-        return WGR > 20000 ? 100 :
+        return WGR > 11000 ? 100 :
             Math.round(Math.max(0, Math.min(100,
-                WGR / 200
+                WGR*(WGR*(WGR*(WGR*(WGR*(-WGR*
+                0.0000000000000000000004209
+                + 0.000000000000000012477)
+                - 0.00000000000014338)
+                + 0.0000000008309)
+                - 0.000002361)
+                + 0.01048)
+                + 0.4
             )));
     }
 
