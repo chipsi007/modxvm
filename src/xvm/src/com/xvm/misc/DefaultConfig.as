@@ -112,7 +112,6 @@ package com.xvm.misc
             var c:CHangar = new CHangar();
             c.hideTutorial = false;
             c.xwnInCompany = true;
-            c.masteryMarkInTankCarousel = true;
             c.masteryMarkInTechTree = true;
             c.hidePricesInTechTree = false;
             c.widgetsEnabled = false;
@@ -152,6 +151,13 @@ package com.xvm.misc
                     blur: 4,
                     strength: 2
                 };
+            c.carousel = new CCarousel();
+            c.carousel.zoom = 1;
+            c.carousel.rows = 1;
+            c.carousel.padding = { horizontal:10, vertical:2 },
+            c.carousel.hideBuyTank = false;
+            c.carousel.hideBuySlot = false;
+            c.carousel.extraFields = [];
             return c;
         }
 
