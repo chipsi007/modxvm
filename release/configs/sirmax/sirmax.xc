@@ -32,13 +32,22 @@
   },
   "hangar": {
     "hideTutorial": false,
-    "masteryMarkInTankCarousel": true,
     "masteryMarkInTechTree": true,
     "hidePricesInTechTree": true,
     "widgetsEnabled": true,
     "pingServers": {
       "$ref": { "path":"def.pingServers" },
       "x": 5
+    },
+    "carousel": {
+      "zoom": 0.75,
+      "rows": 2,
+      "padding": { "horizontal": 2, "vertical": 2 },
+      "hideBuyTank": false,
+      "hideBuySlot": false,
+      "extraFields": [
+
+      ]
     }
   },
   "userInfo": {

@@ -88,9 +88,9 @@ package net.wg.gui.components.controls
         
         protected var selectedItemRenderer:IListItemRenderer = null;
         
-        private var scopeWidth:Number = 0;
+        protected var scopeWidth:Number = 0;
         
-        private var courseFactor:Number = 0;
+        protected var courseFactor:Number = 0;
         
         private var slideAcceleratorAfterDrag:Number = 16;
         
@@ -598,7 +598,7 @@ private function slidingFn(param1:Object) : void
     
 }
 
-private function getCurrentFirstRendererOnAnim() : Number
+protected function getCurrentFirstRendererOnAnim() : Number
 {
     var _loc1_:* = NaN;
     if(!container || !_renderers)
@@ -729,7 +729,7 @@ this.currentFirstRenderer = _loc4_;
 this.courseFactor = 0;
 }
 
-private function arrowSlide() : void
+protected function arrowSlide() : void
 {
 var _loc1_:* = NaN;
 var _loc2_:* = NaN;
