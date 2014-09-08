@@ -27,6 +27,7 @@ package com.xvm.types.cfg
         public var minimap:CMinimap;
         public var minimapAlt:CMinimap;
         public var markers:CMarkers;
+        public var battleMessenger:CBattleMessenger;
 
         public var colors:CColors;
         public var alpha:CAlpha;
