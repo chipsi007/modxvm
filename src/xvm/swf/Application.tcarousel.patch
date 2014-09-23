@@ -1,0 +1,500 @@
+diff -Naur Application.orig-0.orig/net/wg/gui/components/controls/Carousel.class.asasm Application.orig-0/net/wg/gui/components/controls/Carousel.class.asasm
+--- Application.orig-0.orig/net/wg/gui/components/controls/Carousel.class.asasm	2014-09-13 19:57:04.143675400 +0300
++++ Application.orig-0/net/wg/gui/components/controls/Carousel.class.asasm	2014-09-13 19:57:50.579331400 +0300
+@@ -63,8 +63,8 @@
+   trait slot QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "lastDx") type QName(PackageNamespace(""), "Number") value Integer(0) end
+   trait slot QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "allowDrag") type QName(PackageNamespace(""), "Boolean") value False() end
+   trait slot QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "selectedItemRenderer") type QName(PackageNamespace("scaleform.clik.interfaces"), "IListItemRenderer") value Null() end
+-  trait slot QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "scopeWidth") type QName(PackageNamespace(""), "Number") value Integer(0) end
+-  trait slot QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor") type QName(PackageNamespace(""), "Number") value Integer(0) end
++  trait slot QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "scopeWidth") type QName(PackageNamespace(""), "Number") value Integer(0) end
++  trait slot QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor") type QName(PackageNamespace(""), "Number") value Integer(0) end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "slideAcceleratorAfterDrag") type QName(PackageNamespace(""), "Number") value Integer(16) end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "slideAcceleratorByArrow") type QName(PackageNamespace(""), "Number") value Integer(7) end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "slideToPosAccelerator") type QName(PackageNamespace(""), "Number") value Integer(7) end
+@@ -1410,7 +1410,7 @@
+       getlocal0
+       getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "_defContainerPos")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "scopeWidth")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "scopeWidth")
+       getlocal0
+       getproperty         QName(PackageNamespace(""), "renderersMask")
+       getproperty         QName(PackageNamespace(""), "width")
+@@ -1481,7 +1481,7 @@
+       getlocal0
+       getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "_defContainerPos")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "scopeWidth")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "scopeWidth")
+       getlocal0
+       getproperty         QName(PackageNamespace(""), "renderersMask")
+       getproperty         QName(PackageNamespace(""), "width")
+@@ -1616,7 +1616,7 @@
+       pushbyte            2
+       multiply
+       add
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "scopeWidth")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "scopeWidth")
+ 
+       returnvoid
+      end ; code
+@@ -2363,7 +2363,7 @@
+ 
+       getlocal0
+       getlocal0
+-      callproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "getCurrentFirstRendererOnAnim"), 0
++      callproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "getCurrentFirstRendererOnAnim"), 0
+       initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "currentFirstRenderer")
+ 
+       getlex              QName(PackageNamespace(""), "container")
+@@ -2385,7 +2385,7 @@
+     end ; body
+    end ; method
+   end ; trait
+-  trait method QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "getCurrentFirstRendererOnAnim")
++  trait method QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "getCurrentFirstRendererOnAnim")
+    method
+     refid "net.wg.gui.components.controls:Carousel/instance/net.wg.gui.components.controls:Carousel/instance/getCurrentFirstRendererOnAnim"
+     returns QName(PackageNamespace(""), "Number")
+@@ -2487,7 +2487,7 @@
+       pushscope
+ 
+       getlocal0
+-      callproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "getCurrentFirstRendererOnAnim"), 0
++      callproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "getCurrentFirstRendererOnAnim"), 0
+       convert_d
+       setlocal1
+ 
+@@ -2722,7 +2722,7 @@
+ 
+       getlocal0
+       getlocal0
+-      callproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "getCurrentFirstRendererOnAnim"), 0
++      callproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "getCurrentFirstRendererOnAnim"), 0
+       initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "currentFirstRenderer")
+ 
+       getlocal0
+@@ -2777,7 +2777,7 @@
+ 
+       getlocal0
+       pushbyte            0
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+ 
+       jump                L65
+ 
+@@ -2796,7 +2796,7 @@
+       pushbyte            255
+       convert_d
+ L64:
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+ 
+ L65:
+       getlocal0
+@@ -2826,7 +2826,7 @@
+       getlocal0
+       findpropstrict      QName(PackageNamespace("flash.utils"), "setInterval")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "arrowSlide")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "arrowSlide")
+       getlocal0
+       getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "INTERVAL_SPEED")
+       callproperty        QName(PackageNamespace("flash.utils"), "setInterval"), 2
+@@ -2973,14 +2973,14 @@
+ 
+       getlocal0
+       pushbyte            0
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+ 
+       returnvoid
+      end ; code
+     end ; body
+    end ; method
+   end ; trait
+-  trait method QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "arrowSlide")
++  trait method QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "arrowSlide")
+    method
+     refid "net.wg.gui.components.controls:Carousel/instance/net.wg.gui.components.controls:Carousel/instance/arrowSlide"
+     returns QName(PackageNamespace(""), "void")
+@@ -3005,7 +3005,7 @@
+       getlocal0
+       getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "maxDx")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+       multiply
+       getlocal0
+       getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "lastDx")
+@@ -3017,7 +3017,7 @@
+       initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "lastDx")
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+       pushbyte            0
+       ifne                L106
+ 
+@@ -3126,7 +3126,7 @@
+       setproperty         QName(PackageNamespace(""), "x")
+ 
+       getlocal0
+-      callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "getCurrentFirstRendererOnAnim"), 0
++      callpropvoid        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "getCurrentFirstRendererOnAnim"), 0
+ 
+       getlocal0
+       getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "_currentFirstRendererOnAnim")
+@@ -3137,7 +3137,7 @@
+ 
+       pop
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+       pushbyte            1
+       equals
+ L126:
+@@ -3149,7 +3149,7 @@
+ 
+       getlocal0
+       pushbyte            0
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+ 
+       jump                L160
+ 
+@@ -3167,7 +3167,7 @@
+ 
+       pop
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+       pushbyte            255
+       equals
+ L149:
+@@ -3183,7 +3183,7 @@
+ 
+       getlocal0
+       pushbyte            0
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "courseFactor")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "courseFactor")
+ 
+ L160:
+       returnvoid
+@@ -3214,7 +3214,7 @@
+       iffalse             L38
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.components.controls:Carousel/instance#0"), "scopeWidth")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.components.controls:Carousel"), "scopeWidth")
+       getlocal0
+       getproperty         QName(PackageNamespace(""), "renderersMask")
+       getproperty         QName(PackageNamespace(""), "width")
+diff -Naur Application.orig-0.orig/net/wg/gui/lobby/hangar/tcarousel/TankCarousel.class.asasm Application.orig-0/net/wg/gui/lobby/hangar/tcarousel/TankCarousel.class.asasm
+--- Application.orig-0.orig/net/wg/gui/lobby/hangar/tcarousel/TankCarousel.class.asasm	2014-09-13 19:57:14.478266500 +0300
++++ Application.orig-0/net/wg/gui/lobby/hangar/tcarousel/TankCarousel.class.asasm	2014-09-13 19:57:50.599332500 +0300
+@@ -120,8 +120,8 @@
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_createdRendersListByCompDescr") type QName(PackageNamespace(""), "Object") value Null() end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_createdRendersListByCompDescrLength") type QName(PackageNamespace(""), "Number") value Integer(0) end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_vehiclesVOManager") type QName(PackageNamespace("net.wg.gui.lobby.hangar.tcarousel.helper"), "VehicleCarouselVOManager") value Null() end
+-  trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot") type QName(PackageNamespace("scaleform.clik.interfaces"), "IListItemRenderer") value Null() end
+-  trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle") type QName(PackageNamespace("scaleform.clik.interfaces"), "IListItemRenderer") value Null() end
++  trait slot QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot") type QName(PackageNamespace("scaleform.clik.interfaces"), "IListItemRenderer") value Null() end
++  trait slot QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle") type QName(PackageNamespace("scaleform.clik.interfaces"), "IListItemRenderer") value Null() end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_updateInProgress") type QName(PackageNamespace(""), "Boolean") value False() end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_rendererHelpLayout") type QName(PackageNamespace("flash.display"), "DisplayObject") end
+   trait slot QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_isShowHelpLayout") type QName(PackageNamespace(""), "Boolean") value False() end
+@@ -402,31 +402,31 @@
+       callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "removeEmptySlots"), 0
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       iffalse             L105
+ 
+       getlocal0
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       callpropvoid        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "cleanUpRenderer"), 1
+ 
+       getlocal0
+       pushnull
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+ 
+ L105:
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       iffalse             L115
+ 
+       getlocal0
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       callpropvoid        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "cleanUpRenderer"), 1
+ 
+       getlocal0
+       pushnull
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+ 
+ L115:
+       getlocal0
+@@ -677,7 +677,7 @@
+       setlocal3
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       pushnull
+       ifeq                L83
+ 
+@@ -694,7 +694,7 @@
+       setlocal            4
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       pushnull
+       ifeq                L245
+ 
+@@ -833,7 +833,7 @@
+ 
+ L199:
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       getlex              QName(PackageNamespace(""), "padding")
+       getproperty         QName(PackageNamespace(""), "horizontal")
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+@@ -845,11 +845,11 @@
+ 
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       callpropvoid        QName(Namespace("http://adobe.com/AS3/2006/builtin"), "push"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       getlex              QName(PackageNamespace("flash.display"), "DisplayObject")
+       astypelate
+       coerce              QName(PackageNamespace("flash.display"), "DisplayObject")
+@@ -861,7 +861,7 @@
+ 
+ L222:
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       getlex              QName(PackageNamespace(""), "padding")
+       getproperty         QName(PackageNamespace(""), "horizontal")
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+@@ -873,7 +873,7 @@
+ 
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       callpropvoid        QName(Namespace("http://adobe.com/AS3/2006/builtin"), "push"), 1
+ 
+       getlocal0
+@@ -1629,7 +1629,7 @@
+       initproperty        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_updateShowByCompactDescription")
+ 
+       getlocal0
+-      callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "showHideFilters"), 0
++      callpropvoid        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "showHideFilters"), 0
+ 
+       getlocal0
+       callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "addAdvancedSlots"), 0
+@@ -1651,7 +1651,7 @@
+       iffalse             L175
+ 
+       getlocal0
+-      callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "showHideFilters"), 0
++      callpropvoid        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "showHideFilters"), 0
+ 
+       getlocal0
+       callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "updateEmptySlots"), 0
+@@ -2195,7 +2195,7 @@
+       getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_currentShowRendersByIndex")
+       getproperty         QName(PackageNamespace(""), "length")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       getlex              QName(PackageNamespace("net.wg.gui.lobby.hangar.tcarousel.helper"), "VehicleCarouselVOBuilder")
+       getproperty         QName(PackageNamespace(""), "instance")
+       getlocal0
+@@ -2229,7 +2229,7 @@
+       getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_currentShowRendersByIndex")
+       getproperty         QName(PackageNamespace(""), "length")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       getlex              QName(PackageNamespace("net.wg.gui.lobby.hangar.tcarousel.helper"), "VehicleCarouselVOBuilder")
+       getproperty         QName(PackageNamespace(""), "instance")
+       getlocal0
+@@ -2715,7 +2715,7 @@
+     end ; body
+    end ; method
+   end ; trait
+-  trait method QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "showHideFilters")
++  trait method QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "showHideFilters")
+    method
+     refid "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance/net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance/showHideFilters"
+     returns QName(PackageNamespace(""), "void")
+@@ -3843,12 +3843,12 @@
+       callpropvoid        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "cleanUpRenderer"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       iffalse             L63
+ 
+       getlocal0
+       pushnull
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+ 
+ L63:
+       jump                L65
+@@ -3890,7 +3890,7 @@
+       ifngt               L72
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       iftrue              L49
+ 
+       getlocal0
+@@ -3898,10 +3898,10 @@
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getproperty         QName(PackageNamespace(""), "length")
+       callproperty        QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "createRenderer"), 1
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       pushnull
+       ifeq                L48
+ 
+@@ -3910,7 +3910,7 @@
+       callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "updateSlotForBuyVehicle"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       getlex              QName(PackageNamespace(""), "padding")
+       getproperty         QName(PackageNamespace(""), "horizontal")
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+@@ -3922,11 +3922,11 @@
+ 
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       callpropvoid        QName(Namespace("http://adobe.com/AS3/2006/builtin"), "push"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       getlex              QName(PackageNamespace("flash.display"), "DisplayObject")
+       astypelate
+       coerce              QName(PackageNamespace("flash.display"), "DisplayObject")
+@@ -3941,7 +3941,7 @@
+ 
+ L49:
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       getlex              QName(PackageNamespace(""), "padding")
+       getproperty         QName(PackageNamespace(""), "horizontal")
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+@@ -3953,11 +3953,11 @@
+ 
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       callpropvoid        QName(Namespace("http://adobe.com/AS3/2006/builtin"), "push"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuyVehicle")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuyVehicle")
+       getlex              QName(PackageNamespace("flash.display"), "DisplayObject")
+       astypelate
+       coerce              QName(PackageNamespace("flash.display"), "DisplayObject")
+@@ -3970,7 +3970,7 @@
+ 
+ L72:
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       pushnull
+       ifne                L113
+ 
+@@ -3979,10 +3979,10 @@
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getproperty         QName(PackageNamespace(""), "length")
+       callproperty        QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "createRenderer"), 1
+-      initproperty        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      initproperty        QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       pushnull
+       ifeq                L112
+ 
+@@ -3991,7 +3991,7 @@
+       callpropvoid        QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "updateSlotForBuySlot"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       getlex              QName(PackageNamespace(""), "padding")
+       getproperty         QName(PackageNamespace(""), "horizontal")
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+@@ -4003,11 +4003,11 @@
+ 
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       callpropvoid        QName(Namespace("http://adobe.com/AS3/2006/builtin"), "push"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       getlex              QName(PackageNamespace("flash.display"), "DisplayObject")
+       astypelate
+       coerce              QName(PackageNamespace("flash.display"), "DisplayObject")
+@@ -4022,7 +4022,7 @@
+ 
+ L113:
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       getlex              QName(PackageNamespace(""), "padding")
+       getproperty         QName(PackageNamespace(""), "horizontal")
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+@@ -4034,11 +4034,11 @@
+ 
+       getlex              QName(ProtectedNamespace("scaleform.clik.controls:CoreList"), "_renderers")
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       callpropvoid        QName(Namespace("http://adobe.com/AS3/2006/builtin"), "push"), 1
+ 
+       getlocal0
+-      getproperty         QName(PrivateNamespace(null, "net.wg.gui.lobby.hangar.tcarousel:TankCarousel/instance#0"), "_slotForBuySlot")
++      getproperty         QName(ProtectedNamespace("net.wg.gui.lobby.hangar.tcarousel:TankCarousel"), "_slotForBuySlot")
+       getlex              QName(PackageNamespace("flash.display"), "DisplayObject")
+       astypelate
+       coerce              QName(PackageNamespace("flash.display"), "DisplayObject")
