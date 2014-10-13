@@ -2,12 +2,14 @@
 {
     import com.xvm.*;
     import com.xvm.types.*;
+    import com.xvm.types.dossier.*;
     import com.xvm.utils.*;
     import flash.display.*;
     import flash.filters.*;
     import flash.text.*;
     import flash.utils.*;
     import net.wg.gui.components.controls.*;
+    import net.wg.gui.events.*;
     import scaleform.gfx.*;
 
     public class ExtraFields
@@ -56,25 +58,87 @@
 
                 //Logger.addObject(fmt);
 
-                createExtraTextField(owner, fmt, owner.formats.length - 1, width, height);
+                if (fmt.src != null)
+                    createExtraMovieClip(owner, fmt, owner.formats.length - 1);
+                else
+                    createExtraTextField(owner, fmt, owner.formats.length - 1, width, height);
             }
         }
 
-        public static function updateExtraFields(owner:MovieClip):void
+        public static function updateVehicleExtraFields(owner:MovieClip, vdata:VehicleDossierCut):void
         {
-            //Logger.add("updateExtraFields");
-            //var obj = BattleState.getUserData(m_name);
+            //Logger.add("updateVehicleExtraFields");
             var formats:Array = owner.formats;
+            if (formats == null)
+                return;
             var len:Number = formats.length;
             for (var i:Number = 0; i < len; ++i)
             {
                 var field:DisplayObject = owner.getChildByName("f" + i);
                 if (field != null)
-                    _internal_update(field, formats[i], null /*obj*/);
+                {
+                    var opt:MacrosFormatOptions = new MacrosFormatOptions();
+                    opt.vdata = vdata;
+                    _internal_update(field, formats[i], opt);
+                }
             }
         }
 
-        private static function createExtraTextField(owner:MovieClip, format:Object, n:Number, defW:Number, defH:Number):TextField
+        private static function createExtraMovieClip(owner:MovieClip, format:Object, n:Number):void
+        {
+            //Logger.addObject(format);
+            var x:Number = format.x != null && !isNaN(format.x) ? format.x : 0;
+            var y:Number = format.y != null && !isNaN(format.y) ? format.y : 0;
+            var w:Number = format.w != null && !isNaN(format.w) ? format.w : NaN;
+            var h:Number = format.h != null && !isNaN(format.h) ? format.h : NaN;
+
+            var img:UILoaderAlt = owner.addChild(App.utils.classFactory.getComponent("UILoaderAlt", UILoaderAlt)) as UILoaderAlt;
+            img.name = "f" + n;
+            img["data"] = {
+                x: x, y: y, w: w, h: h,
+                format: format,
+                align: format.align != null ? format.align : "left"
+            };
+            //Logger.addObject(img["data"]);
+
+            img.alpha = format.alpha != null && !isNaN(format.alpha) ? format.alpha / 100.0 : 1;
+            img.rotation = format.rotation != null && !isNaN(format.rotation) ? format.rotation : 0;
+
+            img.autoSize = true;
+            img.maintainAspectRatio = false;
+            img.visible = false;
+
+            img.addEventListener(UILoaderEvent.COMPLETE, onExtraMovieClipLoadComplete);
+
+            cleanupFormat(img, format);
+        }
+
+        private static function onExtraMovieClipLoadComplete(e:UILoaderEvent):void
+        {
+            //Logger.add("onExtraMovieClipLoadComplete");
+            //Logger.addObject(e);
+
+            var img:UILoaderAlt = e.target as UILoaderAlt;
+
+            var loader:Loader = img.getChildAt(1) as Loader;
+
+            var data:Object = img["data"];
+            if (isNaN(data.w) && data.format.w == null)
+                data.w = loader.contentLoaderInfo.content.width;
+            if (isNaN(data.h) && data.format.h == null)
+                data.h = loader.contentLoaderInfo.content.height;
+            //Logger.addObject(data, 2);
+
+            img.visible = false;
+            img.x = 0;
+            img.y = 0;
+            img.width = 0;
+            img.height = 0;
+            alignField(img);
+            App.utils.scheduler.envokeInNextFrame(function():void { img.visible = true; } );
+        }
+
+        private static function createExtraTextField(owner:MovieClip, format:Object, n:Number, defW:Number, defH:Number):void
         {
             //Logger.addObject(format);
             var x:Number = format.x != null && !isNaN(format.x) ? format.x : 0;
@@ -128,12 +192,10 @@
             cleanupFormat(tf, format);
 
             alignField(tf);
-
-            return tf;
         }
 
         // cleanup formats without macros to remove extra checks
-        private static function cleanupFormat(field:TextField, format:Object):void
+        private static function cleanupFormat(field:*, format:Object):void
         {
             if (format.x != null && (typeof format.x != "string" || format.x.indexOf("{{") < 0))
                 delete format.x;
@@ -156,8 +218,9 @@
         private static function alignField(field:DisplayObject):void
         {
             var tf:TextField = field as TextField;
+            var img:UILoaderAlt = field as UILoaderAlt;
 
-            var data:Object = (field.parent as MovieClip).data[field.name];
+            var data:Object = img ? img["data"] : (field.parent as MovieClip).data[field.name];
             //Logger.addObject(data);
 
             var x:Number = data.x;
@@ -176,7 +239,7 @@
             else if (data.align == "center")
                 x -= w / 2;
 
-            //Logger.add("x:" + x + " y:" + y + " w:" + w + " h:" + h + " align:" + data.align + " textWidth:" + tf.textWidth);
+            //Logger.add("x:" + x + " y:" + y + " w:" + w + " h:" + h + " align:" + data.align);
 
             if (tf != null)
             {
@@ -189,55 +252,78 @@
                 if (tf.height != h)
                     tf.height = h;
             }
+            else if (img != null)
+            {
+                if (img.x != x)
+                    img.x = x;
+                if (img.y != y)
+                    img.y = y;
+                if (img.width != w || img.height != h)
+                {
+                    //Logger.add(img.width + "->" + w + " " + x + " " + y);
+                    img.width = w;
+                    img.height = h;
+                }
+            }
         }
 
         private static function _internal_update(f:DisplayObject, format:Object, options:MacrosFormatOptions):void
         {
-            var m_name:String = null;
-
             var tf:TextField = f as TextField;
+            var img:UILoaderAlt = f as UILoaderAlt;
 
             var needAlign:Boolean = false;
             var data:Object = (f.parent as MovieClip).data[f.name];
 
             if (format.x != null)
             {
-                data.x = parseFloat(Macros.Format(m_name, format.x, options)) || 0;
+                data.x = parseFloat(Macros.Format(null, format.x, options)) || 0;
                 needAlign = true;
             }
             if (format.y != null)
             {
-                data.y = parseFloat(Macros.Format(m_name, format.y, options)) || 0;
+                data.y = parseFloat(Macros.Format(null, format.y, options)) || 0;
                 needAlign = true;
             }
             if (format.w != null)
             {
-                data.w = parseFloat(Macros.Format(m_name, format.w, options)) || 0;
+                data.w = parseFloat(Macros.Format(null, format.w, options)) || 0;
                 needAlign = true;
             }
             if (format.h != null)
             {
-                data.h = parseFloat(Macros.Format(m_name, format.h, options)) || 0;
+                data.h = parseFloat(Macros.Format(null, format.h, options)) || 0;
                 needAlign = true;
             }
             if (format.alpha != null)
             {
-                var alpha:Number = parseFloat(Macros.Format(m_name, format.alpha, options));
+                var alpha:Number = parseFloat(Macros.Format(null, format.alpha, options));
                 f.alpha = isNaN(alpha) ? 1 : alpha / 100.0;
             }
             if (format.rotation != null)
-                f.rotation = parseFloat(Macros.Format(m_name, format.rotation, options)) || 0;
+                f.rotation = parseFloat(Macros.Format(null, format.rotation, options)) || 0;
             if (format.borderColor != null && tf != null)
-                tf.borderColor = parseInt(Macros.Format(m_name, format.borderColor, options).split("#").join("0x")) || 0;
+                tf.borderColor = parseInt(Macros.Format(null, format.borderColor, options).split("#").join("0x")) || 0;
             if (format.bgColor != null && tf != null)
-                tf.backgroundColor = parseInt(Macros.Format(m_name, format.bgColor, options).split("#").join("0x")) || 0;
+                tf.backgroundColor = parseInt(Macros.Format(null, format.bgColor, options).split("#").join("0x")) || 0;
 
             if (format.format != null && tf != null)
             {
-                var txt:String = Macros.Format(m_name, format.format, options);
+                var txt:String = Macros.Format(null, format.format, options);
                 //Logger.add(txt);
                 tf.htmlText = "<span class='extraField'>" + txt + "</span>";
                 needAlign = true;
+            }
+
+            if (format.src != null && img != null)
+            {
+                var src:String = "../../" + Macros.Format(null, format.src, options).replace("img://", "");
+                if (img.source != src)
+                {
+                    //Logger.add(img.source + " => " + src);
+                    img.visible = true;
+                    img.source = src;
+                }
             }
 
             if (needAlign)

@@ -21,10 +21,6 @@
   // Версия конфига. Не удаляйте и не изменяйте её без необходимости.
   "configVersion": "5.1.0",
 
-  // Version of the editor.
-  // Версия редактора.
-  "editorVersion": "0.80",
-
   // Language used in mod
   // "auto" - automatically detect language from game client,
   // or specify file name located in res_mods/xvm/l10n/ (ex: "en")
@@ -58,15 +54,15 @@
 
     // Config last modified.
     // Дата последней модификации конфига.
-    "date": "16.08.2014",
+    "date": "28.09.2014",
 
     // Supported version of the game.
     // Поддерживаемая версия игры.
-    "gameVersion": "0.9.2",
+    "gameVersion": "0.9.3",
 
     // The minimum required version of the XVM mod.
     // Минимально необходимая версия мода XVM.
-    "modMinVersion": "5.3.4"
+    "modMinVersion": "5.3.6"
   },
 
   // Parameters for login screen.

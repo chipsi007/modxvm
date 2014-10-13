@@ -20,6 +20,9 @@ from gui.shared.gui_items import GUI_ITEM_TYPE
 from helpers.i18n import makeString
 from gui.Scaleform.locale.MENU import MENU
 from gui.Scaleform.locale.PROFILE import PROFILE
+from gui.shared import g_itemsCache
+from items import vehicles
+from dossiers2.ui.achievements import ACHIEVEMENT_BLOCK as _AB
 
 from xpm import *
 
@@ -150,14 +153,27 @@ class _Dossier(object):
 
         return res
 
-
     def _prepareVehicleResult(self, dossier):
         res = {}
         if dossier is None:
             return res
 
         res = self._prepareCommonResult(dossier)
-        res['vehId'] = int(self.vehId)
+
+        res.update({
+            'vehId': int(self.vehId),
+            'marksOnGun': int(dossier.getRecordValue(_AB.TOTAL, 'marksOnGun')),
+            'damageRating': dossier.getRecordValue(_AB.TOTAL, 'damageRating') / 100.0,
+        })
+
+        #vehicle = g_itemsCache.items.getItemByCD(res['vehId'])
+        #if vehicle is not None and vehicle.invID >= 0:
+        #_, nID, innID = vehicles.parseIntCompactDescr(res['vehId'])
+        #vehDescr = vehicles.VehicleDescr(typeID = (nID, innID))
+        #if vehDescr is not None:
+        #    if res['vehId'] == 4657:
+        #        log("ok %i %i %i" % (res['vehId'], vehDescr.maxHealth, vehDescr.turret['maxHealth']))
+        #        #log(vars(vehDescr))
 
         return res
 

@@ -1,7 +1,6 @@
 """ XVM (c) www.modxvm.com 2013-2014 """
 
 import os
-import glob
 import traceback
 
 import simplejson
@@ -15,27 +14,25 @@ from xpm import *
 
 from constants import *
 from logger import *
-from gameregion import *
 from pinger import *
 #from pinger_wg import *
 from stats import getBattleStat, getBattleResultsStat, getUserData
 from dossier import getDossier
 from vehinfo import getVehicleInfoDataStr
 from vehstate import getVehicleStateData
-from wn8 import getWN8ExpectedData
-from token import getXvmStatTokenData
-from test import runTest
+import token
+import comments
 import utils
+import userprefs
 from websock import g_websock
 from minimap_circles import g_minimap_circles
+from test import runTest
 #from config.default import g_default_config
 
 _LOG_COMMANDS = (
   COMMAND_LOADBATTLESTAT,
   COMMAND_LOADBATTLERESULTSSTAT,
   COMMAND_LOGSTAT,
-  COMMAND_LOAD_SETTINGS,
-  COMMAND_SAVE_SETTINGS,
   COMMAND_TEST,
   )
 
@@ -60,9 +57,6 @@ class Xvm(object):
             res = None
             if cmd == COMMAND_LOG:
                 log(*args)
-            elif cmd == COMMAND_LOAD_FILE:
-                fn = os.path.join(XVM_DIR, args[0])
-                res = load_file(fn) if os.path.exists(fn) else None
             elif cmd == COMMAND_SET_CONFIG:
                 #debug('setConfig')
                 self.config_str = args[0]
@@ -75,25 +69,12 @@ class Xvm(object):
             elif cmd == COMMAND_PING:
                 #return
                 ping(proxy)
-            elif cmd == COMMAND_GETMODS:
-                #return
-                res = self.getMods()
             elif cmd == COMMAND_GETSCREENSIZE:
                 #return
                 res = simplejson.dumps(list(GUI.screenResolution()))
-            elif cmd == COMMAND_GETGAMEREGION:
-                #return
-                res = region
-            elif cmd == COMMAND_GETLANGUAGE:
-                #return
-                res = language
             elif cmd == COMMAND_GETVEHICLEINFODATA:
                 #return
                 res = getVehicleInfoDataStr()
-            elif cmd == COMMAND_GETWN8EXPECTEDDATA:
-                res = getWN8ExpectedData()
-            elif cmd == COMMAND_GETXVMSTATTOKENDATA:
-                res = simplejson.dumps(getXvmStatTokenData())
             elif cmd == COMMAND_LOADBATTLESTAT:
                 getBattleStat(proxy, args)
             elif cmd == COMMAND_LOADBATTLERESULTSSTAT:
@@ -102,20 +83,25 @@ class Xvm(object):
                 getUserData(proxy, args)
             elif cmd == COMMAND_GETDOSSIER:
                 getDossier(proxy, args)
+            elif cmd == COMMAND_RETURN_CREW:
+                self.__processReturnCrew()
             elif cmd == COMMAND_OPEN_URL:
                 if len(args[0]):
                     utils.openWebBrowser(args[0], False)
-            elif cmd == COMMAND_RETURN_CREW:
-                self.__processReturnCrew()
             elif cmd == COMMAND_LOAD_SETTINGS:
-                pass # TODO
+                res = userprefs.get(args[0])
             elif cmd == COMMAND_SAVE_SETTINGS:
-                pass # TODO
+                userprefs.set(args[0], args[1])
+            elif cmd == COMMAND_GETCOMMENTS:
+                res = comments.getXvmUserComments(args[0])
+            elif cmd == COMMAND_SETCOMMENTS:
+                res = comments.setXvmUserComments(args[0])
             elif cmd == COMMAND_TEST:
                 runTest(args)
             else:
                 err("unknown command: " + str(cmd))
-            proxy.movie.invoke(('xvm.respond', [id, res]))
+            proxy.movie.invoke(('xvm.respond',
+                [id] + res if isinstance(res, list) else [id, res]))
         except Exception, ex:
             err(traceback.format_exc())
 
@@ -129,11 +115,14 @@ class Xvm(object):
                 if len(args) > 5:
                     #debug('extendVehicleMarkerArgs: %i %s' % (handle, function))
                     v = utils.getVehicleByName(args[5])
-                    if hasattr(v, 'publicInfo'): 
+                    if hasattr(v, 'publicInfo'):
+                        vInfo = utils.getVehicleInfo(v.id)
+                        vStats = utils.getVehicleStats(v.id)
                         args.extend([
+                            vInfo.player.accountDBID,
                             v.publicInfo.marksOnGun,
-                            utils.getVehicleInfo(v.id).vehicleStatus,
-                            utils.getVehicleStats(v.id).frags,
+                            vInfo.vehicleStatus,
+                            vStats.frags,
                         ])
             elif function not in ['showExInfo']:
                 #debug('extendVehicleMarkerArgs: %i %s %s' % (handle, function, str(args)))
@@ -149,6 +138,7 @@ class Xvm(object):
             isRepeated = event.isRepeatedEvent()
             if not isRepeated:
                 #debug("key=" + str(key) + ' ' + ('down' if isDown else 'up'))
+                #g_websock.send("%s/%i" % ('down' if isDown else 'up', key))
                 if self.config is not None:
                     if self.battleFlashObject is not None:
                         if self.checkKeyEventBattle(key, isDown):
@@ -176,17 +166,6 @@ class Xvm(object):
 
         return False
 
-    def getMods(self):
-        mods_dir = XVM_MODS_DIR
-        if not os.path.isdir(mods_dir):
-            return None
-        mods = []
-        for m in glob.iglob(mods_dir + "/*.swf"):
-            m = m.replace('\\', '/')
-            if not m.lower().endswith("/xvm.swf"):
-                mods.append(m)
-        return simplejson.dumps(mods) if mods else None
-
     def initApplication(self):
         pass
 
@@ -204,15 +183,39 @@ class Xvm(object):
     def initVmm(self):
         self.sendConfig(self.vmmFlashObject)
 
+    def on_websock_message(self, message):
+        try:
+            pass
+            #type = SystemMessages.SM_TYPE.Information
+            #msg += message
+            #msg += '</textformat>'
+            #SystemMessages.pushMessage(msg, type)
+        except:
+            debug(traceback.format_exc())
+
+    def on_websock_error(self, error):
+        try:
+            type = SystemMessages.SM_TYPE.Error
+            msg = token.getXvmMessageHeader(self.config)
+            msg += 'WebSocket error: %s' % str(error)
+            msg += '</textformat>'
+            SystemMessages.pushMessage(msg, type)
+        except:
+            pass
+
     def onShowLogin(self, e=None):
         if self.currentPlayerId is not None:
             self.currentPlayerId = None
             g_websock.send('id')
+            token.clearToken()
 
     def onShowLobby(self, e=None):
         playerId = getCurrentPlayerId()
         if playerId is not None and self.currentPlayerId != playerId:
             self.currentPlayerId = playerId
+            token.checkVersion(self.config)
+            if self.config['rating']['showPlayersStatistics']:
+                token.initializeXvmToken(self.config)
             g_websock.send('id/%d' % playerId)
         if self.app is not None:
            self.app.loaderManager.onViewLoaded += self.onViewLoaded
@@ -253,7 +256,7 @@ class Xvm(object):
         if self.config is None:
             return
 
-        if self.config['battle']['allowGunMarksInPanelsAndMinimap'] and \
+        if self.config['battle']['allowMarksOnGunInPanelsAndMinimap'] and \
             not self.config['battle']['allowHpInPanelsAndMinimap']:
                 if self.battleFlashObject is not None:
                     movie = self.battleFlashObject.movie
@@ -323,7 +326,8 @@ class Xvm(object):
                 movie.invoke((RESPOND_CONFIG, [
                     self.config_str,
                     self.lang_str,
-                    getVehicleInfoDataStr()]))
+                    getVehicleInfoDataStr(),
+                    comments.getXvmUserComments(not isReplay())]))
         except Exception, ex:
             err('sendConfig(): ' + traceback.format_exc())
 

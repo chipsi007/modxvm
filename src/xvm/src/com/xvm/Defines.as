@@ -7,11 +7,10 @@ package com.xvm
     public class Defines
     {
         // Global versions
-        public static const XVM_VERSION:String = "5.3.4-dev";
+        public static const XVM_VERSION:String = "5.3.7-dev";
         public static const XVM_INTRO:String = "www.modxvm.com";
-        public static const WOT_VERSION:String = "0.9.2";
+        public static const WOT_VERSION:String = "0.9.3";
         public static const CONFIG_VERSION:String = "5.1.0";
-        public static const EDITOR_VERSION:String = "0.80";
 
         // Locale
         public static const LOCALE_AUTO_DETECTION:String = "auto";
@@ -21,9 +20,6 @@ package com.xvm
 
         // res_mods/xvm/
         public static const XVM_ROOT:String = "../../../xvm/";
-
-        // res_mods/xvm/
-        public static const XVMCONF_ROOT:String = XVM_ROOT + "configs/";
 
         // res_mods/xvm/res/
         public static const XVMRES_ROOT:String = XVM_ROOT + "res/";
@@ -37,11 +33,20 @@ package com.xvm
         // res_mods/xvm/res/ (for <img> tag)
         public static const XVMRES_IMG_ROOT:String = "../xvm/res/";
 
-        // res_mods/xvm/res/SixthSense.png
-        public static const SIXTH_SENSE_IMG:String = XVMRES_ROOT + "SixthSense.png";
+        // res_mods/xvm/
+        public static const XVM_DIR_NAME:String = "res_mods/xvm/";
+
+        // res_mods/xvm/configs/
+        public static const XVM_CONFIGS_DIR_NAME:String = XVM_DIR_NAME + "configs/";
 
         // res_mods/xvm/configs/xvm.xc
-        public static const CONFIG_FILE_NAME:String = "xvm.xc";
+        public static const XVM_CONFIG_FILE_NAME:String = XVM_CONFIGS_DIR_NAME + "xvm.xc";
+
+        // res_mods/xvm/l10n
+        public static const XVM_L10N_DIR_NAME:String = XVM_DIR_NAME + "l10n/";
+
+        // res_mods/xvm/res/SixthSense.png
+        public static const SIXTH_SENSE_IMG:String = XVMRES_ROOT + "SixthSense.png";
 
         // Settings keys
         public static const SETTINGS_WIDGETS:String = "widgets";
@@ -55,8 +60,10 @@ package com.xvm
         public static const WG_CONTOUR_ICON_PATH:String = "../maps/icons/vehicle/contour/";
         public static const WG_CONTOUR_ICON_NOIMAGE:String = WG_CONTOUR_ICON_PATH + "noImage.png";
 
+        public static const MAX_BATTLETIER_HPS:Array = [140, 190, 320, 420, 700, 1400, 1500, 1780, 2000, 3000, 3000];
+
         // Events
-        public static const E_LOCALE_LOADED:String = "locale_loaded";
+        public static const E_CMD_RECEIVED:String = "cmd_rvcd";
         public static const E_ITEM_UPDATED:String = "item_updated";
 
         // UI Colors
@@ -117,6 +124,9 @@ package com.xvm
         public static const DYNAMIC_COLOR_WGR:int = 14;
         public static const DYNAMIC_COLOR_X:int = 15;
         public static const DYNAMIC_COLOR_AVGLVL:int = 16;
+        public static const DYNAMIC_COLOR_WN8EFFD:int = 17;
+        public static const DYNAMIC_COLOR_DAMAGERATING:int = 18;
+        public static const DYNAMIC_COLOR_HITSRATIO:int = 19;
 
         // Dynamic alpha types
         public static const DYNAMIC_ALPHA_EFF:int = 1;
@@ -166,5 +176,10 @@ package com.xvm
         public static const WIDGET_MODE_2:int =        0x04;
         public static const WIDGET_MODE_DETAILED:int = 0x08;
         public static const WIDGET_MODES_ALL:int = WIDGET_MODE_HIDE | WIDGET_MODE_1 | WIDGET_MODE_2 | WIDGET_MODE_DETAILED;
+
+        // String templates
+        public static const SYSTEM_MESSAGE_HEADER:String =
+            '<textformat tabstops="[130]"><img src="img://../xvm/res/icons/xvm/16x16t.png" vspace="-5">' +
+            '&nbsp;<a href="#XVM_SITE#"><font color="#E2D2A2">www.modxvm.com</font></a>\n\n%VALUE%';
     }
 }

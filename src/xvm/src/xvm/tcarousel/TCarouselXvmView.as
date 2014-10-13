@@ -7,12 +7,13 @@ package xvm.tcarousel
     import com.xvm.*;
     import com.xvm.infrastructure.*;
     import com.xvm.misc.*;
+    import com.xvm.utils.*;
     import com.xvm.types.dossier.*;
+    import net.wg.data.*;
     import net.wg.gui.lobby.hangar.*;
     import net.wg.gui.lobby.hangar.tcarousel.TankCarousel;
     import net.wg.infrastructure.events.*;
     import net.wg.infrastructure.interfaces.*;
-    import scaleform.clik.utils.Padding;
 
     public class TCarouselXvmView extends XvmViewBase
     {
@@ -28,17 +29,20 @@ package xvm.tcarousel
 
         override public function onBeforePopulate(e:LifeCycleEvent):void
         {
+            //Logger.add((new Error()).getStackTrace());
             if (Config.config.hangar.carousel.enabled)
                 replaceCarouselControl();
         }
 
-        public override function onAfterPopulate(e:LifeCycleEvent):void
+        override public function onAfterPopulate(e:LifeCycleEvent):void
         {
             //Logger.addObject("onAfterPopulate: " + view.as_alias);
             try
             {
                 if (Config.config.hangar.carousel.enabled)
+                {
                     init();
+                }
             }
             catch (ex:Error)
             {
@@ -46,45 +50,44 @@ package xvm.tcarousel
             }
         }
 
+        // PRIVATE
+
         private function replaceCarouselControl():void
         {
-            if (isNaN(Config.config.hangar.carousel.rows) || Config.config.hangar.carousel.rows <= 0)
-                Config.config.hangar.carousel.rows = 1;
+            try
+            {
+                if (isNaN(Config.config.hangar.carousel.rows) || Config.config.hangar.carousel.rows <= 0)
+                    Config.config.hangar.carousel.rows = 1;
 
-            var c:TankCarousel = new UI_TankCarousel(Config.config.hangar.carousel);
-            c.componentInspectorSetting = true;
-            c.dragEnabled = page.carousel.dragEnabled;
-            c.enabled = page.carousel.enabled;
-            c.enableInitCallback = page.carousel.enableInitCallback;
-            c.focusable = page.carousel.focusable;
-            c.margin = page.carousel.margin;
-            c.inspectablePadding = {
-                top: 0,
-                right: Config.config.hangar.carousel.padding.horizontal / 2,
-                bottom: Config.config.hangar.carousel.padding.vertical,
-                left: Config.config.hangar.carousel.padding.horizontal / 2
-            };
-            c.useRightButton = page.carousel.useRightButton;
-            c.useRightButtonForSelect = page.carousel.useRightButtonForSelect;
-            c.visible = page.carousel.visible;
-            c.slotImageWidth = page.carousel.slotImageWidth * Config.config.hangar.carousel.zoom;
-            c.slotImageHeight = page.carousel.slotImageHeight * Config.config.hangar.carousel.zoom;
-            var h:int = (c.slotImageHeight + c.padding.vertical) * Config.config.hangar.carousel.rows - c.padding.vertical;
-            c.height = h + 10;
-            c.leftArrow.height = c.rightArrow.height = c.renderersMask.height = c.dragHitArea.height = h;
-            c.itemRenderer = UI_TankCarouselItemRenderer;
-            c.componentInspectorSetting = false;
-
-            var index:int = page.getChildIndex(page.carousel);
-            page.removeChildAt(index);
-            page.carousel.dispose();
-            page.carousel = c;
-            page.addChildAt(page.carousel, index);
+                var index:int = page.getChildIndex(page.carousel);
+                page.removeChildAt(index);
+                //page.carousel.dispose(); // TODO: exception
+                var carousel:UI_TankCarousel = new UI_TankCarousel();
+                page.carousel = carousel;
+                page.addChildAt(carousel, index);
+            }
+            catch (ex:Error)
+            {
+                Logger.add(ex.getStackTrace());
+            }
         }
 
         private function init():void
         {
-            Dossier.loadAccountDossier(page.carousel, page.carousel.invalidateData, PROFILE.PROFILE_DROPDOWN_LABELS_ALL);
+            Macros.RegisterVehiclesMacros();
+            Dossier.loadAccountDossier(this, onAccountDossierLoaded, PROFILE.PROFILE_DROPDOWN_LABELS_ALL);
+        }
+
+        private function onAccountDossierLoaded():void
+        {
+            var dossier:AccountDossier = Dossier.getAccountDossier();
+            //Logger.addObject(dossier);
+            if (dossier != null)
+            {
+                for (var vehId:String in dossier.vehicles)
+                    Dossier.loadVehicleDossier(null, null, PROFILE.PROFILE_DROPDOWN_LABELS_ALL, parseInt(vehId));
+            }
+            page.carousel.invalidateData();
         }
     }
 }

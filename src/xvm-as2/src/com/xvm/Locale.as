@@ -20,9 +20,9 @@ class com.xvm.Locale
 
     public static function get(format:String):String
     {
-        //Logger.add("[AS2][Locale][get]: id: " + format + " | value: " + s_lang.locale[format] + " | fallback value: " + s_lang_fallback[format]);
-        if (s_lang.locale && s_lang.locale.hasOwnProperty(format))
-            format =  s_lang.locale[format];
+        //Logger.add("[AS2][Locale][get]: id: " + format + " | value: " + s_lang[format] + " | fallback value: " + s_lang_fallback[format]);
+        if (s_lang && s_lang.hasOwnProperty(format))
+            format =  s_lang[format];
         else if (s_lang_fallback.hasOwnProperty(format))
             format = s_lang_fallback[format];
         /** each item in array begin with macro */
@@ -57,6 +57,8 @@ class com.xvm.Locale
     {
         try
         {
+            s_lang = null;
+
             LoadLanguageFallback();
 
             if (data_str == null)
@@ -103,10 +105,12 @@ class com.xvm.Locale
             tr["chanceBattleTier"] = "Уровень боя";
 
             // Hitlog
-            tr["attack"] = "атака";
+            tr["shot"] = "атака";
             tr["fire"] = "пожар";
             tr["ramming"] = "таран";
             tr["world_collision"] = "падение";
+            tr["death_zone"] = "death zone";
+            tr["drowning"] = "drowning";
             tr["Hits"] = "Пробитий";
             tr["Total"] = "Всего";
             tr["Last"] = "Последний";
@@ -166,7 +170,7 @@ class com.xvm.Locale
 
             // VehicleMarkersManager
             tr["blownUp"] = "Взрыв БК!";
-            
+
             //Vehicle status
             tr["Destroyed"] = "Уничтожен";
             tr["No data"] = "Нет данных";
@@ -181,6 +185,8 @@ class com.xvm.Locale
 
             // Hitlog
             tr["world_collision"] = "falling";
+            tr["death_zone"] = "death zone";
+            tr["drowning"] = "drowning";
 
             // Hp Left
             tr["hpLeftTitle"] = "Hitpoints left:";

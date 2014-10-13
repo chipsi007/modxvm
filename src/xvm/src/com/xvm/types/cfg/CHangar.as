@@ -6,12 +6,13 @@ package com.xvm.types.cfg
 {
     public dynamic class CHangar extends Object
     {
-        public var hideTutorial:Boolean;
         public var xwnInCompany:Boolean;
         public var masteryMarkInTechTree:Boolean;
         public var hidePricesInTechTree:Boolean;
         public var widgetsEnabled:Boolean;
         public var pingServers:CPingServers;
         public var carousel:CCarousel;
+        public var clock:CClock;
+        public var comments:CComments;
     }
 }

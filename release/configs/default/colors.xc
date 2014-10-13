@@ -57,10 +57,12 @@
     // Dynamic color by damage kind.
     // Динамический цвет по типу урона.
     "dmg_kind": {
-      "attack": "0xFFAA55",          // attack / атака
+      "shot": "0xFFAA55",            // shot / попадание
       "fire": "0xFF6655",            // fire / пожар
       "ramming": "0x998855",         // ramming / таран
       "world_collision": "0x228855", // world collision / столкновение с объектами, падение
+      "death_zone": "0xCCCCCC",      // TODO: value, description
+      "drowning": "0xCCCCCC",        // TODO: value, description
       "other": "0xCCCCCC"            // other / другое
     },
     // Dynamic color by vehicle type.
@@ -222,12 +224,12 @@
     // Dynamic color by WN8 rating
     // Динамический цвет по рейтингу WN8
     "wn8": [
-      { "value": 315,  "color": ${"def.colorRating.very_bad" } },  //    0 - 314  - very bad   (20% of players)
-      { "value": 760,  "color": ${"def.colorRating.bad"      } },  //  315 - 759  - bad        (better then 20% of players)
-      { "value": 1325, "color": ${"def.colorRating.normal"   } },  //  760 - 1324 - normal     (better then 60% of players)
-      { "value": 1980, "color": ${"def.colorRating.good"     } },  // 1325 - 1979 - good       (better then 90% of players)
-      { "value": 2570, "color": ${"def.colorRating.very_good"} },  // 1980 - 2569 - very good  (better then 99% of players)
-      { "value": 9999, "color": ${"def.colorRating.unique"   } }   // 2570 - *    - unique     (better then 99.9% of players)
+      { "value": 355,  "color": ${"def.colorRating.very_bad" } },  //    0 - 354  - very bad   (20% of players)
+      { "value": 820,  "color": ${"def.colorRating.bad"      } },  //  355 - 819  - bad        (better then 20% of players)
+      { "value": 1370, "color": ${"def.colorRating.normal"   } },  //  820 - 1369 - normal     (better then 60% of players)
+      { "value": 2020, "color": ${"def.colorRating.good"     } },  // 1370 - 2019 - good       (better then 90% of players)
+      { "value": 2620, "color": ${"def.colorRating.very_good"} },  // 2020 - 2619 - very good  (better then 99% of players)
+      { "value": 9999, "color": ${"def.colorRating.unique"   } }   // 2620 - *    - unique     (better then 99.9% of players)
     ],
     // Dynamic color by WG rating
     // Динамический цвет по рейтингу WG
@@ -327,6 +329,37 @@
       { "value": 1.3,  "color": ${"def.colorRating.good"     } },
       { "value": 2.0,  "color": ${"def.colorRating.very_good"} },
       { "value": 15,   "color": ${"def.colorRating.unique"   } }
+    ],
+    // Dynamic color by WN8 effective damage
+    // Динамический цвет по эффективному урону по WN8
+    "wn8effd": [
+      { "value": 0.6,  "color": ${"def.colorRating.very_bad" } },
+      { "value": 0.8,  "color": ${"def.colorRating.bad"      } },
+      { "value": 1.0,  "color": ${"def.colorRating.normal"   } },
+      { "value": 1.3,  "color": ${"def.colorRating.good"     } },
+      { "value": 2.0,  "color": ${"def.colorRating.very_good"} },
+      { "value": 15,   "color": ${"def.colorRating.unique"   } }
+    ],
+    // Dynamic color by damage rating (percents for marks on gun)
+    // Динамический цвет по рейтингу урона (процент для отметок на стволе)
+    "damageRating": [
+      { "value": 20,    "color": ${"def.colorRating.very_bad" } },  // 20% of players
+      { "value": 60,    "color": ${"def.colorRating.bad"      } },  // better then 20% of players
+      { "value": 90,    "color": ${"def.colorRating.normal"   } },  // better then 60% of players
+      { "value": 99,    "color": ${"def.colorRating.good"     } },  // better then 90% of players
+      { "value": 99.9,  "color": ${"def.colorRating.very_good"} },  // better then 99% of players
+      { "value": 101,   "color": ${"def.colorRating.unique"   } }   // better then 99.9% of players
+    ],
+    // TODO:values
+    // Dynamic color by hit ratio (percents of hits)
+    // Динамический цвет по проценту попаданий
+    "hitsRatio": [
+      { "value": 20,    "color": ${"def.colorRating.very_bad" } },
+      { "value": 60,    "color": ${"def.colorRating.bad"      } },
+      { "value": 90,    "color": ${"def.colorRating.normal"   } },
+      { "value": 99,    "color": ${"def.colorRating.good"     } },
+      { "value": 99.9,  "color": ${"def.colorRating.very_good"} },
+      { "value": 101,   "color": ${"def.colorRating.unique"   } }
     ]
   }
 }

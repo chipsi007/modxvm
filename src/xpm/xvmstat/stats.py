@@ -47,7 +47,6 @@ from xpm import *
 
 from constants import *
 from logger import *
-from gameregion import region
 from loadurl import loadUrl
 from token import getXvmStatActiveTokenData
 import utils
@@ -70,7 +69,6 @@ class _Stat(object):
         self.playersSkip = None
         self.cache = {}
         self.cacheUser = {}
-        self.info = None
 
     def enqueue(self, req):
         with self.lock:
@@ -178,7 +176,7 @@ class _Stat(object):
         #pprint(players)
 
         with self.lock:
-            self.resp = {'players': players, 'info': self.info}
+            self.resp = {'players': players}
 
 
 
@@ -228,7 +226,7 @@ class _Stat(object):
             #pprint(players)
 
             with self.lock:
-                self.resp = {'arenaUniqueId': value['arenaUniqueID'], 'players': players, 'info': self.info}
+                self.resp = {'arenaUniqueId': value['arenaUniqueID'], 'players': players}
 
         except Exception, ex:
             err('_battleResultsCallback() exception: ' + traceback.format_exc())
@@ -243,7 +241,7 @@ class _Stat(object):
     def _get_user(self):
         (value, isId) = self.req['args']
         orig_value = value
-        reg = region
+        reg = gameRegion
         if isId:
             value = str(int(value))
         else:
@@ -270,7 +268,7 @@ class _Stat(object):
                     else:
                         req = "nick/%s/%s/%s" % (tok, reg, value)
                     server = XVM_STAT_SERVERS[randint(0, len(XVM_STAT_SERVERS) - 1)]
-                    (response, duration) = loadUrl(server, req)
+                    (response, duration, errStr) = loadUrl(server, req)
 
                     if not response:
                         #err('Empty response or parsing error')
@@ -342,7 +340,7 @@ class _Stat(object):
                     return
 
                 server = XVM_STAT_SERVERS[randint(0, len(XVM_STAT_SERVERS) - 1)]
-                (response, duration) = loadUrl(server, updateRequest)
+                (response, duration, errStr) = loadUrl(server, updateRequest)
 
                 if not response:
                     #err('Empty response or parsing error')
@@ -354,9 +352,6 @@ class _Stat(object):
                 for vehId in self.players:
                     players.append(self._get_battle_stub(self.players[vehId]))
                 data = {'players':players}
-
-            if 'info' in data and region in data['info']:
-                self.info = data['info'][region]
 
             if 'players' not in data:
                 err('Stat request failed: ' + str(response))

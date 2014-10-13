@@ -31,7 +31,6 @@
     "pingServers": ${"def.pingServers"}
   },
   "hangar": {
-    "hideTutorial": false,
     "masteryMarkInTechTree": true,
     "hidePricesInTechTree": true,
     "widgetsEnabled": true,
@@ -39,36 +38,11 @@
       "$ref": { "path":"def.pingServers" },
       "x": 5
     },
-    "carousel": {
-      //"enabled": false,
-      //"zoom": 0.66,
-      //"zoom": 0.70,
-      "zoom": 0.75,
-      //"zoom": 2,
-      "rows": 2,
-      "padding": { "horizontal": 2, "vertical": 2 },
-      "alwaysShowFilters": true,
-      //"hideBuyTank": true,
-      //"hideBuySlot": true,
-      "fields": {
-        "tankType": { "visible": true, "dx": 0, "dy": 0, "alpha": 100, "scale": 1 },
-        "level":    { "visible": true, "dx": 0, "dy": 0, "alpha": 100, "scale": 1 },
-        "xp":       { "visible": true, "dx": 0, "dy": 0, "alpha": 100, "scale": 1 },
-        "multiXp":  { "visible": true, "dx": 0, "dy": 0, "alpha": 100, "scale": 1 },
-        "tankName": { "visible": true, "dx": 0, "dy": 0, "alpha": 100, "scale": 1 }
-      },
-      "extraFields": [
-        // for tests
-        //{ "w": 1, "h": 23, "bgColor": "0xFFFFFF" },
-        //{ "x": "25", "y": 0,  "align": "left",   "w": 20, "h": 5, "bgColor": "0xFF0F0F", "alpha": 50 },
-        //{ "x": "15", "y": 5,  "align": "center", "w": 20, "h": 5, "bgColor": "0x0FFF0F", "alpha": 50 },
-        //{ "x": "5",  "y": 10, "align": "right",  "w": 20, "h": 5, "bgColor": "0x0F0FFF", "alpha": 50 },
-
-        //{ "x": 50, "y": 10, "format": "<font color='#FFFFFF'>[{{xwn8|--}}]</font>", "shadow": {} },
-        //{ "x": 90, "y": 10, "format": "<img src='xvm://res/icons/xvm/16x16.png'>" },
-        //{ "x": 90, "y": 30, "format": "<img src='xvm://res/contour/HARDicons/{{vehiclename}}.png'" },
-        {}
-      ]
+    "carousel": ${"sirmax-carousel.xc":"carousel"},
+    "clock": {
+      //"x": 100,
+      //"y": 5,
+      //"format": "<font face='$FieldFont'><font size='26'> {{H}}:{{m%02d}} {{AM?a.m.|p.m.}}</font></font>"
     }
   },
   "userInfo": {
@@ -90,7 +64,7 @@
     "showPostmortemTips": false,
     "highlightVehicleIcon": false,
     "allowHpInPanelsAndMinimap": true,
-    "allowGunMarksInPanelsAndMinimap": true,
+    "allowMarksOnGunInPanelsAndMinimap": true,
     "clanIconsFolder": "clanicons",
     "elements": ${"elements"}
   },
@@ -142,6 +116,7 @@
   "battleResults": {
     "startPage": 1,
     "sortColumn": 5,
+    "showCrewExperience": true,
     "showTotals": true,
     "showChances": true,
     "showBattleTier": true
@@ -197,7 +172,7 @@
   },
   "texts": {
     //"vtype": { "LT":  "ЛТ" },
-    "gunMarks": { "_0": "", "_1": "|", "_2": "||", "_3": "|||" }
+    "marksOnGun": { "_0": "0", "_1": "1", "_2": "2", "_3": "3" }
   },
   "colors": {
     "system": {

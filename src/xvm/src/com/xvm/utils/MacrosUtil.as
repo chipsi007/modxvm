@@ -5,6 +5,7 @@
 package com.xvm.utils
 {
     import com.xvm.*;
+    import com.xvm.types.cfg.*;
     import com.xvm.types.veh.*;
     import org.idmedia.as3commons.util.*;
 
@@ -20,7 +21,7 @@ package com.xvm.utils
             if (isNaN(value))
                 return null;
 
-            var cfg_root:Object = Config.config.colors;
+            var cfg_root:CColors = Config.config.colors;
             var cfg:Array;
             switch (type)
             {
@@ -40,6 +41,9 @@ package com.xvm.utils
                 case Defines.DYNAMIC_COLOR_TDV:             cfg = cfg_root.tdv; break;
                 case Defines.DYNAMIC_COLOR_TFB:             cfg = cfg_root.tfb; break;
                 case Defines.DYNAMIC_COLOR_TSB:             cfg = cfg_root.tsb; break;
+                case Defines.DYNAMIC_COLOR_WN8EFFD:         cfg = cfg_root.wn8effd; break;
+                case Defines.DYNAMIC_COLOR_DAMAGERATING:    cfg = cfg_root.damageRating; break;
+                case Defines.DYNAMIC_COLOR_HITSRATIO:       cfg = cfg_root.hitsRatio; break;
                 default: return null;
             }
 
@@ -63,7 +67,7 @@ package com.xvm.utils
             if (isNaN(value))
                 return NaN;
 
-            var cfg_root:Object = Config.config.alpha;
+            var cfg_root:CAlpha = Config.config.alpha;
             var cfg:Array;
             switch (type)
             {
@@ -171,56 +175,23 @@ package com.xvm.utils
             return parseInt(Config.config.colors.system[key]);
         }
 
-    /**
-     * Return vehicle marker frame name for current state
-     *
-     * VehicleMarkerAlly should contain 4 named frames:
-     *   - green - normal ally
-     *   - gold - squad mate
-     *   - blue - teamkiller
-     * VehicleMarkerEnemy should contain 2 named frames:
-     *   - red - normal enemy
-     * @param	entityName EntityName
-     * @param	isColorBlindMode CB mode flag
-     * @return	name of marker frame
-     */
-/*        public static function getMarkerColorAlias(entityName):String
+        //   src: ally, squadman, enemy, unknown, player (allytk, enemytk - how to detect?)
+        public static function damageFlagToDamageSource(damageFlag:Number):String
         {
-            //if (m_entityName != "ally" && m_entityName != "enemy" && m_entityName != "squadman" && m_entityName != "teamKiller")
-            //  Logger.add("m_entityName=" + m_entityName);
-            if (entityName == "ally")
-                return "green";
-            if (entityName == "squadman")
-                return "gold";
-            if (entityName == "teamKiller")
-                return "blue";
-            if (entityName == "enemy")
-                return "red";
-
-            // if not found (node is not implemented), return inverted enemy color (for debug only)
-            // TODO: throw error may be better?
-            return "purple";
-        }
-
-        public static function getDamageSystemColor(damageSource:String, damageDest:String, damageType:String,
-            isDead:Boolean, isBlowedUp:Boolean):Number
-        {
-            switch (damageType)
+            switch (damageFlag)
             {
-                case "world_collision":
-                case "death_zone":
-                case "drowning":
-                    return parseInt(Config.s_config.colors.dmg_kind[damageType]);
-
-                case "attack":
-                case "fire":
-                case "ramming":
+                case Defines.FROM_ALLY:
+                    return "ally";
+                case Defines.FROM_ENEMY:
+                    return "enemy";
+                case Defines.FROM_PLAYER:
+                    return "player";
+                case Defines.FROM_SQUAD:
+                    return "squadman";
+                case Defines.FROM_UNKNOWN:
                 default:
-                    var key:String = damageSource + "_" + damageDest + "_";
-                    key += !isDead ? "hit" : isBlowedUp ? "blowup" : "kill";
-                    return parseInt(Config.s_config.colors.damage[key]);
+                    return "unknown";
             }
         }
-*/
     }
 }

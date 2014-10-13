@@ -94,7 +94,7 @@
           //   "{{nick}}",
           //   "<img src='xvm://res/img/panel-bg-l-{{alive|dead}}.png' width='318' height='28'>",
           //   // extended format
-          //   { "x": 20, "y": 10, "border": 1, "borderColor": "0xFFFFFF", "format": "{{nick}}" },
+          //   { "x": 20, "y": 10, "borderColor": "0xFFFFFF", "format": "{{nick}}" },
           //   { "x": 200, "src": "xvm://res/contour/{{vehiclename}}.png" }
           // ]
           //
@@ -118,8 +118,9 @@
           //   "align" - horizontal alignment ("left", "center", "right")
           //      for left panel default value is "left"
           //      for right panel default value is "right"
+          //   "scaleX", "scaleY" - scaling (use negative values for mirroring)
           //
-          // fields available for both TextField format only:
+          // fields available for TextField format only:
           //   "valign" - vertical alignment ("top", "center", "bottom")
           //      default value is "top"
           //   "borderColor" - if set, draw border with specified color (macros allowed)

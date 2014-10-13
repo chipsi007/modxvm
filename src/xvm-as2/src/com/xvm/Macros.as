@@ -9,20 +9,20 @@ class com.xvm.Macros
 
     private static var dict:Object = {}; //{ PLAYERNAME1: { macro1: func || value, macro2:... }, PLAYERNAME2: {...} }
     public static var globals:Object = {};
+    public static var comments:Object = null;
 
-    public static function Format(playerName:String, format:String, options:Object):String
+    public static function Format(pname:String, format:String, options:Object):String
     {
-        //Logger.add("format:" + format + " player:" + playerName);
-        if (format == null || playerName == null)
+        //Logger.add("format:" + format + " player:" + pname);
+        if (format == null || pname == null)
             return null;
         try
         {
-            var name:String = Utils.GetPlayerName(playerName);
-            var player_cache = macros_cache[name];
+            var player_cache = macros_cache[pname];
             if (player_cache == null)
             {
-                macros_cache[name] = { alive: { }, dead: { }};
-                player_cache = macros_cache[name];
+                macros_cache[pname] = { alive: { }, dead: { }};
+                player_cache = macros_cache[pname];
             }
             var dead:Boolean = options != null && options.dead == true;
             var dead_value:String = dead ? "dead" : "alive";
@@ -51,7 +51,7 @@ class com.xvm.Macros
                     }
                     else
                     {
-                        var pdata = dict[name];
+                        var pdata = dict[pname];
                         if (pdata != null)
                         {
                             var parts:Array = GetMacroParts(macro, pdata, dead);
@@ -101,10 +101,10 @@ class com.xvm.Macros
             if (isStaticMacro)
                 player_cache[dead_value][format] = res;
             //else
-            //    Logger.add(name + "> " + format);
+            //    Logger.add(pname + "> " + format);
 
-            //Logger.add(name + "> " + format);
-            //Logger.add(name + "> " + res);
+            //Logger.add(pname + "> " + format);
+            //Logger.add(pname + "> " + res);
             return res;
         }
         catch (ex:Error)
@@ -115,7 +115,7 @@ class com.xvm.Macros
         return "";
     }
 
-    private static function GetMacroParts(macro:String, pdata:Object, dead:Boolean):Array
+    private static function GetMacroParts(macro:String, pdata:Object):Array
     {
         //Logger.addObject(pdata);
         var parts:Array = [null,null,null,null,null,null];
@@ -180,8 +180,6 @@ class com.xvm.Macros
         }
         parts[section] = part;
 
-        //if (dead && Strings.startsWith("c:", parts[0]) && pdata[parts[0] + "#d"] != null)
-        //    parts[0] += "#d";
         if (parts[5] == null)
             parts[5] = "";
 
@@ -287,7 +285,10 @@ class com.xvm.Macros
                         break;
                     value = vdata.hpTop;
                 }
-                res = Math.round(parseInt(norm) * value / Defines.MAX_BATTLETIER_HPS[globals["battletier"] - 1]).toString();
+                var maxBattleTierHp:Number = Defines.MAX_BATTLETIER_HPS[globals["battletier"] - 1];
+                if (pdata["veh-id"] == 65313) // M24 Chaffee Sport
+                    maxBattleTierHp = 1000;
+                res = Math.round(parseInt(norm) * value / maxBattleTierHp).toString();
                 //Logger.add("res: " + res);
                 break;
             case "hp-ratio":
@@ -307,13 +308,12 @@ class com.xvm.Macros
 
     // Macros registration
 
-    public static function RegisterPlayerData(playerName:String, data:Object, team:Number)
+    public static function RegisterPlayerData(pname:String, data:Object, team:Number)
     {
         if (!Config.config)
             return;
         if (!data)
             return;
-        var pname:String = Utils.GetPlayerName(playerName);
         if (!dict.hasOwnProperty(pname))
             dict[pname] = { };
         var pdata = dict[pname];
@@ -325,10 +325,33 @@ class com.xvm.Macros
         // player name
         if (!pdata.hasOwnProperty("nick"))
         {
-            var fname:String = data.label + (data.label.indexOf("[") >= 0 || !data.clanAbbrev ? "" : "[" + data.clanAbbrev + "]");
-            var name:String = Macros.modXvmDevLabel(pname);
-            var clan:String = Utils.GetClanNameWithBrackets(fname);
-            var nick:String = name + clan;
+            var name:String = Macros.getCustomPlayerName(pname, data.uid);
+            var idx:Number = name.indexOf("[");
+            var clan:String = null;
+            var clannb:String = null;
+            if (idx >= 0)
+            {
+                clan = name.slice(idx);
+                clannb = clan.slice(1, clan.indexOf("]"));
+            }
+            else
+            {
+                idx = data.label.indexOf("[");
+                if (idx >= 0)
+                {
+                    clan = data.label.slice(idx);
+                    clannb = clan.slice(1, clan.indexOf("]"));
+                }
+                else
+                {
+                    if (data.clanAbbrev != null && data.clanAbbrev != "")
+                    {
+                        clannb = data.clanAbbrev;
+                        clan = "[" + clannb + "]";
+                    }
+                }
+            }
+            var nick:String = name + (clan || "");
 
             // {{nick}}
             pdata["nick"] = nick;
@@ -337,7 +360,7 @@ class com.xvm.Macros
             // {{clan}}
             pdata["clan"] = clan;
             // {{clannb}}
-            pdata["clannb"] = Utils.GetClanName(fname);
+            pdata["clannb"] = clannb;
             // {{player}}
             pdata["player"] = data.himself == true ? "pl" : null;
         }
@@ -387,8 +410,8 @@ class com.xvm.Macros
             pdata["alive"] = function(o):String { return o.dead == true ? null : 'alive'; }
             // {{tk}}
             pdata["tk"] = function(o):String { return o.teamKiller == true ? 'tk' : null; }
-            // {{gun-marks}}
-            pdata["gun-marks"] = function(o):String { return isNaN(o.marksOnGun) ? null : Utils.getGunMarksText(o.marksOnGun); }
+            // {{marksOnGun}}
+            pdata["marksOnGun"] = function(o):String { return isNaN(o.marksOnGun) || pdata["level"] < 5 ? null : Utils.getMarksOnGunText(o.marksOnGun); }
 
             // hp
 
@@ -477,11 +500,12 @@ class com.xvm.Macros
         globals["battletier"] = battletier;
     }
 
-    public static function RegisterStatMacros(playerName:String, stat:StatData)
+    public static function RegisterStatMacros(pname:String, stat:StatData)
     {
+        //Logger.addObject(stat);
+
         if (!stat)
             return;
-        var pname:String = Utils.GetPlayerName(playerName);
         if (!dict.hasOwnProperty(pname))
             dict[pname] = { };
         var pdata = dict[pname];
@@ -653,7 +677,7 @@ class com.xvm.Macros
     {
         if (!player)
             return;
-        var pname:String = Utils.GetPlayerName(player.userName);
+        var pname:String = player.userName;
         if (!dict.hasOwnProperty(pname))
             dict[pname] = { };
         var pdata = dict[pname];
@@ -662,11 +686,12 @@ class com.xvm.Macros
         pdata["vehicle-class"] = vehicleClassSymbol;
     }
 
-    public static function RegisterMarkerData(playerName:String, data:Object)
+    public static function RegisterMarkerData(pname:String, data:Object)
     {
+        //Logger.addObject(data);
+
         if (!data)
             return;
-        var pname:String = Utils.GetPlayerName(playerName);
         if (!dict.hasOwnProperty(pname))
             dict[pname] = { };
         var pdata = dict[pname];
@@ -675,46 +700,67 @@ class com.xvm.Macros
         pdata["turret"] = data.turret || "";
     }
 
+    public static function RegisterCommentsData(json_str:String)
+    {
+        try
+        {
+            comments = JSONx.parse(json_str).players;
+            //Logger.addObject(comments, 2);
+        }
+        catch (ex:Error)
+        {
+            Logger.add("RegisterCommentsData: ERROR: " + ex.message);
+        }
+    }
+
     // PRIVATE
 
-    private static function modXvmDevLabel(nick:String):String
+    private static function getCustomPlayerName(pname:String, uid:Number):String
     {
-        var label = Utils.GetPlayerName(nick);
+        //Logger.add(pname + " " + uid);
         switch (Config.config.region)
         {
             case "RU":
-                if (label == "M_r_A")
+                if (pname == "M_r_A")
                     return "Флаттершай - лучшая пони!";
-                if (label == "sirmax2" || label == "0x01" || label == "_SirMax_")
+                if (pname == "sirmax2" || pname == "0x01" || pname == "_SirMax_")
                     return "«сэр Макс» (XVM)";
-                if (label == "Mixailos")
+                if (pname == "Mixailos")
                     return "Михаил";
-                if (label == "STL1te")
+                if (pname == "STL1te")
                     return "О, СТЛайт!";
-                if (label == "Yusha")
-                    return "Это же PROТанки!";
                 break;
 
             case "CT":
-                if (label == "M_r_A_RU" || label == "M_r_A_EU")
+                if (pname == "M_r_A_RU" || pname == "M_r_A_EU")
                     return "Fluttershy is best pony!";
-                if (label == "sirmax2_RU" || label == "sirmax2_EU" || label == "sirmax_NA" || label == "0x01_RU")
+                if (pname == "sirmax2_RU" || pname == "sirmax2_EU" || pname == "sirmax_NA" || pname == "0x01_RU")
                     return "«sir Max» (XVM)";
                 break;
 
             case "EU":
-                if (label == "M_r_A")
+                if (pname == "M_r_A")
                     return "Fluttershy is best pony!";
-                if (label == "sirmax2" || label == "0x01" || label == "_SirMax_")
+                if (pname == "sirmax2" || pname == "0x01" || pname == "_SirMax_")
                     return "«sir Max» (XVM)";
                 break;
 
             case "US":
-                if (label == "sirmax" || label == "0x01" || label == "_SirMax_")
+                if (pname == "sirmax" || pname == "0x01" || pname == "_SirMax_")
                     return "«sir Max» (XVM)";
                 break;
         }
 
-        return nick;
+        if (comments != null && !isNaN(uid) && uid > 0)
+        {
+            var cdata:Object = comments[String(uid)];
+            if (cdata != null)
+            {
+                if (cdata.nick != null && cdata.nick != "")
+                    pname = cdata.nick;
+            }
+        }
+
+        return pname;
     }
 }

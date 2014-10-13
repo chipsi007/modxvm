@@ -69,7 +69,7 @@ package xvm.ping.PingServers
             var cluster:String = pingObj.cluster;
             var time:String = pingObj.time;
             var raw:String = cluster + cfg.delimiter + time;
-            return "<span class='" + STYLE_NAME_PREFIX + defineQuality(time) + "'>" + raw + "</span>";
+            return "<textformat leading='" + cfg.leading + "'><span class='" + STYLE_NAME_PREFIX + defineQuality(time) + "'>" + raw + "</span></textformat>";
         }
 
         private function defineQuality(time:String):String
@@ -150,7 +150,7 @@ package xvm.ping.PingServers
             tf.alpha = cfg.alpha / 100.0;
             tf.htmlText =  "";
             if (cfg.shadow.enabled)
-                tf.filters = [ Utils.extractShadowFilter(cfg.shadow) ];
+                tf.filters = [ Utils.createShadowFilter(cfg.shadow) ];
             addChild(tf);
             return tf;
         }

@@ -20,8 +20,8 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
 {
     //private function trace(str:String):Void
     //{
-        //if (m_playerFullName == "...")
-        //Logger.add(m_playerFullName + "> " + str);
+        //if (m_playerName == "...")
+        //Logger.add(m_playerName + "> " + str);
     //}
 
     /**
@@ -79,12 +79,17 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
     function init(vClass:String, vIconSource:String, vType:String, vLevel:Number,
         pFullName:String, pName:String, pClan:String, pRegion:String,
         curHealth:Number, maxHealth:Number, entityName:String, speaking:Boolean, hunt:Boolean, entityType:String)
-        /* added by XVM: marksOnGun:Number, vehicleState:Number, frags:Number*/
+        /* added by XVM: playerId:Number, marksOnGun:Number, vehicleState:Number, frags:Number*/
     {
         m_playerName = pName; // alex
         m_playerClan = pClan; // "" || ALX
         m_playerRegion = pRegion; // null || ?
-        m_playerFullName = pFullName; // alex[ALX]
+        //m_playerFullName = pFullName; // alex[ALX] (MS-1)
+
+        //Logger.add(m_playerName);
+        //Logger.add(m_playerClan);
+        //Logger.add(m_playerRegion);
+        //Logger.add(m_playerFullName);
 
         //trace("Xvm::init(): " + entityName + ", " + entityType);
 
@@ -104,9 +109,10 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         m_isDead    = curHealth <= 0; // -1 for ammunition storage explosion
         m_curHealth = curHealth >= 0 ? curHealth : 0;
 
-        m_marksOnGun = arguments[14];
-        m_isReady = (arguments[15] & 2) != 0; // 2 - IS_AVATAR_READY
-        m_frags = arguments[16];
+        m_playerId = arguments[14];
+        m_marksOnGun = arguments[15];
+        m_isReady = (arguments[16] & 2) != 0; // 2 - IS_AVATAR_READY
+        m_frags = arguments[17];
 
         healthBarComponent.init();
         contourIconComponent.init(m_entityType);
@@ -115,7 +121,7 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         vehicleTypeComponent.init(vClass /*mediumTank*/, hunt);
         damageTextComponent.init();
 
-        Macros.RegisterMarkerData(Utils.GetPlayerName(m_playerFullName),
+        Macros.RegisterMarkerData(m_playerName,
         {
             turret: turretStatusComponent.getMarker()
         });
@@ -130,7 +136,7 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         XVMUpdateStyle();
 
         // Load stat
-        if (Config.config.rating.showPlayersStatistics && !Stat.s_loaded)
+        if (!Stat.s_loaded)
         {
             GlobalEventDispatcher.addEventListener(Defines.E_STAT_LOADED, this, onStatLoaded);
         }
@@ -239,13 +245,13 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
          * 0 - "FROM_UNKNOWN", 1 - "FROM_ALLY", 2 - "FROM_ENEMY", 3 - "FROM_SQUAD", 4 - "FROM_PLAYER"
          *
          * damageType - string:
-         *  "attack", "fire", "ramming", "world_collision", "death_zone", "drowning", "explosion"
+         *  "shot", "fire", "ramming", "world_collision", "death_zone", "drowning"
          */
 
         //Logger.add("Xvm::updateHealth(" + flag + ", " + damageType + ", " + newHealth +")");
 
         if (newHealth < 0)
-            s_blowedUp[m_playerFullName] = true;
+            s_blowedUp[m_playerName] = true;
 
         // can be dead with newHealth > 0 if crew is dead
         if (newHealth <= 0)
@@ -262,7 +268,7 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
             healthBarComponent.showDamage(vehicleStateCfg, newHealth, m_maxHealth, -delta, flag, damageType);
             var cfg = flag == Defines.FROM_PLAYER ? vehicleStateCfg.damageTextPlayer
                 : flag == Defines.FROM_SQUAD ? vehicleStateCfg.damageTextSquadman : vehicleStateCfg.damageText;
-            //Logger.addObject(cfg, m_playerFullName);
+            //Logger.addObject(cfg, m_playerName);
             damageTextComponent.showDamage(cfg, newHealth, -delta, flag, damageType);
         }
 
@@ -424,9 +430,9 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
                     if (cfg.textFields[i].visible)
                     {
                         //if (m_team == "ally")
-                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerFullName + " " + st);
+                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerName + " " + st);
                         //if (m_team == "enemy")
-                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerFullName + " " + st);
+                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerName + " " + st);
                         fields.push(createTextField(cfg.textFields[i]));
                     }
                 }
@@ -442,7 +448,7 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
 
     function XVMUpdateStyle()
     {
-        //trace("XVMUpdateStyle: " + m_playerFullName + m_vname + " " + " scale=" + proxy.marker._xscale);
+        //trace("XVMUpdateStyle: " + m_playerName + m_vname + " " + " scale=" + proxy.marker._xscale);
         try
         {
             //var start = new Date(); // for debug

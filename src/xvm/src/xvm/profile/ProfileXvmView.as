@@ -107,14 +107,19 @@ package xvm.profile
 
             try
             {
-                //Logger.addObject(tabNavigator.initData, 3);
+                if (tabNavigator.initData == null)
+                {
+                    //Logger.add("tabNavigator.initData == null");
+                    App.utils.scheduler.envokeInNextFrame(tabNavigator_onAfterPopulate);
+                    return;
+                }
                 // initialize start page
                 var alias:String = tabNavigator.initData.selectedAlias;
                 if (alias == "profileSummaryPage" || alias == "")
                 {
                     var index:int = Config.config.userInfo.startPage - 1;
                     if (index > 0 && index < tabNavigator.initData.sectionsData.length)
-                        tabNavigator.initData.selectedAlias = tabNavigator.initData.sectionsData[index].alias;
+                        tabNavigator.bar.selectedIndex = index;
                 }
             }
             catch (ex:Error)
@@ -126,7 +131,6 @@ package xvm.profile
         private function viewStack_ViewShowed(e:ViewStackEvent):void
         {
             //Logger.add("viewStack_ViewShowed: " + e.view);
-
             try
             {
                 var page:ProfileTechniquePage = e.view as ProfileTechniquePage;

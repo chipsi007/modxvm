@@ -12,7 +12,6 @@ class _DefaultConfig(object):
     def __init__(self):
         self.config = {
             'configVersion': CONFIG_VERSION,
-            'editorVersion': '',
             'language': LOCALE_AUTO_DETECTION,
             'region': REGION_AUTO_DETECTION,
             'definition': self.getDefinitionSection(),
@@ -98,7 +97,6 @@ class _DefaultConfig(object):
 
     def getHangarSection(self):
         return {
-            'hideTutorial': false,
             'xwnInCompany': true,
             'masteryMarkInTankCarousel': true,
             'masteryMarkInTechTree': true,
@@ -739,11 +737,7 @@ class _DefaultConfig(object):
             player_enemytk_blowup:    "0xFFDD33"
         };
         c.dmg_kind = {
-            attack:          "0xFFAA55",
-            fire:            "0xFF6655",
-            ramming:         "0x998855",
-            world_collision: "0x998855",
-            other:           "0xCCCCCC"
+        ...
         };
         c.vtype = {
             LT:  "0xA2FF9A",        // Color for light tanks

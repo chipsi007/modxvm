@@ -28,6 +28,12 @@
 
         public var turret:int;
 
+        public var wn8expDamage:Number;
+        public var wn8expSpot:Number;
+        public var wn8expWinRate:Number;
+        public var wn8expDef:Number;
+        public var wn8expFrag:Number;
+
         // additional
 
         public var shortName:String;
@@ -49,6 +55,11 @@
         public function get vtype():String
         {
             return VClassToVType(vclass);
+        }
+
+        public function get sysname():String
+        {
+            return key.replace(':', '-');
         }
 
         // PRIVATE
