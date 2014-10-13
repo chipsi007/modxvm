@@ -142,7 +142,7 @@ class wot.StatisticForm.BattleStatItemRenderer
             : Config.config.iconset.statisticFormEnemy)), wrapper.data.icon ]);
 
         wrapper.data.icon = m_iconset.currentIcon;
-        wrapper.data.label = Cache.Get("SF." + saved_label, function() { return Macros.Format(saved_label, "{{name}}") });
+        wrapper.data.label = Cache.Get("SF." + name, function() { return Macros.Format(name, "{{name}}") });
 
         // Player/clan icons
         attachClanIconToPlayer(wrapper.data);
@@ -161,10 +161,10 @@ class wot.StatisticForm.BattleStatItemRenderer
         var c:String = "#" + Strings.padLeft(wrapper.textField.textColor.toString(16), 6, '0');
 
         var obj = BattleState.getUserData(name);
-        var fmt:String = Macros.Format(saved_label, (team == Defines.TEAM_ALLY) ? Config.config.statisticForm.formatLeftNick : Config.config.statisticForm.formatRightNick, obj);
+        var fmt:String = Macros.Format(name, (team == Defines.TEAM_ALLY) ? Config.config.statisticForm.formatLeftNick : Config.config.statisticForm.formatRightNick, obj);
         wrapper.textField.htmlText = "<font color='" + c + "'>" + fmt + "</font>";
 
-        fmt = Macros.Format(saved_label, (team == Defines.TEAM_ALLY) ? Config.config.statisticForm.formatLeftVehicle : Config.config.statisticForm.formatRightVehicle, obj);
+        fmt = Macros.Format(name, (team == Defines.TEAM_ALLY) ? Config.config.statisticForm.formatLeftVehicle : Config.config.statisticForm.formatRightVehicle, obj);
         wrapper.col3.htmlText = "<font color='" + c + "'>" + fmt + "</font>";
     }
 
@@ -196,7 +196,7 @@ class wot.StatisticForm.BattleStatItemRenderer
                 wrapper.iconLoader._y + wrapper._parent._parent._y + wrapper._parent._y + wrapper._y,
                 team);
         }
-        PlayerInfo.setSource(m_clanIcon, Utils.GetPlayerName(data.userName), data.clanAbbrev);
+        PlayerInfo.setSource(m_clanIcon, data.uid, Utils.GetPlayerName(data.userName), data.clanAbbrev);
         m_clanIcon["holder"]._alpha = ((data.vehicleState & net.wargaming.ingame.VehicleStateInBattle.IS_ALIVE) != 0) ? 100 : 50;
     }
 }

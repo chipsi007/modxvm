@@ -39,6 +39,13 @@ added JSONx extensions 2012-2013 by Maxim Schedriviy "m.schedriviy(at)gmail.com"
         External: "obj": ${"filename":"path.to.object"}
         Root object: "obj": ${"."}
 
+        Full format: "obj": { "$ref": { "file": "<filename>", "path":"<path.to.object." } }
+        Override referenced values (full format only):
+            "obj": {
+                "$ref": { "file": "<filename>", "path":"<path.to.object." },
+                "name": <value>
+            }
+
 ported to AS3 2013-08-23 by Maxim Schedriviy "m.schedriviy(at)gmail.com", www.modxvm.com
 */
 
@@ -232,12 +239,7 @@ package com.xvm.io
             var _value:Function;
 
             var _error:Function = function(m:String):void {
-                throw {
-                    name: 'JSONxError',
-                    message: m,
-                    at: at - 1,
-                    text: text
-                };
+                throw new JSONxError("PARSE_ERROR", m, at - 1, text);
             }
 
             var _next:Function = function():String {

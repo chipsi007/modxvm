@@ -30,9 +30,6 @@
   Support:       http://www.koreanrandom.com/forum/topic/1383-xvm
   FAQ:           http://www.modxvm.com/en/faq/
   User configs:  http://www.koreanrandom.com/forum/forum/50-custom-configurations
-  Сonfig editor: http://www.koreanrandom.com/forum/topic/1422-/#entry11316
-
-
 
 -----------------------------------------------------------
 2. INSTALL
@@ -49,7 +46,6 @@
 
     All possible config options you can see in
       \res_mods\xvm\configs\@Default\
-    Or use online editor: http://www.koreanrandom.com/forum/topic/1422-/#entry11316
 
     Note: If you want to change the config manually, use Notepad, DO NOT use MS Word,
     WordPad and such editors.
@@ -78,8 +74,6 @@
   Mod config files:
     \res_mods\xvm\configs\@Default\
   You can select ready config file from \res_mods\xvm\configs\user configs\ directory
-  You can create new config or edit existing using online editor:
-    http://www.koreanrandom.com/forum/topic/1422-/#entry11316
 
   All possible config options you can see in this file:
     \res_mods\xvm\configs\@Default\
@@ -87,6 +81,8 @@
 
   Supported HTML tags:
     http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/text/TextField.html#htmlText
+
+  WARNING: Macros in this file is not actual, see macros.txt and macros-hangar.txt for actual macros
 
   Macros available:
     In players panel, battle loading screen, statistic form and vehicle markers:
@@ -256,8 +252,8 @@
                 "0" for filling with leading zeros
         width - minimum width
         prec  - depended from the type:
-                - maximum width for lines
-                - number of digits after comma for numbers
+                - maximum width for strings
+                - number of digits after comma for float numbers
                 - offset of ASCII table for numbers as ASCII char (default 129)
         type  - type
                 s - string
@@ -307,21 +303,23 @@
   Clan and players icons.
   Config parameter battle/clanIconsFolder set path to clan icons root folder.
 
-  All icons are loading automatically from game region subfolder (RU/EU/US/...).
+  All icons are loading automatically from game region subfolder (RU/EU/US/... or
+  ID for player's account id).
 
   To add your clan or player icon, just copy icon file to:
     \res_mods\xvm\res\clanicons\[REGION]\clan\ (for clan)
     \res_mods\xvm\res\clanicons\[REGION]\nick\ (for single player)
+    \res_mods\xvm\res\clanicons\ID\ (for single player by accountId)
   Also you can create default clan and player icons:
     \res_mods\xvm\res\clanicons\[REGION]\clan\default.png (for default clan)
     \res_mods\xvm\res\clanicons\[REGION]\nick\default.png (for default player)
   Search order is:
-    nick/<player>.png -> clan/<clan>.png -> clan/default.png -> nick/default.png
+    ID/<accountId>.png -> nick/<playerName>.png -> clan/<clan>.png -> clan/default.png -> nick/default.png
   TOP 150 clans are added to mod archive by default.
   Full archive with all clans can be downloaded separately:
     http://www.modxvm.com/en/download-xvm/
-    Files: clanicons-full-ru-XXX.zip (RU), clanicons-full-eu-XXX.zip (EU), clanicons-full-na-XXX.zip (NA),
-    clanicons-full-ASIA-XXX.zip (ASIA), clanicons-full-kr-XXX.zip (KR), clanicons-full-vn-XXX.zip (VN)
+    Files: clanicons-full-RU-XXX.zip (RU), clanicons-full-EU-XXX.zip (EU), clanicons-full-NA-XXX.zip (NA),
+    clanicons-full-ASIA-XXX.zip (ASIA), clanicons-full-KR-XXX.zip (KR)
 
   6-th sense image.
   To change sixth sense indicator place alternative PNG image to

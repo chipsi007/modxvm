@@ -1,10 +1,12 @@
-""" XPM misc functions (c) www.modxvm.com 2013-2014 """
+""" XPM core functions (c) www.modxvm.com 2013-2014 """
 
 import os
 import datetime
 import json
 import codecs
 import random
+import glob
+import traceback
 
 #####################################################################
 # Global constants
@@ -18,6 +20,9 @@ if IS_DEVELOPMENT:
 
 def log(msg):
     print datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S:'), msg
+
+def err(msg):
+    log('[ERROR] %s' % msg)
 
 def debug(msg):
     if IS_DEVELOPMENT:
@@ -34,7 +39,7 @@ def logtrace(exc=None):
     print "============================="
     import traceback
     if exc is not None:
-        log("ERROR: " + str(exc))
+        err(str(exc))
         traceback.print_exc()
     else:
         traceback.print_stack()
@@ -44,7 +49,8 @@ def load_file(fn):
     try:
         return codecs.open(fn, 'r', 'utf-8-sig').read()
     except:
-        logtrace(__file__)
+        if fn != 'res_mods/xvm/configs/xvm.xc':
+            logtrace(__file__)
         return None
 
 def load_config(fn):
@@ -104,32 +110,6 @@ class EventHook(object):
                 self -= theHandler
 
 
-#################################################################
-# WG-Specific
-
-import BigWorld
-
-def getCurrentPlayerId():
-    player = BigWorld.player()
-    if hasattr(player, 'databaseID'):
-        return player.databaseID
-
-    arena = getattr(player, 'arena', None)
-    if arena is not None:
-        vehID = getattr(player, 'playerVehicleID', None)
-        if vehID is not None and vehID in arena.vehicles:
-            return arena.vehicles[vehID]['accountDBID']
-
-    #print('===================')
-    #pprint(vars(player))
-    #print('===================')
-    return None
-
-def isReplay():
-    import BattleReplay
-    return BattleReplay.g_replayCtrl.isPlaying
-
-
 #####################################################################
 # Register events
 
@@ -168,6 +148,213 @@ def OverrideMethod(cls, method, handler):
         i += 1
     setattr(cls, newm, getattr(cls, method))
     setattr(cls, method, lambda *a, **k: handler(getattr(cls, newm), *a, **k))
+
+
+#################################################################
+# WG-Specific
+
+import BigWorld
+import ResMgr
+
+def getCurrentPlayerId():
+    player = BigWorld.player()
+    if hasattr(player, 'databaseID'):
+        return player.databaseID
+
+    arena = getattr(player, 'arena', None)
+    if arena is not None:
+        vehID = getattr(player, 'playerVehicleID', None)
+        if vehID is not None and vehID in arena.vehicles:
+            return arena.vehicles[vehID]['accountDBID']
+
+    #print('===================')
+    #pprint(vars(player))
+    #print('===================')
+    return None
+
+def isReplay():
+    import BattleReplay
+    return BattleReplay.g_replayCtrl.isPlaying
+
+### Region and language
+
+_updateurl = ResMgr.openSection('scripts_config.xml').readString('csisUrl')
+
+gameRegion = 'null'
+if _updateurl is not None:
+    if 'csis-ct.worldoftanks.' in _updateurl:
+        gameRegion = 'CT'
+    elif 'worldoftanks.ru' in _updateurl:
+        gameRegion = 'RU'
+    elif 'worldoftanks.eu' in _updateurl:
+        gameRegion = 'EU'
+    elif 'worldoftanks.com' in _updateurl:
+        gameRegion = 'NA'
+    elif 'worldoftanks.cn' in _updateurl:
+        gameRegion = 'CN'
+    elif 'worldoftanks.asia' in _updateurl:
+        gameRegion = 'ASIA'
+    elif 'worldoftanks.vn' in _updateurl:
+        gameRegion = 'VTC'
+    elif 'worldoftanks.kr' in _updateurl:
+        gameRegion = 'KR'
+
+from helpers import getClientLanguage
+gameLanguage = getClientLanguage()
+
+
+#####################################################################
+# SWF mods initializer
+
+from gui.shared import events
+from gui import SystemMessages
+
+XPM_CMD = 'xpm.cmd'
+
+_XVM_MODS_DIR = "res_mods/xvm/mods"
+_XVM_VIEW_ALIAS = 'xvm'
+_XVM_SWF_URL = '../../../xvm/mods/xvm.swf'
+
+_XPM_COMMAND_GETMODS = "xpm.getMods"
+_XPM_COMMAND_INITIALIZED = "xpm.initialized"
+_XPM_COMMAND_LOADFILE = "xpm.loadFile"
+_XPM_COMMAND_GETGAMEREGION = "xpm.gameRegion"
+_XPM_COMMAND_GETGAMELANGUAGE = "xpm.gameLanguage"
+_XPM_COMMAND_MESSAGEBOX = 'xpm.messageBox'
+_XPM_COMMAND_SYSMESSAGE = 'xpm.systemMessage'
+
+_xvmView = None
+_xpmInitialized = False
+
+def _start():
+    #debug('start')
+
+    from gui.shared import g_eventBus, EVENT_BUS_SCOPE
+    from gui.Scaleform.framework import g_entitiesFactories, ViewSettings, ViewTypes, ScopeTemplates
+    from gui.Scaleform.framework.entities.View import View
+
+    class XvmView(View):
+        def xvm_cmd(self, cmd, *args):
+            debug('[XPM] # ' + cmd + str(args))
+            if cmd == _XPM_COMMAND_GETMODS:
+                return _xpm_getMods()
+            elif cmd == _XPM_COMMAND_INITIALIZED:
+                global _xpmInitialized
+                _xpmInitialized = True
+            elif cmd == _XPM_COMMAND_LOADFILE:
+                return load_file(args[0])
+            elif cmd == _XPM_COMMAND_GETGAMEREGION:
+                global gameRegion
+                return gameRegion
+            elif cmd == _XPM_COMMAND_GETGAMELANGUAGE:
+                global gameLanguage
+                return gameLanguage
+            elif cmd == _XPM_COMMAND_MESSAGEBOX:
+                # title, message
+                from gui import DialogsInterface
+                from gui.Scaleform.daapi.view import dialogs
+                DialogsInterface.showDialog(dialogs.SimpleDialogMeta(
+                    args[0],
+                    args[1],
+                    dialogs.I18nInfoDialogButtons('common/error')),
+                    (lambda x: None))
+            elif cmd == _XPM_COMMAND_SYSMESSAGE:
+                # message, type
+                # Types: gui.SystemMessages.SM_TYPE:
+                #   'Error', 'Warning', 'Information', 'GameGreeting', ...
+                SystemMessages.pushMessage(
+                    args[0],
+                    type=SystemMessages.SM_TYPE.of(args[1]))
+            else:
+                handlers = g_eventBus._EventBus__scopes[EVENT_BUS_SCOPE.DEFAULT][XPM_CMD]
+                for handler in handlers.copy():
+                    try:
+                        (result, status) = handler(cmd, *args)
+                        if status:
+                            return result
+                    except TypeError:
+                        err(traceback.format_exc())
+                log('WARNING: unknown command: %s' % cmd)
+
+        def as_xvm_cmdS(self, cmd, *args):
+            return self.flashObject.as_xvm_cmd(cmd, *args)
+
+    g_entitiesFactories.addSettings(ViewSettings(
+        _XVM_VIEW_ALIAS,
+        XvmView,
+        _XVM_SWF_URL,
+        ViewTypes.SERVICE_LAYOUT,
+        None,
+        ScopeTemplates.GLOBAL_SCOPE))
+
+    g_eventBus.addListener(events.GUICommonEvent.APP_STARTED, _appStarted)
+
+def _fini():
+    #debug('fini')
+    from gui.shared import g_eventBus
+    g_eventBus.removeListener(events.GUICommonEvent.APP_STARTED, _appStarted)
+
+def _appStarted(event):
+    #debug('AppStarted')
+    try:
+        from gui.WindowsManager import g_windowsManager
+        app = g_windowsManager.window
+        if app is not None:
+            global _xvmView
+            _xvmView = None
+            global _xpmInitialized
+            _xpmInitialized = False
+            app.loaderManager.onViewLoaded += _onViewLoaded
+            BigWorld.callback(0, lambda:app.loadView(_XVM_VIEW_ALIAS))
+            #app.loadView(_XVM_VIEW_ALIAS)
+    except Exception, ex:
+        err(traceback.format_exc())
+
+def _AppLoadView(base, self, newViewAlias, name = None, *args, **kwargs):
+    #log('loadView: ' + newViewAlias)
+    if newViewAlias == 'hangar':
+        global _xpmInitialized
+        if _xpmInitialized == False:
+            BigWorld.callback(0, lambda:_AppLoadView(base, self, newViewAlias, name, *args, **kwargs))
+            return
+    base(self, newViewAlias, name, *args, **kwargs)
+
+def _onViewLoaded(view):
+    debug('onViewLoaded: ' + view.alias)
+    if view is not None and view.alias == _XVM_VIEW_ALIAS:
+        from gui.WindowsManager import g_windowsManager
+        app = g_windowsManager.window
+        #if app is not None:
+        #    app.loaderManager.onViewLoaded -= _onViewLoaded
+        global _xvmView
+        _xvmView = view
+
+# commands handlers
+
+def _xpm_getMods():
+    try:
+        mods_dir = _XVM_MODS_DIR
+        if not os.path.isdir(mods_dir):
+            return None
+        mods = []
+        for m in glob.iglob(mods_dir + "/*.swf"):
+            m = m.replace('\\', '/')
+            if not m.lower().endswith("/xvm.swf"):
+                mods.append(m)
+        return mods
+    except Exception, ex:
+        err(traceback.format_exc())
+    return None
+
+# register events
+
+def _RegisterEvents():
+    _start()
+    import game
+    RegisterEvent(game, 'fini', _fini)
+    from gui.Scaleform.framework.application import App
+    OverrideMethod(App, 'loadView', _AppLoadView)
+BigWorld.callback(0, _RegisterEvents)
 
 
 #####################################################################

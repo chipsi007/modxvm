@@ -1,5 +1,7 @@
 """ XPM mods loader (c) www.modxvm.com 2013-2014 """
 
+_XPM_VER = '1.5.0'
+
 import glob
 import os
 import ResMgr
@@ -7,7 +9,7 @@ from gui import VERSION_FILE_PATH
 
 # get version
 ver = ResMgr.openSection(VERSION_FILE_PATH).readString('version')
-ver = ver[2:-5] # 'v.0.8.7 #512' or 'v.0.8.7 Common Test #499'
+ver = ver[2:ver.index('#')-1] # 'v.0.8.7 #512' or 'v.0.8.7 Common Test #499'
 
 # determine work dir
 try:
@@ -27,11 +29,12 @@ except Exception, err:
     wd = 'res_mods/%s/%s' % (ver, os.path.dirname(__file__))
     print ("[XPM]   fallback to the default path: %s" % wd)
 
-print "[XPM] Working dir: " + wd
+print "[XPM] %s" % _XPM_VER
+print "[XPM] Working dir: %s" % wd
 
 # add libs to path
 import sys
-sys.path.append('%s/lib' % wd)
+sys.path.insert(0, '%s/lib' % wd)
 
 import xpm
 

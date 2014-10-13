@@ -32,20 +32,20 @@ Legend:
 │ {{level}}                  │ X │ X │ X │ X │ X │ X │ X │   │ X │ vehicle level (Arabic numerals)
 │ {{rlevel}}                 │ X │ X │ X │ X │ X │ X │ X │   │ X │ vehicle level (Roman numerals)
 │ {{battletier}}             │ X │ X │ X │ X │ X │ X │ X │   │   │ guessed current battle tier
-│ {{squad}}                  │   │ X │ X │ X │ X │ X │ X │   │   │ value 'sq' for own squad, empty for others
-│ {{squad-num}}              │   │ X │ X │ X │ X │ X │ X │   │   │ number of squad (1,2,...), empty if not in squad
+│ {{alive}}                  │ X │ X │ X │ X │ X │ X │ X │   │   │ value 'alive' for alive, '' for dead
+│ {{ready}}                  │ X │ X │ X │ X │ X │   │   │   │   │ value 'ready' if player loaded to the game, '' if not
+│ {{player}}                 │ X │ X │ X │ X │   │   │   │   │   │ value 'pl' for current player, empty for others
+│ {{tk}}                     │ X │ X │ X │ X │ X │   │   │   │   │ value 'tk' for teamkiller, empty for others
+│ {{squad}}                  │ X │ X │ X │ X │ X │ X │ X │   │   │ value 'sq' for own squad, empty for others
+│ {{squad-num}}              │ X │ X │ X │ X │ X │ X │ X │   │   │ number of squad (1,2,...), empty if not in squad
+│ {{hp-max}}                 │ X │ X │ X │ X │ X │ X │ X │   │   │ maximum health points
 │ {{hp}}                     │   │ X │ X │ X │ X │ X │ X │   │   │ current health points
 │ {{hp-ratio}}               │   │ X │ X │ X │ X │ X │ X │   │   │ current health ratio (without '%' sign)
-│ {{hp-max}}                 │   │ X │ X │ X │ X │ X │ X │   │   │ maximum health points
 │ {{c:hp}}                   │   │ X │ X │ X │ X │ X │ X │   │   │ color depending on current health points (only in vehicle markers)
 │ {{c:hp-ratio}}             │   │ X │ X │ X │ X │ X │ X │   │   │ color depending on current health ratio (only in vehicle markers)
 │ {{a:hp}}                   │   │ X │ X │ X │ X │ X │ X │   │   │ transparency depending on current health points (only in vehicle markers)
 │ {{a:hp-ratio}}             │   │ X │ X │ X │ X │ X │ X │   │   │ transparency depending on current health ratio (only in vehicle markers)
-│ {{alive}}                  │   │ X │ X │ X │ X │ X │ X │   │   │ value 'alive' for alive, '' for dead
-│ {{ready}}                  │   │ X │ X │ X │ X │   │   │   │   │ value 'ready' if player loaded to the game, '' if not
 │ {{frags}}                  │   │ X │ X │ X │ X │   │   │   │   │ current frags
-│ {{player}}                 │   │ X │ X │ X │   │   │   │   │   │ value 'pl' for current player, empty for others
-│ {{tk}}                     │   │ X │ X │ X │ X │   │   │   │   │ value 'tk' for teamkiller, empty for others
 │ {{c:system}}               │   │ X │ X │ X │ X │   │   │   │   │ system color
 │ {{turret}}                 │   │   │   │   │ X │   │   │   │   │ stock turret marker
 │ {{dmg}}                    │   │   │   │   │ X │ X │   │   │   │ damage health points / last hit value
@@ -118,6 +118,6 @@ Legend:
 │ {{c:avglvl}}    │ X │ X │ X │ X │ X │ color depending on average level of tanks
 │ {{c:t-rating}}  │ X │ X │ X │ X │ X │ color depending on current vehicle win ratio
 │ {{c:t-battles}} │ X │ X │ X │ X │ X │ color depending on current vehicle battles
-│ {{gun-marks}}   │   │ X │ X │ X │ X │ marks on gun (only for spotted vehicles)
+│ {{marksOnGun}}  │   │ X │ X │ X │ X │ marks on gun (only for spotted vehicles)
 └─────────────────┴───┴───┴───┴───┴───┴────────────────────────────────────────────────────────────────
   * Any color macro you can change to transparency macro (e.g. {{a:tdb}}).

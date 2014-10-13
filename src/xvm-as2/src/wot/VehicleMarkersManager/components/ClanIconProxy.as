@@ -12,8 +12,18 @@ class wot.VehicleMarkersManager.components.ClanIconProxy extends AbstractAccessP
         super(xvm);
     }
 
+    public function get playerId():Number
+    {
+        return xvm.m_playerId;
+    }
+
     public function get playerName():String
     {
-        return xvm.m_playerFullName;
+        return xvm.m_playerName;
+    }
+
+    public function get playerClan():String
+    {
+        return xvm.m_playerClan;
     }
 }

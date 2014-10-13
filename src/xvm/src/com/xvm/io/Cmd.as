@@ -12,25 +12,21 @@ package com.xvm.io
     public class Cmd
     {
         private static const COMMAND_LOG:String = "log";
-        private static const COMMAND_LOAD_FILE:String = "loadFile";
         private static const COMMAND_SET_CONFIG:String = "setConfig";
         private static const COMMAND_PING:String = "ping";
         private static const COMMAND_GETSCREENSIZE:String = "getScreenSize";
-        private static const COMMAND_GETGAMEREGION:String = "getGameRegion";
-        private static const COMMAND_GETLANGUAGE:String = "getLanguage";
-        private static const COMMAND_GETMODS:String = "getMods";
         private static const COMMAND_GETVEHICLEINFODATA:String = "getVehicleInfoData";
-        private static const COMMAND_GETWN8EXPECTEDDATA:String = "getWN8ExpectedData";
-        private static const COMMAND_GETXVMSTATTOKENDATA:String = "getXvmStatTokenData";
         private static const COMMAND_LOADBATTLESTAT:String = "loadBattleStat";
         private static const COMMAND_LOADBATTLERESULTSSTAT:String = "loadBattleResultsStat";
         private static const COMMAND_LOADUSERDATA:String = "loadUserData";
         private static const COMMAND_GETDOSSIER:String = "getDossier";
+        private static const COMMAND_RETURN_CREW:String = "returnCrew";
         private static const COMMAND_OPEN_URL:String = "openUrl";
         private static const COMMAND_LOGSTAT:String = "logstat";
-        private static const COMMAND_RETURN_CREW:String = "returnCrew";
         private static const COMMAND_SAVE_SETTINGS:String = "save_settings";
         private static const COMMAND_LOAD_SETTINGS:String = "load_settings";
+        public static const COMMAND_GETCOMMENTS:String = "getComments";
+        public static const COMMAND_SETCOMMENTS:String = "setComments";
         private static const COMMAND_TEST:String = "test";
 
         public static const RESPOND_PINGDATA:String = "xvm.pingdata";
@@ -45,11 +41,6 @@ package com.xvm.io
         public static function log(str:String):void
         {
             _call(null, null, [COMMAND_LOG, str]);
-        }
-
-        public static function loadFile(filename:String, target:Object, callback:Function):void
-        {
-            _call(target, callback, [COMMAND_LOAD_FILE, filename]);
         }
 
         public static function setConfig():void
@@ -69,34 +60,9 @@ package com.xvm.io
             _call(target, callback, [COMMAND_GETSCREENSIZE]);
         }
 
-        public static function getGameRegion(target:Object, callback:Function):void
-        {
-            _call(target, callback, [COMMAND_GETGAMEREGION]);
-        }
-
-        public static function getLanguage(target:Object, callback:Function):void
-        {
-            _call(target, callback, [COMMAND_GETLANGUAGE]);
-        }
-
-        public static function getMods(target:Object, callback:Function):void
-        {
-            _call(target, callback, [COMMAND_GETMODS]);
-        }
-
         public static function getVehicleInfoData(target:Object, callback:Function):void
         {
             _call(target, callback, [COMMAND_GETVEHICLEINFODATA]);
-        }
-
-        public static function getWN8ExpectedData(target:Object, callback:Function):void
-        {
-            _call(target, callback, [COMMAND_GETWN8EXPECTEDDATA]);
-        }
-
-        public static function getXvmStatTokenData(target:Object, callback:Function):void
-        {
-            _call(target, callback, [COMMAND_GETXVMSTATTOKENDATA]);
         }
 
         public static function loadBattleStat(players:Array = null):void
@@ -119,6 +85,11 @@ package com.xvm.io
             _call(null, null, [COMMAND_GETDOSSIER, battleType, playerId, vehId]);
         }
 
+        public static function returnCrew():void
+        {
+            _call(null, null, [COMMAND_RETURN_CREW]);
+        }
+
         public static function openUrl(url:String):void
         {
             _call(null, null, [COMMAND_OPEN_URL, url]);
@@ -129,23 +100,30 @@ package com.xvm.io
             _call(null, null, [COMMAND_LOGSTAT]);
         }
 
-        public static function returnCrew():void
+        public static function loadSettings(target:Object, callback:Function, key:String):void
         {
-            _call(null, null, [COMMAND_RETURN_CREW]);
+            _call(target, callback, [COMMAND_LOAD_SETTINGS, key]);
         }
 
-        public static function loadSettings(target:Object, callback:Function):void
+        public static function saveSettings(key:String, value:String):void
         {
-            _call(target, callback, [COMMAND_LOAD_SETTINGS]);
+            _call(null, null, [COMMAND_SAVE_SETTINGS, key, value]);
         }
 
-        public static function saveSettings(settingsStr:String):void
+        public static function getComments(target:Object, callback:Function, cachedOnly:Boolean = false):void
         {
-            _call(null, null, [COMMAND_SAVE_SETTINGS, settingsStr]);
+            _call(target, callback, [COMMAND_GETCOMMENTS, cachedOnly]);
+        }
+
+        public static function setComments(target:Object, callback:Function, value:String):void
+        {
+            _call(target, callback, [COMMAND_SETCOMMENTS, value]);
         }
 
         public static function runTest(... args):void
         {
+            if (args[0] == "battleResults")
+                args[1] = args[1].replace(".dat", "");
             args.unshift(COMMAND_TEST);
             _call(null, null, args);
         }
@@ -155,15 +133,26 @@ package com.xvm.io
         private static var _listeners:Object = {};
         private static var _counter:int = 0;
 
-        private static var _xvm_sandbox_cmd_initialized:Boolean = false;
         private static function _call(target:Object, callback:Function, args:Array):void
+        {
+            _call_internal(target, callback, args, "xvm.cmd");
+        }
+
+        private static function _call_xpm(target:Object, callback:Function, args:Array):void
+        {
+            _call_internal(target, callback, args, "xpm.cmd");
+        }
+
+        private static var _xvm_sandbox_cmd_initialized:Boolean = false;
+        private static function _call_internal(target:Object, callback:Function, args:Array, cmd:String):void
         {
             if (!_xvm_sandbox_cmd_initialized)
             {
+                ExternalInterface.addCallback("xpm.respond", _callback);
                 ExternalInterface.addCallback("xvm.respond", _callback);
                 setTimeout(function():void {
                     Cmd._xvm_sandbox_cmd_initialized = true;
-                    Cmd._call(target, callback, args);
+                    Cmd._call_internal(target, callback, args, cmd);
                 }, 1);
             }
             else
@@ -172,7 +161,7 @@ package com.xvm.io
                 var id:String = Sandbox.GetCurrentSandboxPrefix() + String(++_counter);
                 if (callback != null)
                     _listeners[id] = {target:target, callback:callback};
-                args.unshift('xvm.cmd', id);
+                args.unshift(cmd, id);
                 ExternalInterface.call.apply(null, args);
             }
         }

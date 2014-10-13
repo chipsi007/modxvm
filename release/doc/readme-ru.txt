@@ -31,7 +31,6 @@
   Поддержка:    http://www.koreanrandom.com/forum/forum/43-xvm/
   FAQ:          http://www.modxvm.com/faq/
   Конфиги:      http://www.koreanrandom.com/forum/forum/50-custom-configurations/
-  Редактор:     http://www.koreanrandom.com/forum/topic/1422-/#entry11316
 
 -----------------------------------------------------------
 2. УСТАНОВКА
@@ -48,7 +47,6 @@
 
     Увидеть все возможные настройки можно в папке
       \res_mods\xvm\configs\@Default\
-    Или воспользоваться онлайн-редактором: http://www.koreanrandom.com/forum/topic/1422-/#entry11316
 
     Внимание: если вы меняете конфиг вручную, используйте Блокнот (notepad),
     НЕ используйте word, wordpad и подобные редакторы
@@ -77,8 +75,6 @@
   Конфигурационные файлы мода:
     \res_mods\xvm\configs\@Default\
   Можно скопировать готовый конфиг из папки \res_mods\xvm\configs\user configs\
-  Можно создать новый конфиг с помощью онлайн-редактора:
-    http://www.koreanrandom.com/forum/topic/1422-/#entry11316
 
   Все возможные параметры конфига можно посмотреть в конфиге с русскими комментариями,
   который находится в папке документации в архиве мода:
@@ -86,6 +82,9 @@
 
   Поддерживаемые теги HTML:
     http://help.adobe.com/en_US/FlashPlatform/reference/actionscript/3/flash/text/TextField.html#htmlText
+
+  ВНИМАНИЕ: Макрсосы в данном файле не актуальные, смотрите macros.txt и macros-hangar.txt для
+  актуальных макросов
 
   Используемые макросы:
     В ушах, на экране загрузки боя, в окне статистики боя по Tab и в маркерах над танком:
@@ -248,7 +247,7 @@
         width - минимальная ширина
         prec  - в зависимости от типа:
                 - максимальная ширина для строк
-                - количество знаков после запятой для чисел
+                - количество знаков после запятой для дробных чисел
                 - смещение ASCII таблицы для чисел в ASCII (по умолчанию 129)
         type  - тип:
                 s - строка
@@ -301,20 +300,21 @@
   Параметр конфигурационного файла battle/clanIconsFolder определяет путь к корневой
   папке иконок кланов.
   Все иконки загружаются автоматически из подпапки с названием, соответствующем региону
-  игры (RU, EU, US, и т.д.).
+  игры (RU, EU, US, и т.д. или из папки ID по id аккаунта игрока).
   Чтобы добавить иконку клана или игрока, просто скопируйте файл иконки в:
     \res_mods\xvm\res\clanicons\[REGION]\clan\ (для клана)
     \res_mods\xvm\res\clanicons\[REGION]\nick\ (для отдельного игрока)
+    \res_mods\xvm\res\clanicons\ID\ (для отдельного игрока по id)
   Так же можно сделать иконку по умолчанию для клана или игрока:
     \res_mods\xvm\res\clanicons\[REGION]\clan\default.png (для клана по умолчанию)
     \res_mods\xvm\res\clanicons\[REGION]\nick\default.png (для игрока по умолчанию)
   Иконки ищутся в следующем порядке:
-    nick/<player>.png -> clan/<clan>.png -> clan/default.png -> nick/default.png
+    ID/<accountId>.png -> nick/<playerName>.png -> clan/<clan>.png -> clan/default.png -> nick/default.png
   По умолчанию в архив мода добавлены топ 150 кланов.
   Полный архив со всеми кланами можно скачать отдельно:
     http://www.modxvm.com/%d1%81%d0%ba%d0%b0%d1%87%d0%b0%d1%82%d1%8c-xvm/
-    Файлы: clanicons-full-ru-XXX.zip (RU), clanicons-full-eu-XXX.zip (EU), clanicons-full-na-XXX.zip (NA),
-    clanicons-full-ASIA-XXX.zip (ASIA), clanicons-full-kr-XXX.zip (KR), clanicons-full-vn-XXX.zip (VN)
+    Файлы: clanicons-full-RU-XXX.zip (RU), clanicons-full-EU-XXX.zip (EU), clanicons-full-NA-XXX.zip (NA),
+    clanicons-full-ASIA-XXX.zip (ASIA), clanicons-full-KR-XXX.zip (KR)
 
   Изображение 6-ого чувства.
   Для замены изображения индикатора 6-ого чувства поместите альтернативное изображение PNG формата в

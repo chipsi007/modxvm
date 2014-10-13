@@ -14,11 +14,11 @@ import org.idmedia.as3commons.util.*; StringUtils;
 import net.wg.data.daapi.base.*; DAAPIDataClass;
 import net.wg.gui.components.common.*; MainViewContainer;
 import net.wg.gui.components.controls.ReadOnlyScrollingList; ReadOnlyScrollingList;
+import net.wg.gui.events.*; ContextMenuEvent;
 import net.wg.gui.intro.*; IntroPage;
 import net.wg.gui.login.impl.*; LoginPage;
 import net.wg.gui.lobby.*; LobbyPage;
 import net.wg.gui.lobby.dialogs.*; SimpleDialog;
-//TODO: 0.9.3 import net.wg.gui.lobby.header.*; TutorialControl;
 import net.wg.gui.lobby.hangar.*; Hangar; TankParam;
 import net.wg.gui.lobby.hangar.crew.*; Crew; RecruitRendererVO; CrewItemRenderer;
 import net.wg.gui.lobby.battleloading.*; BattleLoading; PlayerItemRenderer;
@@ -31,16 +31,23 @@ import net.wg.gui.lobby.profile.pages.technique.*; ProfileTechniquePage; Profile
 import net.wg.gui.lobby.techtree.*; TechTreePage; ResearchPage;
 import net.wg.gui.lobby.window.*; ProfileWindow;
 import net.wg.gui.messenger.controls.*; MemberItemRenderer;
+import net.wg.gui.messenger.forms.*; ContactsListForm;
+import net.wg.gui.messenger.windows.*; ContactsWindow;
 import net.wg.gui.notification.*; NotificationListView;
-import net.wg.gui.prebattle.company.*; CompaniesListWindow; CompanyWindow;
+import net.wg.gui.prebattle.company.*; CompanyMainWindow; CompanyListView; CompanyRoomView;
 import net.wg.gui.prebattle.squad.*; SquadWindow; MessengerUtils;
 import net.wg.infrastructure.base.*; BaseViewWrapper;
-import net.wg.infrastructure.events.*; LoaderEvent; LifeCycleEvent;
-import net.wg.infrastructure.managers.impl.*; ContainerManager;
+import net.wg.infrastructure.events.*; LoaderEvent; LifeCycleEvent; LibraryLoaderEvent;
+import net.wg.infrastructure.helpers.*; LibraryLoader;
+import net.wg.infrastructure.managers.impl.*; ContainerManager; ContextMenuManager;
+import org.idmedia.as3commons.util.*; HashMap;
 
 /**
  * UIs
  */
+
+// advanced.swf
+TextAreaSimple;
 
 // battleLoading.swf
 LeftItemRendererUI;
@@ -56,10 +63,17 @@ CompanyListItemRendererUI;
 CompanyDropItemRendererUI;
 
 // controls.swf
-//ButtonBlack; ButtonCaps; ButtonCapsRed; ButtonIcon; ButtonIconText; ButtonNormal; ButtonRed;
-//CheckBox; CheckBoxFilter; CheckBoxTankers; IconText; LabelControl; NumericStepper;
-//RadioButton; RedButton; Slider; TextFieldShort; TextInput; UILoaderAlt; UILoaderCut;
-ListItemRedererImageText; DropDownImageText;
+DropDownImageText;
+LabelControl;
+ListItemRedererImageText;
+
+// messengerControls.swf
+ContactsClanRosterUI;
+ContactsFriendsRosterUI;
+ContactsIgnoredRosterUI;
+ContactsListFormUI;
+ContactsMutedRosterUI;
+UserRosterItemRendererUI;
 
 // nodesLib.swf
 NationTreeNodeSkinned;
@@ -82,6 +96,9 @@ squadItemRendererUI;
 // TankCarousel.swf
 TankCarouselUI;
 TankCarouselItemRendererUI;
+
+// windows.swf
+WindowUI;
 
 }
 

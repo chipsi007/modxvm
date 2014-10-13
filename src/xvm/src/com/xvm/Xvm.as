@@ -6,23 +6,85 @@ package com.xvm
 {
     XvmLinks;
 
-    import flash.display.*;
-    import flash.events.*;
-    import flash.net.URLRequest;
-    import flash.utils.*;
-    import flash.system.*;
     import com.xvm.*;
+    import com.xvm.events.*;
     import com.xvm.io.*;
-    import net.wg.infrastructure.base.AbstractView;
+    import flash.display.*;
+    import net.wg.data.constants.*;
+    import net.wg.infrastructure.base.*;
+    import net.wg.infrastructure.events.*;
+    import net.wg.infrastructure.helpers.*;
 
-    [SWF(width="1", height="1", backgroundColor="#000000")]
+    [SWF(width="1", height="1", backgroundColor="#6D6178")]
 
     public class Xvm extends AbstractView
     {
+        // private commands
+        private static const _XPM_COMMAND_GETMODS:String = "xpm.getMods";
+        private static const _XPM_COMMAND_INITIALIZED:String = "xpm.initialized";
+
+        // public commands
+        public static const XPM_COMMAND_LOADFILE:String = "xpm.loadFile";
+        public static const XPM_COMMAND_GETGAMEREGION:String = "xpm.gameRegion";
+        public static const XPM_COMMAND_GETGAMELANGUAGE:String = "xpm.gameLanguage";
+        // args: title, message
+        public static const XPM_COMMAND_MESSAGEBOX:String = 'xpm.messageBox';
+        // args: message, type
+        // Types: gui.SystemMessages.SM_TYPE: 'Error', 'Warning', 'Information', 'GameGreeting', ...
+        public static const XPM_COMMAND_SYSMESSAGE:String = 'xpm.systemMessage';
+
+        // static methods for Python-Flash communication
+
+        public static function cmd(cmd:String, ...rest):*
+        {
+            App.utils.asserter.assertNotNull(_instance, "Xvm" + Errors.CANT_NULL);
+            rest.unshift(cmd);
+            return _instance.xvm_cmdS.apply(_instance, rest);
+        }
+
+        public static var _instance:Xvm;
+
+        // private fields
+
+        private var modsList:Vector.<String>;
+        private var loadedList:Vector.<String>;
+        private var loadStart:Number;
+
+        // initialization
+
         public function Xvm():void
         {
+            _instance = this;
             focusable = false;
-            Config.load(this, init);
+        }
+
+        // DAAPI Python-Flash interface
+
+        public var xvm_cmd:Function = null;
+        public function xvm_cmdS(cmd:String, ...rest):*
+        {
+            App.utils.asserter.assertNotNull(this.xvm_cmd, "xvm_cmd" + Errors.CANT_NULL);
+            rest.unshift(cmd);
+            return this.xvm_cmd.apply(this, rest);
+        }
+
+        public function as_xvm_cmd(cmd:*, ...rest):void
+        {
+            //Logger.add("as_xvm_cmd: " + cmd + " " + rest.join(", "));
+            dispatchEvent(new ObjectEvent(Defines.E_CMD_RECEIVED, x));
+        }
+
+        // overrides
+
+        override protected function onPopulate():void
+        {
+            //Logger.add("onPopulate");
+            super.onPopulate();
+
+            VehicleInfo.populateData();
+
+            Config.load();
+            LoadMods();
         }
 
         override protected function nextFrameAfterPopulateHandler():void
@@ -30,72 +92,40 @@ package com.xvm
             //Logger.add("nextFrameAfterPopulateHandler");
             if (this.parent != App.instance)
                 (App.instance as MovieClip).addChild(this);
-            visible = false;
         }
 
-        private function init(e:Event = null):void
+        private function LoadMods():void
         {
-            if (!stage)
-            {
-                addEventListener(Event.ADDED_TO_STAGE, init);
-                return;
-            }
-            removeEventListener(Event.ADDED_TO_STAGE, init);
-
-            // entry point
-
-            VehicleInfo.populateData();
-            Cmd.getMods(this, onGetModsComplete);
-        }
-
-        private function onGetModsComplete(mods:String):void
-        {
-            // TODO: dispose loader
             try
             {
-                if (mods == null)
+                modsList = Vector.<String>(cmd(_XPM_COMMAND_GETMODS));
+                if (modsList == null || modsList.length == 0)
                     return;
 
-                var list:Array = JSONx.parse(mods) as Array;
-                if (list == null || list.length == 0)
-                    return;
+                (App.libraryLoader as LibraryLoader).addEventListener(LibraryLoaderEvent.LOADED, onLibLoaded);
 
-                var ctx:LoaderContext = new LoaderContext(false, ApplicationDomain.currentDomain);
-
-                var preload:Array = [ // TODO make configurable dependencies
+                // preload swfs
+                App.libraryLoader.load(Vector.<String>([ // TODO make configurable dependencies
+                    "contactsWindow.swf",           // xvm-comments
+                    "serviceMessageComponents.swf", // xvm-svcmsg
+                    "TankCarousel.swf",             // xvm-tcarousel
+                    "nodesLib.swf",                 // xvm-treeview
+                    "profileStatistics.swf",        // xvm-profile
+                    "profileTechnique.swf",         // xvm-profile
+                    "squadWindow.swf",              // xvm-squad
                     "prebattleComponents.swf",      // xvm-company
                     "companiesListWindow.swf",      // xvm-company
                     "companyWindow.swf",            // xvm-company
-                    "squadWindow.swf",              // xvm-squad
                     "battleResults.swf",            // xvm-hangar
-                    "battleLoading.swf",            // xvm-hangar
-                    "TankCarousel.swf",             // xvm-tcarousel
-                    "nodesLib.swf",                 // xvm-treeview
-                    "serviceMessageComponents.swf", // xvm-svcmsg
-                    "profileStatistics.swf",        // xvm-profile
-                    "profileTechnique.swf"          // xvm-profile
-                ];
-                for (var x:int = 0; x < preload.length; ++x)
-                {
-                    var swf:String = (preload[x] as String).replace(/^.*\//, '');
-                    Logger.add("[XVM] Preloading swf: " + swf);
-                    var requestSwf:URLRequest = new URLRequest(swf);
-                    var loaderSwf:Loader = new Loader();
-                    loaderSwf.contentLoaderInfo.addEventListener(Event.INIT, onLibLoaded);
-                    loaderSwf.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onLibLoadError);
-                    loaderSwf.load(requestSwf, ctx);
-                }
+                    "battleLoading.swf"             // xvm-hangar
+                ]));
 
-                for (var i:int = 0; i < list.length; ++i)
-                {
-                    var mod:String = (list[i] as String).replace(/^.*\//, '');
-                    Logger.add("[XVM] Loading mod: " + mod);
-                    var request:URLRequest = new URLRequest(Defines.XVMMODS_ROOT + mod);
-                    var loader:Loader = new Loader();
-                    loader.contentLoaderInfo.addEventListener(Event.INIT, onLibLoaded);
-                    loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, onLibLoadError);
-                    loader.load(request, ctx);
-                }
+                // load xvm mods
+                loadStart = (new Date()).getTime();
+                loadedList = new Vector.<String>;
+                modsList = modsList.map(function(x:String):String { return Defines.XVMMODS_ROOT + x.replace(/^.*\//, ''); } );
+                App.libraryLoader.load(modsList);
+                checkLoadComplete();
             }
             catch (ex:Error)
             {
@@ -103,18 +133,14 @@ package com.xvm
             }
         }
 
-        private function onLibLoaded(e:Event):void
+        private function onLibLoaded(e:LibraryLoaderEvent):void
         {
             try
             {
-                var loaderInfo:LoaderInfo = LoaderInfo(e.currentTarget);
-                loaderInfo.removeEventListener(Event.INIT, onLibLoaded);
-                loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onLibLoadError);
-                //Logger.add("[XVM] Mod loaded: " + loaderInfo.url.replace(/^.*\//, ''));
-                var loader:Loader = loaderInfo.loader;
-                loader.visible = false;
-                //loader.addEventListener(Event.UNLOAD, onLibUnload);
-                stage.addChild(loader);
+                if (modsList.indexOf(e.url.replace(/^gui\/flash\//i, '')) < 0)
+                    return;
+                loadedList.push(e.url.replace(/^.*\//, ''));
+                Logger.add("[XVM] Mod " + (e.loader == null ? "load failed" : "loaded") + ": " + e.url.replace(/^.*\//, ''));
             }
             catch (ex:Error)
             {
@@ -122,24 +148,27 @@ package com.xvm
             }
         }
 
-        private function onLibLoadError(e:IOErrorEvent):void
+        private function checkLoadComplete():void
         {
-            try
-            {
-                var loaderInfo:LoaderInfo = LoaderInfo(e.currentTarget);
-                loaderInfo.removeEventListener(Event.INIT, onLibLoaded);
-                loaderInfo.removeEventListener(IOErrorEvent.IO_ERROR, onLibLoadError);
-                Logger.add("[XVM] Mod load error: " + e.text);
-            }
-            catch (ex:Error)
-            {
-                Logger.add(ex.getStackTrace());
-            }
-        }
+            //Logger.add("checkLoadComplete");
 
-        private function onLibUnload(e:Event):void
-        {
-            Logger.add("unload: " + String(e.target));
+            if (modsList.length > loadedList.length && ((new Date()).getTime() - loadStart) < 5000)
+            {
+                App.utils.scheduler.envokeInNextFrame(checkLoadComplete);
+            }
+            else
+            {
+                cmd(_XPM_COMMAND_INITIALIZED);
+                if (modsList.length > loadedList.length)
+                {
+                    for (var i:int = 0; i < modsList.length; ++i)
+                    {
+                        var x:String = modsList[i].replace(/^.*\//, '');
+                        if (loadedList.indexOf(x) < 0)
+                            Logger.add("WARNING: mod is not loaded: " + x);
+                    }
+                }
+            }
         }
     }
 }

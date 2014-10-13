@@ -29,16 +29,6 @@ package com.xvm
             return _instance;
         }
 
-        public static function get infoVersion():String
-        {
-            return instance.info.ver;
-        }
-
-        public static function get infoMessage():String
-        {
-            return instance.info.message;
-        }
-
         public static function get loaded():Boolean
         {
             return instance.loaded;
@@ -92,7 +82,6 @@ package com.xvm
         private var statCache:Dictionary;
         private var battleResultsCache:Dictionary;
         private var userCache:Dictionary;
-        private var info:Object;
         private var loading:Boolean;
         private var loaded:Boolean;
         private var listenersBattle:Vector.<Object>;
@@ -101,7 +90,6 @@ package com.xvm
 
         function Stat()
         {
-            info = { ver: null, message: null };
             statCache = new Dictionary();
             battleResultsCache = new Dictionary();
             userCache = new Dictionary();
@@ -157,9 +145,6 @@ package com.xvm
                 var response:Object = JSONx.parse(json_str);
                 //Logger.addObject(response, 3, "response");
 
-                if (response.info)
-                    info = response.info;
-
                 // clear cache, because it is also used for current battle players list
                 statCache = new Dictionary();
 
@@ -173,7 +158,7 @@ package com.xvm
                         // TODO
                         //StatData.s_data[nm].loadstate = (StatData.s_data[nm].vehicleKey == "UNKNOWN")
                         //    ? Defines.LOADSTATE_UNKNOWN : Defines.LOADSTATE_DONE;
-                        Macros.RegisterMacrosData(name);
+                        Macros.RegisterStatMacrosData(name);
                         //Logger.addObject(stat[name], 3, "stat[" + name + "]");
                     }
                     Macros.RegisterBattleTierData(guessBattleTier());
@@ -261,9 +246,6 @@ package com.xvm
 
                 battleResultsCache[arenaUniqueId] = response;
 
-                if (response.info)
-                    info = response.info;
-
                 if (response.players)
                 {
                     for (var name:String in response.players)
@@ -271,7 +253,7 @@ package com.xvm
                         var sd:StatData = ObjectConverter.convertData(response.players[name], StatData);
                         calculateStatValues(sd);
                         statCache[name] = sd;
-                        Macros.RegisterMacrosData(name);
+                        Macros.RegisterStatMacrosData(name);
                     }
                     Macros.RegisterBattleTierData(guessBattleTier());
                 }
@@ -548,6 +530,9 @@ package com.xvm
                     Tmax: vdata.tierHi
                 });
             }
+
+            if (vis.length == 0)
+                return 0;
 
             // 2. Sort vehicles info by top tiers descending
             vis.sortOn("Tmax", Array.NUMERIC | Array.DESCENDING);

@@ -13,8 +13,8 @@ package com.xvm.misc
         public static function get config():CConfig
         {
             var c:CConfig = new CConfig();
+            c.xvmVersion = Defines.XVM_VERSION;
             c.configVersion = Defines.CONFIG_VERSION;
-            c.editorVersion = Defines.EDITOR_VERSION;
             c.language = Defines.LOCALE_AUTO_DETECTION;
             c.region =  Defines.REGION_AUTO_DETECTION;
             c.definition = getDefinitionSection();
@@ -68,89 +68,95 @@ package com.xvm.misc
             c.saveLastServer = false;
             c.autologin = false;
             c.confirmOldReplays = false;
+
             // Show ping to the servers
             c.pingServers = new CPingServers;
             c.pingServers.enabled = false;
             c.pingServers.updateInterval = 10000; // msec
-            c.pingServers.x = 15;
-            c.pingServers.y = 35;
+            c.pingServers.x = 5;
+            c.pingServers.y = 30;
             c.pingServers.alpha = 80;
             c.pingServers.delimiter = ": ";
             c.pingServers.maxRows = 4;
             c.pingServers.columnGap = 10;
+            c.pingServers.leading = 0;
+            c.pingServers.topmost = true;
             c.pingServers.fontStyle = {
-                    name: "$FieldFont",
-                    size: 12,
-                    bold: false,
-                    italic: false,
-                    color: {
-                        great: "0xFFCC66",
-                        good: "0xE5E4E1",
-                        poor: "0x96948F",
-                        bad: "0xD64D4D"
-                    }
-                };
+                name: "$TextFont",
+                size: 12,
+                bold: false,
+                italic: false,
+                color: {
+                    great: "0xFFCC66",
+                    good: "0xE5E4E1",
+                    poor: "0x96948F",
+                    bad: "0xD64D4D"
+                }
+            };
             c.pingServers.threshold = {
-                    great: 35,
-                    good: 60,
-                    poor: 100
-                };
-            c.pingServers.shadow = {
-                    enabled: true,
-                    color: "0x000000",
-                    distance: 0,
-                    angle: 0,
-                    alpha: 70,
-                    blur: 4,
-                    strength: 2
-                };
+                great: 35,
+                good: 60,
+                poor: 100
+            };
+            c.pingServers.shadow = new CShadow();
+            c.pingServers.shadow.enabled = true;
+            c.pingServers.shadow.color = "0x000000";
+            c.pingServers.shadow.distance = 0;
+            c.pingServers.shadow.angle = 0;
+            c.pingServers.shadow.alpha = 70;
+            c.pingServers.shadow.blur = 4;
+            c.pingServers.shadow.strength = 2;
+
             return c;
         }
 
         private static function getHangarSection():CHangar
         {
             var c:CHangar = new CHangar();
-            c.hideTutorial = false;
             c.xwnInCompany = true;
             c.masteryMarkInTechTree = true;
             c.hidePricesInTechTree = false;
             c.widgetsEnabled = false;
+
             // Show ping to the servers
             c.pingServers = new CPingServers();
             c.pingServers.enabled = false;
             c.pingServers.updateInterval = 10000; // msec
-            c.pingServers.x = 170;
-            c.pingServers.y = 35;
+            c.pingServers.x = 3;
+            c.pingServers.y = 51;
             c.pingServers.alpha = 80;
             c.pingServers.delimiter = ": ";
-            c.pingServers.maxRows = 4;
-            c.pingServers.columnGap = 10;
+            c.pingServers.maxRows = 2;
+            c.pingServers.columnGap = 3;
+            c.pingServers.leading = 0;
+            c.pingServers.topmost = true;
             c.pingServers.fontStyle = {
-                    name: "$FieldFont",
-                    size: 12,
-                    bold: false,
-                    italic: false,
-                    color: {
-                        great: "0xFFCC66",
-                        good: "0xE5E4E1",
-                        poor: "0x96948F",
-                        bad: "0xD64D4D"
-                    }
-                };
+                name: "$FieldFont",
+                size: 12,
+                bold: false,
+                italic: false,
+                color: {
+                    great: "0xFFCC66",
+                    good: "0xE5E4E1",
+                    poor: "0x96948F",
+                    bad: "0xD64D4D"
+                }
+            };
             c.pingServers.threshold = {
-                    great: 35,
-                    good: 60,
-                    poor: 100
-                };
-            c.pingServers.shadow = {
-                    enabled: true,
-                    color: "0x000000",
-                    distance: 0,
-                    angle: 0,
-                    alpha: 70,
-                    blur: 4,
-                    strength: 2
-                };
+                great: 35,
+                good: 60,
+                poor: 100
+            };
+            c.pingServers.shadow = new CShadow();
+            c.pingServers.shadow.enabled = true;
+            c.pingServers.shadow.color = "0x000000";
+            c.pingServers.shadow.distance = 0;
+            c.pingServers.shadow.angle = 0;
+            c.pingServers.shadow.alpha = 70;
+            c.pingServers.shadow.blur = 4;
+            c.pingServers.shadow.strength = 2;
+
+            // Tank carousel
             c.carousel = new CCarousel();
             c.carousel.enabled = true;
             c.carousel.zoom = 1;
@@ -159,14 +165,55 @@ package com.xvm.misc
             c.carousel.alwaysShowFilters = false;
             c.carousel.hideBuyTank = false;
             c.carousel.hideBuySlot = false;
+            c.carousel.filters = {
+              nation:   { enabled: true },
+              type:     { enabled: true },
+              level:    { enabled: true },
+              prefs:    { enabled: true },
+              favorite: { enabled: true }
+            },
             c.carousel.fields = {
-              tankType: { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
-              level:    { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
-              xp:       { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
-              multiXp:  { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
-              tankName: { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 }
+                tankType: { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
+                level:    { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
+                xp:       { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
+                multiXp:  { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 },
+                tankName: { visible: true, dx: 0, dy: 0, alpha: 100, scale: 1 }
             };
-            c.carousel.extraFields = [];
+            c.carousel.extraFields = [
+                { x: -1, y: 10, format: "<img src='img://gui/maps/icons/library/proficiency/class_icons_{{v.mastery}}.png' width='23' height='23'>" }
+            ];
+
+            // Clock
+            c.clock = new CClock();
+            c.clock.enabled = true;
+            c.clock.x = -10;
+            c.clock.y = 28;
+            c.clock.width = 300;
+            c.clock.height = 60;
+            c.clock.topmost = true;
+            c.clock.align = "right";
+            c.clock.valign = "top";
+            c.clock.textAlign = "right";
+            c.clock.textVAlign = "center";
+            c.clock.alpha = 100;
+            c.clock.rotation = 0;
+            c.clock.borderColor = null;
+            c.clock.bgColor = null;
+            c.clock.bgImage = null;
+            c.clock.antiAliasType = "advanced";
+            c.clock.format = "<textformat tabstops='[80]' leading='-39'><font face='$FieldFont'><font size='15'>{{D%02d}} {{MM}} {{Y}}<tab><font size='36'>{{h%02d}}:{{m%02d}}</font>\n<textformat rightMargin='87'>{{WW}}</font></textformat></textformat>";
+            c.clock.shadow = new CShadow();
+            c.clock.shadow.enabled = true;
+            c.clock.shadow.distance = 0;
+            c.clock.shadow.angle = 0;
+            c.clock.shadow.color = "0x000000";
+            c.clock.shadow.alpha = 70;
+            c.clock.shadow.blur = 4;
+            c.clock.shadow.strength = 2;
+
+            c.comments = new CComments();
+            c.comments.enabled = true;
+
             return c;
         }
 
@@ -177,7 +224,7 @@ package com.xvm.misc
             c.showPostmortemTips = true;        // Popup tooltip panel after death.
             c.highlightVehicleIcon = true;      // False - disable highlighting of selected vehicle icon and squad.
             c.allowHpInPanelsAndMinimap = false;
-            c.allowGunMarksInPanelsAndMinimap = false;
+            c.allowMarksOnGunInPanelsAndMinimap = false;
             // Show the clock on the Debug Panel (near FPS).
             c.clockFormat = "H:N"; // TODO "H:i:s";   // Format: http://php.net/date
             c.clanIconsFolder = "clanicons/";   // Folder with clan icons
@@ -246,10 +293,9 @@ package com.xvm.misc
         {
             var c:CHotkeys = new CHotkeys();
             c.minimapZoom = { enabled: false, keyCode: 29, onHold: true }; // 29 - Left Ctrl
-            c.minimapAltMode = { enabled: false, keyCode: 29 };
-            c.playersPanelAltMode = { enabled: false, keyCode: 29 };
+            c.minimapAltMode = { enabled: false, keyCode: 29, onHold: true };
+            c.playersPanelAltMode = { enabled: false, keyCode: 29, onHold: true };
             /*
-            c.minimapExtended: { enabled: true, onHold: true, keycode: 16 }
             c.messages: [
               {  enabled: true, keycode: 113, text: "ШАНСЫ 5% АЙДА ТАПИЦА" }, // F2
               {  enabled: true, keycode: 114, text: "☆\nhey!\n☆" } // .split("\n")
@@ -280,6 +326,7 @@ package com.xvm.misc
             c.clanIcon.w = 16;
             c.clanIcon.alpha = 90;
             // Dispay format. Macro-substitutiones allowed.
+            c.darkenNotReadyIcon = true;
             c.formatLeftNick = "{{name%.20s~..}}<font alpha='#A0'>{{clan}}</font>";
             c.formatRightNick = "{{name%.20s~..}}<font alpha='#A0'>{{clan}}</font>";
             c.formatLeftVehicle = "{{vehicle}}<font face='Lucida Console' size='12'> <font color='{{c:kb}}'>{{kb%2d~k}}</font> <font color='{{c:xwn8}}'>{{xwn8}}</font> <font color='{{c:rating}}'>{{rating%2d~%}}</font></font>";
@@ -418,6 +465,8 @@ package com.xvm.misc
         {
             var c:CBattleResults = new CBattleResults();
             c.startPage = 1;
+            c.showTotalExperience = true;
+            c.showCrewExperience = false;
             c.showNetIncome = true;
             c.showExtendedInfo = true;
             c.showTotals = true;
@@ -955,10 +1004,12 @@ package com.xvm.misc
                 player_enemytk_blowup:    "0xFFDD33"
             };
             c.dmg_kind = {
-                attack:          "0xFFAA55",
+                shot:            "0xFFAA55",
                 fire:            "0xFF6655",
                 ramming:         "0x998855",
                 world_collision: "0x998855",
+                death_zone:      "0xCCCCCC",
+                drowning:        "0xCCCCCC",
                 other:           "0xCCCCCC"
             };
             c.vtype = {
@@ -1009,11 +1060,11 @@ package com.xvm.misc
                 { value: 9999, color: Defines.C_PURPLE }   // unique
             ];
             c.wn8 = [
-                { value: 315,  color: Defines.C_RED },     // very bad
-                { value: 760,  color: Defines.C_ORANGE },  // bad
-                { value: 1325, color: Defines.C_YELLOW },  // normal
-                { value: 1980, color: Defines.C_GREEN },   // good
-                { value: 2570, color: Defines.C_BLUE },    // very good
+                { value: 355,  color: Defines.C_RED },     // very bad
+                { value: 820,  color: Defines.C_ORANGE },  // bad
+                { value: 1370, color: Defines.C_YELLOW },  // normal
+                { value: 2020, color: Defines.C_GREEN },   // good
+                { value: 2620, color: Defines.C_BLUE },    // very good
                 { value: 9999, color: Defines.C_PURPLE }   // unique
             ];
             c.wgr = [
@@ -1095,6 +1146,31 @@ package com.xvm.misc
                 { value: 2.0,  color: Defines.C_BLUE },
                 { value: 15,   color: Defines.C_PURPLE }
             ];
+            c.wn8effd = [
+                { value: 0.6,  color: Defines.C_RED },
+                { value: 0.8,  color: Defines.C_ORANGE },
+                { value: 1.0,  color: Defines.C_YELLOW },
+                { value: 1.3,  color: Defines.C_GREEN },
+                { value: 2.0,  color: Defines.C_BLUE },
+                { value: 15,   color: Defines.C_PURPLE }
+            ];
+            c.damageRating = [
+                { value: 20,    color: Defines.C_RED },
+                { value: 60,    color: Defines.C_ORANGE },
+                { value: 90,    color: Defines.C_YELLOW },
+                { value: 99,    color: Defines.C_GREEN },
+                { value: 99.9,  color: Defines.C_BLUE },
+                { value: 101,   color: Defines.C_PURPLE }
+            ];
+            // TODO:values
+            c.hitsRatio = [
+                { value: 20,    color: Defines.C_RED },
+                { value: 60,    color: Defines.C_ORANGE },
+                { value: 90,    color: Defines.C_YELLOW },
+                { value: 99,    color: Defines.C_GREEN },
+                { value: 99.9,  color: Defines.C_BLUE },
+                { value: 101,   color: Defines.C_PURPLE }
+            ];
             return c;
         }
 
@@ -1133,9 +1209,9 @@ package com.xvm.misc
                 { value: 9999, alpha: 40 }
             ];
             c.wn8 = [
-                { value: 760,  alpha: 100 },
-                { value: 1325, alpha: 80 },
-                { value: 1980, alpha: 60 },
+                { value: 820,  alpha: 100 },
+                { value: 1370, alpha: 80 },
+                { value: 2020, alpha: 60 },
                 { value: 9999, alpha: 40 }
             ];
             c.wgr = [
@@ -1209,11 +1285,11 @@ package com.xvm.misc
             c.vtype.SPG = "{{l10n:SPG}}",  // Text for arty
             c.vtype.TD =  "{{l10n:TD}}"    // Text for tank destroyers
 
-            c.gunMarks = new CTextsGunMarks();
-            c.gunMarks._0 = "0";
-            c.gunMarks._1 = "1";
-            c.gunMarks._2 = "2";
-            c.gunMarks._3 = "3";
+            c.marksOnGun = new CTextsMarksOnGun();
+            c.marksOnGun._0 = "0";
+            c.marksOnGun._1 = "1";
+            c.marksOnGun._2 = "2";
+            c.marksOnGun._3 = "3";
 
             return c;
         }

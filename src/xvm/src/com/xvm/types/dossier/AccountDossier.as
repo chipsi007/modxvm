@@ -23,10 +23,7 @@ package com.xvm.types.dossier
 
             vehicles = {};
             for (var vehId:String in vehiclesData)
-            {
-                vehicles[vehId] = new VehicleDossierCut(vehiclesData[vehId]);
-                vehicles[vehId].vehId = vehId;
-            }
+                vehicles[vehId] = new VehicleDossierCut(parseInt(vehId), vehiclesData[vehId]);
         }
 
         public var maxXPVehId:int;
@@ -57,5 +54,13 @@ package com.xvm.types.dossier
         {
             return _maxDamageVehicleName;
         }
+
+        public function getVehicleDossierCut(vehId:int):VehicleDossierCut
+        {
+            if (!vehicles.hasOwnProperty(vehId))
+                vehicles[vehId] = new VehicleDossierCut(vehId, { } );
+            return vehicles[vehId];
+        }
+
     }
 }

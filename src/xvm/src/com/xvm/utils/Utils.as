@@ -4,7 +4,8 @@
  */
 package com.xvm.utils
 {
-    import flash.display.Sprite;
+    import com.xvm.types.cfg.*;
+    import flash.display.*;
     import flash.utils.*;
     import flash.text.*;
     import flash.filters.*;
@@ -20,6 +21,22 @@ package com.xvm.utils
                 return defaultValue;
             var n:Number = parseInt(String(value));
             return isNaN(n) ? defaultValue : int(n);
+        }
+
+        public static function forceInt(value:String):int
+        {
+            if (value == null)
+                return 0;
+            // HINT: string.replace(/[^0-9]/g, '') is broken, use the crutch
+            var s:String = "";
+            var len:int = value.length;
+            for (var i:Number = 0; i < len; ++i)
+            {
+                var c:String = value.charAt(i);
+                if (c >= '0' && c <= '9')
+                    s += c;
+            }
+            return s == "" ? 0 : parseInt(s);
         }
 
         public static function toFloat(value:Object, defaultValue:Number = 0):Number
@@ -323,17 +340,28 @@ package com.xvm.utils
         /**
          * Create DropShadowFilter from config section
          */
-        public static function extractShadowFilter(source:Object):DropShadowFilter
+        public static function createShadowFilter(cfg:CShadow):DropShadowFilter
         {
             // NOTE: quality arg is not working with Scaleform 4.2 AS3
-            return new DropShadowFilter(
-                source.distance, // distance
-                source.angle, // angle
-                parseInt(source.color, 16),
-                source.alpha / 100.0,
-                source.blur,
-                source.blur,
-                source.strength);
+            return cfg.enabled == false ? null : new DropShadowFilter(
+                cfg.distance, // distance
+                cfg.angle, // angle
+                parseInt(cfg.color, 16),
+                cfg.alpha / 100.0,
+                cfg.blur,
+                cfg.blur,
+                cfg.strength);
         }
+
+        public static function getMarksOnGunText(value:Number):String
+        {
+            if (isNaN(value) || !Config.config.texts.marksOnGun["_" + value])
+                return null;
+            var v:String = Config.config.texts.marksOnGun["_" + value];
+            if (v.indexOf("{{l10n:") >= 0)
+                v = Locale.get(v);
+            return v;
+        }
+
     }
 }

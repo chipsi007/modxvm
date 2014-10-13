@@ -19,10 +19,10 @@ _special = {
     'ussr:M3_Stuart_LL':            [ 3, 4 ],
     'ussr:LTP':                     [ 3, 4 ],
     'ussr:BT-SV':                   [ 3, 4 ],
-    'ussr:T-127':                   [ 3, 4 ],
-    'ussr:SU76I':                   [ 3, 4 ],
     'germany:PzII_J':               [ 3, 4 ],
+    'ussr:T-127':                   [ 3, 4 ],
     'japan:Ke_Ni_B':                [ 3, 4 ],
+    'ussr:SU76I':                   [ 3, 4 ],
 
     # level 4
     'ussr:Valentine_LL':            [ 4, 4 ],
@@ -47,7 +47,6 @@ _special = {
     'uk:GB51_Excelsior':            [ 5, 6 ],
     'uk:GB68_Matilda_Black_Prince': [ 5, 6 ],
     'uk:GB20_Crusader':             [ 5, 7 ],
-    'usa:M24_Chaffee':              [ 7, 11 ],
 
     # level 6
     'germany:PzV_PzIV':             [ 6, 7 ],
@@ -66,10 +65,10 @@ _special = {
     'ussr:Object252':               [ 8, 9 ],
     'france:FCM_50t':               [ 8, 9 ],
     'usa:T26_E4_SuperPershing':     [ 8, 9 ],
+    'usa:M6A2E1':                   [ 8, 9 ],
     'china:Ch23_112':               [ 8, 9 ],
     'china:Ch14_T34_3':             [ 8, 9 ],
     'china:Ch01_Type59':            [ 8, 9 ],
-    'china:Ch01_Type59_Gold':       [ 8, 9 ],
     'germany:JagdTiger_SdKfz_185':  [ 8, 9 ],
 }
 

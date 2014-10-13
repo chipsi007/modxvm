@@ -70,11 +70,11 @@ class com.xvm.Utils
         }
     }
 
-    public static function getGunMarksText(value:Number):String
+    public static function getMarksOnGunText(value:Number):String
     {
-        if (value == null || !Config.config.texts.gunMarks["_" + value])
+        if (value == null || !Config.config.texts.marksOnGun["_" + value])
             return null;
-        var v:String = Config.config.texts.gunMarks["_" + value];
+        var v:String = Config.config.texts.marksOnGun["_" + value];
         if (v.indexOf("{{l10n:") >= 0)
             v = Locale.get(v);
         return v;
@@ -93,47 +93,6 @@ class com.xvm.Utils
             ++i;
         }
         return -1;
-    }
-
-    // 0 - equal, -1 - v1<v2, 1 - v1>v2, -2 - error
-    public static function compareVersions(v1:String, v2:String):Number
-    {
-        try
-        {
-            v1 = v1.split("-").join(".");
-            v2 = v2.split("-").join(".");
-
-            var a: Array = v1.split(".");
-            while (a.length < 4)
-                a.push("0");
-            var b: Array = v2.split(".");
-            while (b.length < 4)
-                b.push("0");
-
-            for (var i = 0; i < 4; ++i)
-            {
-                if (isNaN(parseInt(a[i])) && isNaN(parseInt(b[i])))
-                    return a[i] == b[i] ? 0 : a[i] < b[i] ? -1 : 1;
-
-                if (isNaN(parseInt(a[i])))
-                    return -1;
-
-                if (isNaN(parseInt(b[i])))
-                    return 1;
-
-                if (parseInt(a[i]) < parseInt(b[i]))
-                    return -1;
-
-                if (parseInt(a[i]) > parseInt(b[i]))
-                    return 1;
-            }
-
-            return 0;
-        }
-        catch (e)
-        {
-            return -2;
-        }
     }
 
     public static function GetPlayerName(fullplayername:String):String
@@ -429,16 +388,16 @@ class com.xvm.Utils
 
     public static function XWN8(WN8:Number):Number
     {
-        return WN8 > 3300 ? 100 :
+        return WN8 > 3400 ? 100 :
             Math.round(Math.max(0, Math.min(100,
                 WN8*(WN8*(WN8*(WN8*(WN8*(WN8*
-                0.000000000000000000071
-                + 0.0000000000000002455)
-                - 0.000000000006785)
-                + 0.00000002708)
-                - 0.000042707)
-                + 0.06319)
-                + 0.348
+                0.00000000000000000009553
+                - 0.0000000000000001644)
+                - 0.00000000000426)
+                + 0.0000000197)
+                - 0.00003192)
+                + 0.056265)
+                - 0.157
             )));
     }
 

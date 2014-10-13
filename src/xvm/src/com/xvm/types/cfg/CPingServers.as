@@ -15,6 +15,8 @@ package com.xvm.types.cfg
         public var delimiter:String;
         public var maxRows:Number;
         public var columnGap:Number;
+        public var leading:Number;
+        public var topmost:Boolean;
         public var fontStyle:Object;
         //{
             //name: "$FieldFont",
@@ -34,15 +36,6 @@ package com.xvm.types.cfg
             //good: 60,
             //poor: 100
         //},
-        public var shadow:Object;
-        //{
-            //enabled: true,
-            //color: "0x000000",
-            //distance: 0,
-            //angle: 0,
-            //alpha: 70,
-            //blur: 4,
-            //strength: 2
-        //}
+        public var shadow:CShadow;
     }
 }

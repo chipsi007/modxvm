@@ -1,7 +1,48 @@
-﻿  * new section: hangar/carousel
-  * removed option hangar/masteryMarkInCarousel
+﻿XVM-5.3.7-dev:
+  * new mod: xvm-comments, allow to change nicks of the friends and add comments.
+  * added section hangar/comments for comments for players mod
+  * added option battleLoading/darkenNotReadyIcon for customize icons are not ready players
+  * added options pingServers/leading and pingServers/topmost
+  * carousel: added macro {{v.selected}}, returns 'sel' for selected, empty for others
+  * changed token location, now it is stored in the user preferences.
+    You need to reactivate XVM services (use "Add client" button in the personal cabinet on the
+    www.modxvm.com site). You can remove res_mods/xvm/db/ folder.
+  * playersPanel: in extra fields added options "scaleX" and "scaleY"
 
-XVM-5.3.4-dev:
+XVM-5.3.6.1:
+  * fixed bug when xvm.xc is absent
+
+XVM-5.3.6:
+  * many bugs fixed
+  * macro {{gun-marks}} changed to {{marksOnGun}}, section "gunmarks" changed to "marksOnGun",
+    option "allowGunMarksInPanelsAndMinimap" changed "allowMarksOnGunInPanelsAndMinimap"
+    for unification
+  * changed macro value: {{v.hitsRatio}} is in percents now
+  * added macro {{v.c_hitsRatio}} and colors section "hitsRatio"
+  * added macro {{v.c_damageRating}} and colors section "damageRating"
+  * added option "onHold" to the hotkeys settings for alternative minimap and players panel mode
+  * added option hangar/clock/bgImage for background image in clock
+  * macros {{alive}}, {{ready}}, {{player}}, {{tk}}, {{squad}}, {{squad-num}}, {{hp-max}} works in the
+    battle loading screen
+
+XVM-5.3.5:
+  * adaptation to WoT 0.9.3
+  * dmg-kind values changed:
+      shot, fire, ramming, world_collision, death_zone, drowning, other
+  * new sections:
+      hangar/carousel - extended tank carousel settings
+      hangar/clock - hangar clock settings
+  * removed options:
+      hangar/masteryMarkInCarousel
+      hangar/hideTutorial
+  * new options:
+    battleResults/showTotalExperience - Display total experience in After Battle Screen
+    battleResults/showCrewExperience - Display crew experience in After Battle Screen
+  * player icon by accountId - loading from \res_mods\xvm\res\clanicons\ID\
+    Search order is:
+      id -> nick -> clan -> clan/default.png -> nick/default.png
+
+XVM-5.3.4:
   * new macros:
       {{ready}}, returns "ready" when player loaded to the game and empty if not
       {{gun-marks}}, return count of the marks on gun for spotted vehicles
