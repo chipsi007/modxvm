@@ -1,6 +1,9 @@
 ﻿XVM-5.4.1-dev:
   * adaptation to Wot 0.9.4
 
+XVM-5.4.0.2:
+  * fixed bug with online services setting
+
 XVM-5.4.0:
   * new mod: xvm-comments, allow to change nicks of the friends and add comments.
   * removed section "rating" - replaced with network services settings in the personal cabinet
