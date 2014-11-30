@@ -11,6 +11,7 @@ package com.xvm
     import com.xvm.utils.*;
     import com.xvm.types.*;
     import com.xvm.types.cfg.*;
+    import flash.events.*;
 
     public class Config
     {
@@ -69,6 +70,7 @@ package com.xvm
             loadXvmXc();
             loadGameRegion();
             loadLanguage();
+            VehicleInfo.populateData();
             setConfigLoaded();
         }
 
@@ -79,7 +81,10 @@ package com.xvm
             //Logger.add("TRACE: STAGE 1: loadXvmXc()");
             try
             {
+                var autoReloadConfig:Boolean = Config.config == null ? false : Config.config.autoReloadConfig;
+
                 this.config = DefaultConfig.config;
+
                 var res:Object = JSONxLoader.Load(Defines.XVM_CONFIG_FILE_NAME);
 
                 //Logger.addObject(res, 2);
@@ -87,15 +92,15 @@ package com.xvm
                 var e:Error = res as Error;
                 if (e != null)
                 {
+                    Config.config.autoReloadConfig = autoReloadConfig;
                     if (res.type == "NO_FILE")
                     {
                         stateInfo = { warning: "" };
-                        Logger.add("[XVM] WARNING: xvm.xc was not found, using internal config");
+                        Logger.add("[XVM] WARNING: xvm.xc was not found, using the built-in config");
                     }
                     else
                     {
-                        var text:String = "[" + res.type + "] " +
-                            (res.filename ? "Error parsing file " + res.filename.replace(Defines.XVM_CONFIGS_DIR_NAME, '') : e.message) + ": ";
+                        var text:String = res.filename ? "Error parsing file " + res.filename.replace(Defines.XVM_CONFIGS_DIR_NAME, '') + ":\n" : "";
                         text += ConfigUtils.parseErrorEvent(e);
 
                         stateInfo = { error: text };
@@ -158,17 +163,26 @@ package com.xvm
 
         private function setConfigLoaded():void
         {
-            //if (e.result != null && e.result.error != null && stateInfo.error == null)
-            //    stateInfo = { error: e.result.error };
+            try
+            {
+                //if (e.result != null && e.result.error != null && stateInfo.error == null)
+                //    stateInfo = { error: e.result.error };
 
-            Logger.add(Sprintf.format("Config loaded. Region: %s (%s), Language: %s (%s)",
-                config.region,
-                config.regionDetected ? "detected" : "config",
-                config.language,
-                config.languageDetected ? "detected" : "config"));
-            //Logger.addObject(config, "config", 10);
+                Logger.add(Sprintf.format("Config loaded. Region: %s (%s), Language: %s (%s)",
+                    config.region,
+                    config.regionDetected ? "detected" : "config",
+                    config.language,
+                    config.languageDetected ? "detected" : "config"));
+                //Logger.addObject(config, "config", 10);
 
-            Cmd.setConfig();
+                Cmd.setConfig();
+
+                Xvm.dispatchEvent(new Event(Defines.XVM_EVENT_CONFIG_LOADED));
+            }
+            catch (e:Error)
+            {
+                Logger.add(e.getStackTrace());
+            }
         }
     }
 }
