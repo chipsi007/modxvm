@@ -214,6 +214,7 @@ XPM_CMD = 'xpm.cmd'
 g_xvmView = None
 
 _xvm_swf_file_name = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../../../xvm/mods/xvm.swf')
+_xvm_config_dir_name = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../../../../../../xvm/configs')
 
 if os.path.isfile(_xvm_swf_file_name):
 
@@ -229,7 +230,9 @@ if os.path.isfile(_xvm_swf_file_name):
     _XPM_COMMAND_MESSAGEBOX = 'xpm.messageBox'
     _XPM_COMMAND_SYSMESSAGE = 'xpm.systemMessage'
 
-    _xpmInitialized = False
+    _XPM_AS_COMMAND_RELOAD_CONFIG = "xpm.as.reload_config"
+
+    _xvmInitialized = False
 
     def _start():
         #debug('start')
@@ -244,8 +247,9 @@ if os.path.isfile(_xvm_swf_file_name):
                 if cmd == _XPM_COMMAND_GETMODS:
                     return _xpm_getMods()
                 elif cmd == _XPM_COMMAND_INITIALIZED:
-                    global _xpmInitialized
-                    _xpmInitialized = True
+                    global _xvmInitialized
+                    _xvmInitialized = True
+                    _startConfigWatchdog()
                 elif cmd == _XPM_COMMAND_LOADFILE:
                     return load_file(args[0])
                 elif cmd == _XPM_COMMAND_GETGAMEREGION:
@@ -282,7 +286,7 @@ if os.path.isfile(_xvm_swf_file_name):
                     log('WARNING: unknown command: %s' % cmd)
 
             def as_xvm_cmdS(self, cmd, *args):
-                return self.flashObject.as_xvm_cmd(cmd, *args)
+                return self.flashObject.as_xvm_cmd(cmd, *args) if self.flashObject is not None else None
 
         g_entitiesFactories.addSettings(ViewSettings(
             _XVM_VIEW_ALIAS,
@@ -298,6 +302,7 @@ if os.path.isfile(_xvm_swf_file_name):
         #debug('fini')
         from gui.shared import g_eventBus
         g_eventBus.removeListener(events.GUICommonEvent.APP_STARTED, _appStarted)
+        _stopConfigWatchdog()
 
     def _appStarted(event):
         #debug('AppStarted')
@@ -307,8 +312,8 @@ if os.path.isfile(_xvm_swf_file_name):
             if app is not None:
                 global g_xvmView
                 g_xvmView = None
-                global _xpmInitialized
-                _xpmInitialized = False
+                global _xvmInitialized
+                _xvmInitialized = False
                 app.loaderManager.onViewLoaded += _onViewLoaded
                 BigWorld.callback(0, lambda:app.loadView(_XVM_VIEW_ALIAS))
                 #app.loadView(_XVM_VIEW_ALIAS)
@@ -318,8 +323,8 @@ if os.path.isfile(_xvm_swf_file_name):
     def _AppLoadView(base, self, newViewAlias, name = None, *args, **kwargs):
         #log('loadView: ' + newViewAlias)
         if newViewAlias == 'hangar':
-            global _xpmInitialized
-            if _xpmInitialized == False:
+            global _xvmInitialized
+            if _xvmInitialized == False:
                 BigWorld.callback(0, lambda:_AppLoadView(base, self, newViewAlias, name, *args, **kwargs))
                 return
         base(self, newViewAlias, name, *args, **kwargs)
@@ -354,6 +359,71 @@ if os.path.isfile(_xvm_swf_file_name):
         except Exception, ex:
             err(traceback.format_exc())
         return None
+
+    # config watchdog
+    _configWatchdogTimerId = None
+    _lastConfigDirState = None
+
+    def _startConfigWatchdog():
+        _stopConfigWatchdog()
+        if _isConfigReloadingEnabled():
+            _configWatchdog()
+
+    def _configWatchdog():
+        #log('_configWatchdog')
+
+        global _xvm_config_dir_name
+        global _lastConfigDirState
+        global _configWatchdogTimerId
+
+        try:
+            x = [(nm, os.path.getmtime(nm)) for nm in [os.path.join(p, f) for p, n, fn in os.walk(_xvm_config_dir_name) for f in fn]]
+            if _lastConfigDirState is None:
+                _lastConfigDirState = x
+            elif _lastConfigDirState != x:
+                _lastConfigDirState = x
+                global g_xvmView
+                if g_xvmView is not None and g_xvmView.flashObject is not None:
+                    _stopConfigWatchdog()
+                    g_xvmView.as_xvm_cmdS(_XPM_AS_COMMAND_RELOAD_CONFIG)
+
+                    from gui.WindowsManager import g_windowsManager
+                    from gui.Scaleform.framework import ViewTypes
+                    from gui.Scaleform.daapi.settings.views import VIEW_ALIAS
+                    from gui.prb_control.events_dispatcher import g_eventDispatcher
+                    app = g_windowsManager.window
+                    if app:
+                        container = app.containerManager.getContainer(ViewTypes.LOBBY_SUB)
+                        if container:
+                            view = container.getView()
+                            if view and view.alias == VIEW_ALIAS.LOBBY_HANGAR:
+                                container.remove(view)
+                            g_eventDispatcher.loadHangar()
+                    return
+                else:
+                    # TODO: reload config in battle
+                    pass
+
+        except Exception, ex:
+            err(traceback.format_exc())
+
+        if _isConfigReloadingEnabled():
+            _configWatchdogTimerId = BigWorld.callback(1, _configWatchdog)
+        else:
+            _stopConfigWatchdog()
+
+    def _stopConfigWatchdog():
+        global _configWatchdogTimerId
+        if _configWatchdogTimerId:
+            BigWorld.cancelCallback(_configWatchdogTimerId)
+            _configWatchdogTimerId = None
+
+    def _isConfigReloadingEnabled():
+        try:
+            from gui.mods.xvmstat.config import config
+            return config['autoReloadConfig'] == True
+        except:
+            return False
 
     # register events
 
