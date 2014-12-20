@@ -1,10 +1,11 @@
 {
   "minimap": {
-    "enabled": true,
+    //"enabled": false,
     "iconScale": 1.5,
-    "zoom": { "centered": false },
     "hideCameraTriangle": true,
     "cameraAlpha": 90,
+    "selfIconAlpha": 75,
+    "zoom": { "centered": false },
     "circles": {
         "view": [
             { "enabled": true, "state": 1, "distance": 50, "scale": 1, "thickness": 0.5, "alpha": 70, "color": "0xFFFFFF" },
@@ -39,9 +40,9 @@
     "labels": {
       "units": {
         "format": {
-          "ally":           "<span class='mm_a'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font>{{vehicle-short}}</span>",
-          "teamkiller":     "<span class='mm_t'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font>{{vehicle-short}}</span>",
-          "enemy":          "<span class='mm_e'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font>{{vehicle-short}}</span>"
+          "ally":           "<span class='mm_a'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font> {{vehicle-short}}</span>",
+          "teamkiller":     "<span class='mm_t'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font> {{vehicle-short}}</span>",
+          "enemy":          "<span class='mm_e'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font> {{vehicle-short}}</span>"
         },
         "alpha" : {
           //"deadenemy": 50
@@ -61,6 +62,7 @@
     "circles": {
       //"enabled": false,
       "view": [
+          { "enabled": true, "state": 3, "distance": 50, "scale": 1, "thickness": 0.5, "alpha": 70, "color": "0xFFFFFF" },
           { "enabled": true, "state": 1, "distance": 250, "scale": 1, "thickness": 0.5, "alpha": 70, "color": "0xFFFFFF" }
       ]
     },
@@ -76,12 +78,16 @@
     "labels": {
       "units": {
         "format": {
-          "ally":           "<span class='mm_a'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
-          "squad":          "<span class='mm_s'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
-          "teamkiller":     "<span class='mm_t'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
-          "enemy":          "<span class='mm_e'><font color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
+          "ally":           "<span class='mm_a'><font size='7' color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
+          "squad":          "<span class='mm_s'><font size='7' color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
+          "teamkiller":     "<span class='mm_t'><font size='7' color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
+          "enemy":          "<span class='mm_e'><font size='7' color='{{c:xwn8}}' alpha='{{alive?#FF|#80}}'>{{marksOnGun|*}}</font></span>",
           "lostally":       "<span class='mm_la'>{{vehicle-class}}</span>",
-          "lost":           "<span class='mm_l'>{{vehicle-class}}</span>"
+          "lost":           "<span class='mm_l'>{{vehicle-class}}</span>",
+          "deadally":       "<span class='mm_dot'>{{vehicle-class}}</span><span class='mm_da'><i>{{nick%.5s}}</i></span>",
+          "deadteamkiller": "<span class='mm_dot'>{{vehicle-class}}</span><span class='mm_dt'><i>{{nick%.5s}}</i></span>",
+          "deadenemy":      "<span class='mm_dot'>{{vehicle-class}}</span><span class='mm_de'><i>{{nick%.5s}}</i></span>",
+          "deadsquad":      "<span class='mm_dot'>{{vehicle-class}}</span><span class='mm_ds'><i>{{nick%.5s}}</i></span>"
         }
       },
       "mapSize": { "enabled": false }

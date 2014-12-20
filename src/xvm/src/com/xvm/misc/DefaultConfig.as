@@ -395,11 +395,11 @@ package com.xvm.misc
                 fragsFormatLeft: "{{frags}}",
                 fragsFormatRight: "{{frags}}",
                 extraFieldsLeft: [
-                    { "x": 5, "y": 5, "src": "xvm://res/icons/lang/16x16/{{lang}}.png" }
+                    { "x": 5, "y": 5, "src": "xvm://res/icons/lang/16x16/{{language}}.png" }
                 ],
                 extraFieldsRight: [
                     { x: 0, y: 5, valign: "top", bindToIcon: true, format: "{{spotted}}", shadow: {} },
-					{ "x": 5, "y": 5, "src": "xvm://res/icons/lang/16x16/{{lang}}.png" }
+                    { "x": 5, "y": 5, "src": "xvm://res/icons/lang/16x16/{{language}}.png" }
                 ]
             };
             // Medium2 mode.
@@ -430,11 +430,11 @@ package com.xvm.misc
                 fragsFormatLeft: "{{frags}}",
                 fragsFormatRight: "{{frags}}",
                 extraFieldsLeft: [
-                    { "x": 46, "y": 5, "src": "xvm://res/icons/lang/16x16/{{lang}}.png" }
+                    { "x": 46, "y": 5, "src": "xvm://res/icons/lang/16x16/{{language}}.png" }
                 ],
                 extraFieldsRight: [
                     { x: 0, y: 5, valign: "top", bindToIcon: true, format: "{{spotted}}", shadow: {} },
-					{ "x": 46, "y": 5, "src": "xvm://res/icons/lang/16x16/{{lang}}.png" }
+                    { "x": 46, "y": 5, "src": "xvm://res/icons/lang/16x16/{{language}}.png" }
                 ]
             };
 
@@ -467,7 +467,7 @@ package com.xvm.misc
             var c:CMinimap = new CMinimap();
             c.enabled = true;
             c.mapBackgroundImageAlpha = 100;
-            c.selfIconAlpha = 100;
+            c.selfIconAlpha = 75;
             c.hideCameraTriangle = false;
             c.cameraAlpha = 100;
             c.iconScale = 1;
@@ -648,10 +648,10 @@ package com.xvm.misc
                 deadsquad:      { enabled: true, color: "0x000000", distance: 0, angle: 45, alpha: 80, blur: 3, strength: 3 }
             };
             c.labels.units.offset = {
-                ally:           {x: 3, y: -1},
-                teamkiller:     {x: 3, y: -1},
-                enemy:          {x: 3, y: -1},
-                squad:          {x: 3, y: -2},
+                ally:           {x: 3, y: -2},
+                teamkiller:     {x: 3, y: -2},
+                enemy:          {x: 3, y: -2},
+                squad:          {x: 3, y: -3},
                 oneself:        {x: 0, y: 0},
                 lostally:       {x: -5, y: -11},
                 lostteamkiller: {x: -5, y: -11},

@@ -4,7 +4,7 @@
   //"language": "pl",
   "def": {
     "formatNick": "{{name%.20s~..}}<font alpha='#A0'>{{clan}}</font>",
-    "formatVehicle": "<font face='Consolas' size='11'><img src='xvm://res/icons/lang/{{lang}}.png' width='16' height='11'> <font color='{{c:avglvl|#666666}}'>{{avglvl%d|-}}</font> <font color='{{c:tdv|#666666}}'>{{tdv%0.1f|---}}|<font color='{{c:e|#666666}}'>{{e|-}}</font>|<font color='{{c:xwgr|#666666}}'>{{xwgr|--}}</font>|<font color='{{c:xeff|#666666}}'>{{xeff|--}}</font>|<font color='{{c:xwn8|#666666}}'>{{xwn8|--}}</font> <font color='{{c:kb|#666666}}'>{{kb%2d~k|--k}}</font></font>",
+    "formatVehicle": "<font face='Consolas' size='11'><img src='xvm://res/icons/lang/{{language}}.png' width='16' height='11'> <font color='{{c:avglvl|#666666}}'>{{avglvl%d|-}}</font> <font color='{{c:tdv|#666666}}'>{{tdv%0.1f|---}}|<font color='{{c:e|#666666}}'>{{e|-}}</font>|<font color='{{c:xwgr|#666666}}'>{{xwgr|--}}</font>|<font color='{{c:xeff|#666666}}'>{{xeff|--}}</font>|<font color='{{c:xwn8|#666666}}'>{{xwn8|--}}</font> <font color='{{c:kb|#666666}}'>{{kb%2d~k|--k}}</font></font>",
     //"formatVehicle": "{{vehicle}}",
     //"formatVehicle": "<font color='{{c:teff|#666666}}'>{{teff%4d|----}}</font>",
 
@@ -80,8 +80,8 @@
     "__stub__": null
   },
   "hotkeys": {
-    //"minimapZoom": { "enabled": true, "keyCode": 29, "onHold": true },
-    "minimapAltMode": { "enabled": true, "keyCode": 29 },
+    "minimapZoom": { "enabled": true, "keyCode": 29, "onHold": true },
+    "minimapAltMode": { "enabled": true, "keyCode": 29, "onHold": true },
     "playersPanelAltMode": { "enabled": true, "keyCode": 56 }, // LAlt
     "__stub__": {}
   },
@@ -173,10 +173,12 @@
   },
   "colors": {
     "system": {
-      //"ally_alive":          "0x029CF5",
-      //"enemy_alive":         "0xFFBB28"
-      //"ally_base":          "0xFFFF80",
-      //"enemy_base":         "0x8080FF"
+      "ally_alive":          "0x029CF5",
+      "enemy_alive":         "0xFFBB28",
+      "ally_dead":           "0x029CF5",
+      "enemy_dead":          "0xFFBB28"
+      //"ally_base":           "0xFFFF80",
+      //"enemy_base":          "0x8080FF"
     },
     "damage": {
       //"enemy_allytk_hit":      "0x00EAFF",
