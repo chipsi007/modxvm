@@ -6,6 +6,7 @@ import com.greensock.*;
 import com.greensock.plugins.*;
 import com.xvm.*;
 import com.xvm.DataTypes.*;
+import com.xvm.events.*;
 import flash.external.*;
 import wot.battle.*;
 
@@ -207,19 +208,37 @@ class wot.battle.BattleMain
         dead:Boolean, curHealth:Number, maxHealth:Number, marksOnGun:Number, spotted:String):Void
     {
         //Logger.addObject(arguments);
-        var data = new BattleStateData(playerName, playerId, vehId, dead, curHealth, maxHealth, marksOnGun, spotted);
+        var data:Object = { };
+        if (playerName != null)
+            data["playerId"] = playerId;
+        if (!isNaN(playerId))
+            data["playerId"] = playerId;
+        if (!isNaN(vehId))
+            data["vehId"] = vehId;
+        data["dead"] = dead;
+        if (!isNaN(curHealth))
+            data["curHealth"] = curHealth;
+        if (!isNaN(maxHealth))
+            data["maxHealth"] = maxHealth;
+        if (!isNaN(marksOnGun))
+            data["marksOnGun"] = marksOnGun;
+        if (spotted != null)
+            data["spotted"] = spotted;
 
         //Logger.addObject(data);
         BattleState.setUserData(playerName, data);
-        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_BATTLE_STATE_CHANGED, playerName: playerName } );
+        GlobalEventDispatcher.dispatchEvent(new EBattleStateChanged(playerName));
     }
 
     private function onMarksOnGun(playerName:String, marksOnGun:Number)
     {
-        BattleState.setUserData(playerName, { marksOnGun:marksOnGun } );
-        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_BATTLE_STATE_CHANGED, playerName: playerName } );
+        //Logger.add("marksOnGun: " + marksOnGun);
+        if (!isNaN(marksOnGun))
+        {
+            BattleState.setUserData(playerName, { marksOnGun:marksOnGun } );
+            GlobalEventDispatcher.dispatchEvent(new EBattleStateChanged(playerName));
+        }
     }
-
 
     private var debugTextField:TextField = null;
     function onDebugText(text)

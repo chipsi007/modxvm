@@ -34,12 +34,14 @@ class wot.Minimap.shapes.Lines extends ShapeAttach
          * Warning! Workaround!
          * Camera entry (MinimapEntry0) is reinitialized spontaniously many times in a round.
          */
-        GlobalEventDispatcher.addEventListener(MinimapEvent.ON_ENTRY_INITED, this, onEntryInited);
+        GlobalEventDispatcher.addEventListener(MinimapEvent.ENTRY_INITED, this, onEntryInited);
+        GlobalEventDispatcher.addEventListener(MinimapEvent.CAMERA_UPDATED, this, onEntryInited);
     }
 
     public function Dispose()
     {
-        GlobalEventDispatcher.removeEventListener(MinimapEvent.ON_ENTRY_INITED, this, onEntryInited);
+        GlobalEventDispatcher.removeEventListener(MinimapEvent.ENTRY_INITED, this, onEntryInited);
+        GlobalEventDispatcher.removeEventListener(MinimapEvent.CAMERA_UPDATED, this, onEntryInited);
 
         if (camAttach != null)
         {
