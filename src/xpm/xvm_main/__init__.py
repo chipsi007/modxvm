@@ -3,7 +3,7 @@
 #####################################################################
 # MOD INFO (mandatory)
 
-XPM_MOD_VERSION    = "1.6.0"
+XPM_MOD_VERSION    = "1.6.1"
 XPM_MOD_URL        = "http://www.modxvm.com/"
 XPM_MOD_UPDATE_URL = "http://www.modxvm.com/en/download-xvm/"
 XPM_GAME_VERSIONS  = ["0.9.4","0.9.5"]
@@ -18,6 +18,7 @@ import cPickle
 import BigWorld
 
 from xpm import *
+from gui.mods.xvm_flash import *
 
 import config
 from logger import *
