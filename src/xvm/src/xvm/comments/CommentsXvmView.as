@@ -10,7 +10,8 @@ package xvm.comments
     import com.xvm.types.cfg.*;
     import flash.events.*;
     import flash.utils.*;
-    import net.wg.gui.messenger.windows.*;
+    import net.wg.gui.events.*;
+    import net.wg.gui.messenger.*;
     import net.wg.infrastructure.events.*;
     import net.wg.infrastructure.interfaces.*;
     import scaleform.clik.interfaces.*;
@@ -18,7 +19,8 @@ package xvm.comments
 
     public class CommentsXvmView extends XvmViewBase
     {
-        private var lastCommand:String = null;
+        private static const XPM_COMMAND_GET_COMMENTS:String = "xpm.get_comments";
+        private static const XPM_COMMAND_SET_COMMENTS:String = "xpm.set_comments";
 
         public function CommentsXvmView(view:IView)
         {
@@ -26,9 +28,9 @@ package xvm.comments
             CommentsGlobalData.instance.clearData();
         }
 
-        public function get page():ContactsWindow
+        public function get page():ContactsListPopover
         {
-            return super.view as ContactsWindow;
+            return super.view as ContactsListPopover;
         }
 
         override public function onAfterPopulate(e:LifeCycleEvent):void
@@ -39,29 +41,55 @@ package xvm.comments
                 return;
 
             // TODO: async
-            //App.waiting.show("Loading...");
-            lastCommand = Cmd.COMMAND_GETCOMMENTS;
-            Cmd.getComments(this, onGetCommentsReceived);
-            initTabs();
-            CommentsGlobalData.instance.addEventListener(Event.CHANGE, onCommentsDataChange);
+            try
+            {
+                //App.waiting.show("Loading...");
+                init();
+                updateComments(Xvm.cmd(XPM_COMMAND_GET_COMMENTS), true);
+                CommentsGlobalData.instance.addEventListener(Event.CHANGE, onCommentsDataChange);
+            }
+            finally
+            {
+                //App.waiting.hide("");
+            }
         }
 
         override public function onBeforeDispose(e:LifeCycleEvent):void
         {
             //Logger.add("onBeforeDispose: " + view.as_alias);
-            App.utils.scheduler.cancelTask(initTabs);
             CommentsGlobalData.instance.removeEventListener(Event.CHANGE, onCommentsDataChange);
         }
 
         // PRIVATE
 
-        private function onGetCommentsReceived(json_str:String):void
+        private function init():void
         {
-            //Logger.add("onGetCommentsReceived: " + json_str);
+            Logger.add("init");
+
+            Logger.addObject(page.treeComponent.list);
+            page.treeComponent.list.itemRenderer = UI_ContactsTreeItemRenderer;
+
+            /*
+
+            var dp:IDataProvider = page.tabs.dataProvider;
+            if (dp == null || dp.length == 0)
+            {
+                App.utils.scheduler.envokeInNextFrame(initTabs);
+            }
+            else
+            {
+                dp[0]["linkage"] = getQualifiedClassName(UI_ContactsListForm);
+                page.tabs.selectedIndex = -1;
+                page.tabs.selectedIndex = 0;
+                page.validateNow();
+            }*/
+        }
+
+        private function updateComments(json_str:String, isGetCommand:Boolean):void
+        {
+            //Logger.add("updateComments: " + json_str);
             try
             {
-                //App.waiting.hide("");
-
                 var data:Object = { };
                 try
                 {
@@ -78,7 +106,7 @@ package xvm.comments
                     CommentsGlobalData.instance.clearData();
                     Logger.add("[XVM:COMMENTS] WARNING: [" + data.error + "] " + (data.errStr || ""));
                     var err:String = "[" + data.error + "] " + (data.errStr || "") + "\n\n" + Locale.get("Comments disabled");
-                    if (lastCommand == Cmd.COMMAND_GETCOMMENTS)
+                    if (isGetCommand)
                     {
                         err = Defines.SYSTEM_MESSAGE_HEADER.replace("%VALUE%", "<b>" + Locale.get("Error loading comments") + "</b>\n\n" + err);
                         Xvm.cmd(Defines.XPM_COMMAND_SYSMESSAGE, err, "Warning");
@@ -100,29 +128,17 @@ package xvm.comments
             }
         }
 
-        private function initTabs():void
-        {
-            //Logger.add("initTabs");
-
-            var dp:IDataProvider = page.tabs.dataProvider;
-            if (dp == null || dp.length == 0)
-            {
-                App.utils.scheduler.envokeInNextFrame(initTabs);
-            }
-            else
-            {
-                dp[0]["linkage"] = getQualifiedClassName(UI_ContactsListForm);
-                page.tabs.selectedIndex = -1;
-                page.tabs.selectedIndex = 0;
-                page.validateNow();
-            }
-        }
-
         private function onCommentsDataChange(e:Event):void
         {
-            //App.waiting.show("Saving...");
-            lastCommand = Cmd.COMMAND_SETCOMMENTS;
-            Cmd.setComments(this, onGetCommentsReceived, CommentsGlobalData.instance.toJson());
+            try
+            {
+                //App.waiting.show("Saving...");
+                updateComments(Xvm.cmd(XPM_COMMAND_SET_COMMENTS, CommentsGlobalData.instance.toJson()), false);
+            }
+            finally
+            {
+                //App.waiting.hide("");
+            }
         }
     }
 }
