@@ -5,7 +5,7 @@
 class com.xvm.Defines
 {
     // Global versions
-    public static var XVM_VERSION:String = "6.0.1";
+    public static var XVM_VERSION:String = "6.0.2";
     public static var XVM_INTRO:String = "www.modxvm.com";
     public static var WOT_VERSION:String = "0.9.6";
     public static var CONFIG_VERSION:String = "5.1.0";
@@ -44,7 +44,7 @@ class com.xvm.Defines
     // Default path to vehicle icons (relative)
     public static var WG_CONTOUR_ICON_PATH:String = "../maps/icons/vehicle/contour/";
 
-    public static var MAX_BATTLETIER_HPS = [140, 190, 320, 420, 700, 1400, 1500, 1780, 2000, 3000, 3000, 3000];
+    //public static var MAX_BATTLETIER_HPS = [140, 190, 320, 420, 700, 1400, 1500, 1780, 2000, 3000, 3000, 3000];
 
     // Team
     public static var TEAM_ALLY:Number = 1;
