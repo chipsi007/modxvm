@@ -1,4 +1,7 @@
-﻿XVM-6.0.3:
+﻿XVM-6.1.0-dev:
+  * adaptation to WoT 0.9.7
+
+XVM-6.0.3:
   * added macro {{r}} - player's rating (type of rating can be selected in the personal cabinet: http://www.modxvm.com/)
   * macro {{rating}} renamed to {{winrate}}
 
