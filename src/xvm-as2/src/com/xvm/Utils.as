@@ -188,19 +188,19 @@ class com.xvm.Utils
         return (pos < 0) ? fullplayername : Strings.trim(fullplayername.slice(0, pos));
     }
 
-    public static function GetClanName(fullplayername:String):String
+    public static function GetClanNameWithoutBrackets(fullplayername:String):String
     {
-        var pos = fullplayername.indexOf("[");
+        var pos:Number = fullplayername.indexOf("[");
         if (pos < 0)
-            return "";
-        var n = fullplayername.slice(pos + 1);
+            return null;
+        var n:String = fullplayername.slice(pos + 1);
         return n.slice(0, n.indexOf("]"));
     }
 
     public static function GetClanNameWithBrackets(fullplayername:String):String
     {
-        var clan = GetClanName(fullplayername);
-        return clan ? "[" + clan + "]" : "";
+        var clan:String = GetClanNameWithoutBrackets(fullplayername);
+        return clan ? "[" + clan + "]" : null;
     }
 
     private static var xvmModules: Array = [];
@@ -255,12 +255,19 @@ class com.xvm.Utils
         return result;
     }
 
-    public static function removeChildren(mc:MovieClip):Void
+    public static function removeChildren(mc:MovieClip, match:Function):Void
     {
         var children:Array = getChildrenOf(mc, false);
         var len:Number = children.length;
         for (var i:Number = 0; i < len; ++i)
-            MovieClip(children[i]).removeMovieClip();
+        {
+            var child:MovieClip = MovieClip(children[i]);
+            if (child == null)
+                continue;
+            if (match != null && !match(child))
+                continue
+            child.removeMovieClip();
+        }
     }
 
     /**

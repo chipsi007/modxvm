@@ -6,13 +6,14 @@
 XFW_MOD_VERSION    = "2.0.0"
 XFW_MOD_URL        = "http://www.modxvm.com/"
 XFW_MOD_UPDATE_URL = "http://www.modxvm.com/en/download-xvm/"
-XFW_GAME_VERSIONS  = ["0.9.6"]
+XFW_GAME_VERSIONS  = ["0.9.6","0.9.7"]
 
 #####################################################################
 
 import BigWorld
 
 from xfw import *
+import xvm_main.python.config as config
 from xvm_main.python.logger import *
 
 import wg_compat

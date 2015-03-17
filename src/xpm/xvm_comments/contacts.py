@@ -48,6 +48,7 @@ class _Contacts:
                 return
 
             if not token.networkServicesSettings['comments']:
+                self.contacts_disabled = True
                 return
 
             if token.isOnline:
@@ -60,9 +61,9 @@ class _Contacts:
                 if self.cached_data is None or self.cached_token != t:
                     self.cached_token = t
                     json_data = self._doRequest('getComments')
-                    data = {'ver':_CONTACTS_DATA_VERSION} if json_data is None else simplejson.loads(json_data)
+                    data = {'ver':_CONTACTS_DATA_VERSION,'players':{}} if json_data is None else simplejson.loads(json_data)
                     if data['ver'] != _CONTACTS_DATA_VERSION:
-                        pass # TODO: data = convertOldVersion(data)
+                        pass # data = convertOldVersion(data)
                     self.cached_data = data
                     self.is_available = True
 
@@ -84,16 +85,48 @@ class _Contacts:
     def getXvmContactData(self, uid):
         nick = None
         comment = None
-        if self.cached_data is not None and 'players' in self.cached_data:
+
+        if not self.contacts_disabled and self.cached_data is None:
+            self.initialize()
+
+        if not self.contacts_disabled and self.cached_data is not None and 'players' in self.cached_data:
             data = self.cached_data['players'].get(str(uid), None)
             if data is not None:
                 nick = data.get('nick', None)
                 comment = data.get('comment', None)
+
         return {'nick':nick,'comment':comment}
 
     def setXvmContactData(self, uid, value):
-        # TODO
-        return True
+        try:
+            if self.cached_data is None or 'players' not in self.cached_data:
+                raise Exception('[INTERNAL_ERROR]')
+
+            if (value['nick'] is None or value['nick'] == '') and (value['comment'] is None or value['comment'] == ''):
+                self.cached_data['players'].pop(str(uid), None)
+            else:
+                self.cached_data['players'][str(uid)] = value
+
+            json_data = simplejson.dumps(self.cached_data)
+            #log(json_data)
+            self._doRequest('addComments', json_data)
+
+            return True
+
+        except Exception as ex:
+            self.contacts_disabled = True
+            self.is_available = False
+            self.cached_token = None
+            self.cached_data = None
+
+            errstr = _SYSTEM_MESSAGE_TPL.replace('%VALUE%', '<b>{0}</b>\n\n{1}\n\n{2}'.format(
+                l10n('Error saving comments'),
+                str(ex),
+                l10n('Comments disabled')))
+            SystemMessages.pushMessage(errstr, type=SystemMessages.SM_TYPE.Error)
+            err(traceback.format_exc())
+
+            return False
 
     # PRIVATE
 
@@ -102,7 +135,7 @@ class _Contacts:
         server = XVM_SERVERS[randint(0, len(XVM_SERVERS) - 1)]
         (response, duration, errStr) = loadUrl(server, req, body=body)
 
-        if not response:
+        if errStr:
             raise Exception(errStr)
 
         response = response.strip()

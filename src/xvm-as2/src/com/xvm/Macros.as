@@ -61,10 +61,15 @@ class com.xvm.Macros
         _instance._RegisterMarkerData(pname, data);
     }
 
-    public static function RegisterCommentsData(comments:Object)
+    public static function UpdateMyFrags(frags:Number)
     {
-        _instance._RegisterCommentsData(comments);
+        if (Macros.s_my_frags == frags)
+            return false;
+        Macros.s_my_frags = frags;
+        return true;
     }
+
+    public static var s_my_frags:Number = 0;
 
     // PRIVATE
 
@@ -83,7 +88,7 @@ class com.xvm.Macros
     private var m_macros_cache_global:Object = { };
     private var m_dict:Object = { }; //{ PLAYERNAME1: { macro1: func || value, macro2:... }, PLAYERNAME2: {...} }
     private var m_globals:Object = { };
-    private var m_comments:Object = null;
+    private var m_contacts:Object = { };
 
     private var isStaticMacro:Boolean;
 
@@ -485,13 +490,16 @@ class com.xvm.Macros
                 }
                 if (!isNaN(value))
                 {
-                    var tier:Number = m_globals["battletier"];
+                    var maxHp:Number = m_globals["maxhp"];
+                    res = Math.round(parseInt(norm) * value / maxHp).toString();
+                    /*
                     var maxBattleTierHp:Number = Defines.MAX_BATTLETIER_HPS[tier - 1];
                     if (vehId == 65313) // M24 Chaffee Sport
                         maxBattleTierHp = 1000;
                     if (vehId == 64769 || vehId == 64801 || vehId == 65089) // Winter Battle
                         maxBattleTierHp = 5000;
                     res = Math.round(parseInt(norm) * value / maxBattleTierHp).toString();
+                    */
                 }
                 _prepare_value_cache[key] = res;
                 //Logger.add(key + " => " + res);
@@ -515,19 +523,19 @@ class com.xvm.Macros
     {
         if (!isNaN(value))
             return value;
-        return parseFloat(_Format(null, value, null));
+        return parseFloat(_Format(null, value, {}));
     }
 
     private function _FormatGlobalBooleanValue(value):Boolean
     {
         if (typeof value == "boolean")
             return value;
-        return _Format(null, value, null).toLowerCase() == 'true';
+        return String(_Format(null, value, {})).toLowerCase() == 'true';
     }
 
     private function _FormatGlobalStringValue(value):String
     {
-        return _Format(null, String(value), null);
+        return _Format(null, String(value), {});
     }
 
     /**
@@ -557,6 +565,44 @@ class com.xvm.Macros
 
     // Macros registration
 
+    /**
+     * Register minimal macros values for player
+     * @param pname plain player name without extra tags (clan, region, etc)
+     * @param playerId player id
+     * @param fullPlayerName full player name with extra tags (clan, region, etc)
+     */
+    private function _RegisterMinimalMacrosData(pname:String, playerId:Number, fullPlayerName:String)
+    {
+        if (!Config.config)
+            return;
+        if (!m_dict.hasOwnProperty(pname))
+            m_dict[pname] = { };
+        var pdata = m_dict[pname];
+
+        if (!pdata.hasOwnProperty("name"))
+        {
+            var name:String = getCustomPlayerName(pname, playerId);
+            var clanIdx:Number = name.indexOf("[");
+            if (clanIdx > 0)
+            {
+                fullPlayerName = name;
+                name = Strings.trim(name.slice(0, clanIdx));
+            }
+
+            var clanWithoutBrackets:String = Utils.GetClanNameWithoutBrackets(fullPlayerName);
+            var clanWithBrackets:String = Utils.GetClanNameWithBrackets(fullPlayerName);
+
+            // {{nick}}
+            pdata["nick"] = name + (clanWithBrackets || "");
+            // {{name}}
+            pdata["name"] = name;
+            // {{clan}}
+            pdata["clan"] = clanWithBrackets;
+            // {{clannb}}
+            pdata["clannb"] = clanWithoutBrackets;
+        }
+    }
+
     private function _RegisterPlayerData(pname:String, data:Object, team:Number)
     {
         if (!Config.config)
@@ -572,45 +618,14 @@ class com.xvm.Macros
         // Static macros
 
         // player name
-        if (!pdata.hasOwnProperty("nick"))
-        {
-            var name:String = getCustomPlayerName(pname, data.uid);
-            var idx:Number = name.indexOf("[");
-            var clan:String = null;
-            var clannb:String = null;
-            if (idx >= 0)
-            {
-                clan = name.slice(idx);
-                clannb = clan.slice(1, clan.indexOf("]"));
-                name = Strings.trim(name.slice(0, idx));
-            }
-            else
-            {
-                idx = data.label.indexOf("[");
-                if (idx >= 0)
-                {
-                    clan = data.label.slice(idx);
-                    clannb = clan.slice(1, clan.indexOf("]"));
-                }
-                else
-                {
-                    if (data.clanAbbrev != null && data.clanAbbrev != "")
-                    {
-                        clannb = data.clanAbbrev;
-                        clan = "[" + clannb + "]";
-                    }
-                }
-            }
-            var nick:String = name + (clan || "");
+        var fullPlayerName:String = data.label;
+        var idx:Number = fullPlayerName.indexOf("[");
+        if (idx < 0 && data.clanAbbrev != null && data.clanAbbrev != "")
+            fullPlayerName += "[" + data.clanAbbrev + "]";
+        _RegisterMinimalMacrosData(pname, data.uid, fullPlayerName);
 
-            // {{nick}}
-            pdata["nick"] = nick;
-            // {{name}}
-            pdata["name"] = name;
-            // {{clan}}
-            pdata["clan"] = clan;
-            // {{clannb}}
-            pdata["clannb"] = clannb;
+        if (!pdata.hasOwnProperty("player"))
+        {
             // {{player}}
             pdata["player"] = data.himself == true ? "pl" : null;
         }
@@ -622,6 +637,8 @@ class com.xvm.Macros
             //Logger.addObject(vdata);
             if (vdata != null)
             {
+                if (!m_globals["maxhp"] || m_globals["maxhp"] < vdata.hpTop)
+                    m_globals["maxhp"] = vdata.hpTop;
                 // {{veh-id}}
                 pdata["veh-id"] = vdata.vid;
                 // {{vehicle}}
@@ -768,31 +785,28 @@ class com.xvm.Macros
 
     private function _RegisterGlobalMacrosData(battleTier:Number, battleType:Number)
     {
-        if (m_globals["xvm-stat"] === undefined)
+        // {{xvm-stat}}
+        m_globals["xvm-stat"] = Config.networkServicesSettings.statBattle == true ? 'stat' : null;
+
+        switch (battleType)
         {
-            // {{xvm-stat}}
-            m_globals["xvm-stat"] = Config.networkServicesSettings.statBattle == true ? 'stat' : null;
+            case Defines.BATTLE_TYPE_CYBERSPORT:
+                battleTier = 8;
+                break;
+            case Defines.BATTLE_TYPE_REGULAR:
+                break;
+            default:
+                battleTier = 10;
+                break;
         }
 
-        if (m_globals["battletier"] === undefined)
-        {
-            switch (battleType)
-            {
-                case Defines.BATTLE_TYPE_CYBERSPORT:
-                    battleTier = 8;
-                    break;
-                case Defines.BATTLE_TYPE_REGULAR:
-                    break;
-                default:
-                    battleTier = 10;
-                    break;
-            }
+        // {{battletype}}
+        m_globals["battletype"] = Utils.getBattleTypeText(battleType);
+        // {{battletier}}
+        m_globals["battletier"] = battleTier;
 
-            // {{battletype}}
-            m_globals["battletype"] = Utils.getBattleTypeText(battleType);
-            // {{battletier}}
-            m_globals["battletier"] = battleTier;
-        }
+        // {{my-frags}}
+        m_globals["my-frags"] = function(o:Object) { return isNaN(Macros.s_my_frags) || Macros.s_my_frags == 0 ? NaN : Macros.s_my_frags; }
     }
 
     private function _RegisterStatMacros(pname:String, stat:StatData)
@@ -804,6 +818,13 @@ class com.xvm.Macros
         if (!m_dict.hasOwnProperty(pname))
             m_dict[pname] = { };
         var pdata = m_dict[pname];
+
+        // Register contacts data
+        //Logger.addObject(stat, 2);
+        delete m_macros_cache[pname];
+        delete pdata["name"];
+        m_contacts[String(stat._id)] = stat.xvm_contact_data;
+        _RegisterMinimalMacrosData(pname, stat._id, stat.name + (stat.clan == null || stat.clan == "" ? "" : "[" + stat.clan + "]"));
 
         // {{region}}
         pdata["region"] = Config.config.region;
@@ -845,9 +866,13 @@ class com.xvm.Macros
         pdata["wn"] = pdata["wn8"];
         // {{wgr}}
         pdata["wgr"] = stat.wgr;
+        // {{r}}
+        pdata["r"] = getRating(stat, pdata, "", "");
 
-        // {{rating}}
-        pdata["rating"] = stat.r;
+        // {{winrate}}
+        pdata["winrate"] = stat.r;
+        // {{rating}} (obsolete)
+        pdata["rating"] = pdata["winrate"];
         // {{battles}}
         pdata["battles"] = stat.b;
         // {{wins}}
@@ -855,8 +880,10 @@ class com.xvm.Macros
         // {{kb}}
         pdata["kb"] = stat.b / 1000;
 
-        // {{t-rating}}
-        pdata["t-rating"] = stat.v.r;
+        // {{t-winrate}}
+        pdata["t-winrate"] = stat.v.r;
+        // {{t-rating}} (obsolete)
+        pdata["t-rating"] = pdata["t-winrate"];
         // {{t-battles}}
         pdata["t-battles"] = stat.v.b;
         // {{t-wins}}
@@ -908,18 +935,28 @@ class com.xvm.Macros
         // {{c:wgr}}
         pdata["c:wgr"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_WGR, stat.wgr, "#", false);
         pdata["c:wgr#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_WGR, stat.wgr, "#", true);
-        // {{c:rating}}
-        pdata["c:rating"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.r, "#", false);
-        pdata["c:rating#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.r, "#", true);
+        // {{c:r}}
+        pdata["c:r"] = getRating(stat, pdata, "c:", "");
+        pdata["c:r#d"] = getRating(stat, pdata, "c:", "#d");
+
+        // {{c:winrate}}
+        pdata["c:winrate"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.r, "#", false);
+        pdata["c:winrate#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.r, "#", true);
+        // {{c:rating}} (obsolete)
+        pdata["c:rating"] =   pdata["c:winrate"];
+        pdata["c:rating#d"] = pdata["c:winrate#d"];
         // {{c:kb}}
         pdata["c:kb"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_KB, stat.b / 1000, "#", false);
         pdata["c:kb#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_KB, stat.b / 1000, "#", true);
         // {{c:avglvl}}
         pdata["c:avglvl"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_AVGLVL, stat.lvl, "#", false);
         pdata["c:avglvl#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_AVGLVL, stat.lvl, "#", true);
-        // {{c:t-rating}}
-        pdata["c:t-rating"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.v.r, "#", false);
-        pdata["c:t-rating#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.v.r, "#", true);
+        // {{c:t-winrate}}
+        pdata["c:t-winrate"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.v.r, "#", false);
+        pdata["c:t-winrate#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_RATING, stat.v.r, "#", true);
+        // {{c:t-rating}} (obsolete)
+        pdata["c:t-rating"] =   pdata["c:t-winrate"];
+        pdata["c:t-rating#d"] = pdata["c:t-winrate#d"];
         // {{c:t-battles}}
         pdata["c:t-battles"] =   GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_TBATTLES, stat.v.b, "#", false);
         pdata["c:t-battles#d"] = GraphicsUtil.GetDynamicColorValue(Defines.DYNAMIC_COLOR_TBATTLES, stat.v.b, "#", true);
@@ -959,14 +996,21 @@ class com.xvm.Macros
         pdata["a:wgr"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_WGR, stat.wgr);
         // {{a:e}}
         pdata["a:e"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_E, stat.v.te);
-        // {{a:rating}}
-        pdata["a:rating"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_RATING, stat.r);
+        // {{a:r}}
+        pdata["a:r"] = getRating(stat, pdata, "a:", "");
+
+        // {{a:winrate}}
+        pdata["a:winrate"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_RATING, stat.r);
+        // {{a:rating}} (obsolete)
+        pdata["a:rating"] = pdata["a:winrate"];
         // {{a:kb}}
         pdata["a:kb"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_KB, stat.b / 1000);
         // {{a:avglvl}}
         pdata["a:avglvl"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_AVGLVL, stat.lvl);
-        // {{a:t-rating}}
-        pdata["a:t-rating"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_RATING, stat.v.r);
+        // {{a:t-winrate}}
+        pdata["a:t-winrate"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_RATING, stat.v.r);
+        // {{a:t-rating}} (obsolete)
+        pdata["a:t-rating"] = pdata["a:t-winrate"];
         // {{a:t-battles}}
         pdata["a:t-battles"] = GraphicsUtil.GetDynamicAlphaValue(Defines.DYNAMIC_ALPHA_TBATTLES, stat.v.b);
         // {{a:tdb}}
@@ -1004,11 +1048,6 @@ class com.xvm.Macros
 
         // {{turret}}
         pdata["turret"] = data.turret || "";
-    }
-
-    private function _RegisterCommentsData(comments:Object)
-    {
-        m_comments = comments;
     }
 
     // PRIVATE
@@ -1049,9 +1088,9 @@ class com.xvm.Macros
                 break;
         }
 
-        if (m_comments != null && !isNaN(uid) && uid > 0)
+        if (m_contacts != null && !isNaN(uid) && uid > 0)
         {
-            var cdata:Object = m_comments[String(uid)];
+            var cdata:Object = m_contacts[String(uid)];
             if (cdata != null)
             {
                 if (cdata.nick != null && cdata.nick != "")
@@ -1060,5 +1099,30 @@ class com.xvm.Macros
         }
 
         return pname;
+    }
+
+    private static var RATING_MATRIX:Object =
+    {
+        xvm_wgr: "xwgr",
+        xvm_wn6: "xwn6",
+        xvm_wn8: "xwn8",
+        xvm_eff: "xeff",
+        xvm_e: "e",
+        basic_wgr: "xwgr",
+        basic_wn6: "xwn6",
+        basic_wn8: "xwn8",
+        basic_eff: "xeff",
+        basic_e: "e"
+    }
+
+    /**
+     * Returns rating according settings in the personal cabinet
+     */
+    public static function getRating(stat:StatData, pdata:Object, prefix:String, suffix:String)
+    {
+        var n:String = Config.networkServicesSettings.scale + "_" + Config.networkServicesSettings.rating;
+        if (!RATING_MATRIX.hasOwnProperty(n))
+            n = "xvm_wgr";
+        return pdata[prefix + RATING_MATRIX[n] + suffix];
     }
 }
