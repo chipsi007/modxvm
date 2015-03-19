@@ -6,7 +6,7 @@
 XFW_MOD_VERSION    = "2.0.0"
 XFW_MOD_URL        = "http://www.modxvm.com/"
 XFW_MOD_UPDATE_URL = "http://www.modxvm.com/en/download-xvm/"
-XFW_GAME_VERSIONS  = ["0.9.6"]
+XFW_GAME_VERSIONS  = ["0.9.6","0.9.7"]
 
 #####################################################################
 
@@ -28,10 +28,10 @@ import vehstate
 from websock import g_websock
 from xvm import g_xvm
 
-_APPLICATION_SWF = 'Application.swf'
+_LOBBY_SWF = 'lobby.swf'
 _BATTLE_SWF = 'battle.swf'
 _VMM_SWF = 'VehicleMarkersManager.swf'
-_SWFS = [_APPLICATION_SWF, _BATTLE_SWF, _VMM_SWF]
+_SWFS = [_LOBBY_SWF, _BATTLE_SWF, _VMM_SWF]
 
 
 #####################################################################
@@ -68,9 +68,9 @@ def FlashInit(self, swf, className='Flash', args=None, path=None):
         return
     log("FlashInit: " + self.swf)
     self.addExternalCallback('xvm.cmd', lambda *args: g_xvm.onXvmCommand(self, *args))
-    if self.swf == _APPLICATION_SWF:
+    if self.swf == _LOBBY_SWF:
         g_xvm.app = self
-        g_xvm.initApplication()
+        g_xvm.initLobby()
     if self.swf == _BATTLE_SWF:
         g_xvm.battleFlashObject = self
         g_xvm.initBattle()
@@ -83,8 +83,8 @@ def FlashBeforeDelete(self):
         return
     log("FlashBeforeDelete: " + self.swf)
     self.removeExternalCallback('xvm.cmd')
-    if self.swf == _APPLICATION_SWF:
-        g_xvm.deleteApplication()
+    if self.swf == _LOBBY_SWF:
+        g_xvm.deleteLobby()
         g_xvm.app = None
     if self.swf == _BATTLE_SWF:
         g_xvm.battleFlashObject = None
@@ -228,85 +228,6 @@ def WaitingViewMeta_fix(base, self, *args):
     except Exception, ex:
         log('[XVM][Waiting fix]: %s throwed exception: %s' % (base.__name__, ex.message))
 
-# adding tooltip in hangar for shooting range of SPG/machine guns
-def VehicleParamsField_getValue(base, self):
-    try:
-        from gui.shared.utils import ItemsParameters, ParametersCache
-        from math import degrees
-        from helpers import i18n
-        self.PARAMS = {'lightTank':  ('circularVisionRadius', 'piercingPower', 'damageAvg', 'damageAvgPerMinute', 'shotDispersionAngle', 'aimingTime', 'reloadTimeSecs', 'enginePower', 'enginePowerPerTon', 'speedLimits', 'chassisRotationSpeed', 'hullArmor', 'turretArmor'),
-                       'mediumTank': ('circularVisionRadius', 'piercingPower', 'damageAvg', 'damageAvgPerMinute', 'shotDispersionAngle', 'aimingTime', 'reloadTimeSecs', 'enginePower', 'enginePowerPerTon', 'speedLimits', 'chassisRotationSpeed', 'hullArmor', 'turretArmor'),
-                       'heavyTank':  ('circularVisionRadius', 'piercingPower', 'damageAvg', 'damageAvgPerMinute', 'shotDispersionAngle', 'aimingTime', 'reloadTimeSecs', 'enginePower', 'enginePowerPerTon', 'speedLimits', 'chassisRotationSpeed', 'hullArmor', 'turretArmor'),
-                       'AT-SPG':     ('circularVisionRadius', 'piercingPower', 'damageAvg', 'damageAvgPerMinute', 'shotDispersionAngle', 'aimingTime', 'reloadTimeSecs', 'enginePower', 'enginePowerPerTon', 'speedLimits', 'chassisRotationSpeed', 'hullArmor', 'turretArmor'),
-                       'default':    ('circularVisionRadius', 'piercingPower', 'damageAvg', 'damageAvgPerMinute', 'shotDispersionAngle', 'aimingTime', 'reloadTimeSecs', 'enginePower', 'enginePowerPerTon', 'speedLimits', 'chassisRotationSpeed', 'hullArmor', 'turretArmor'),
-                       'SPG':        ('circularVisionRadius', 'piercingPower', 'explosionRadius', 'damageAvg', 'damageAvgPerMinute', 'shotDispersionAngle', 'aimingTime', 'reloadTimeSecs', 'enginePower', 'enginePowerPerTon', 'speedLimits', 'chassisRotationSpeed', 'hullArmor', 'turretArmor')}
-        result = list()
-        vehicle = self._tooltip.item
-        configuration = self._tooltip.context.getParamsConfiguration(vehicle)
-        params = configuration.params
-        crew = configuration.crew
-        eqs = configuration.eqs
-        devices = configuration.devices
-        vehicleCommonParams = dict(ItemsParameters.g_instance.getParameters(vehicle.descriptor))
-        vehicleRawParams = dict(ParametersCache.g_instance.getParameters(vehicle.descriptor))
-        result.append([])
-        gun = vehicle.gun.descriptor
-        if params:
-            for paramName in self.PARAMS.get(vehicle.type, 'default'):
-                if paramName in vehicleCommonParams or paramName in vehicleRawParams:
-                    if paramName == 'turretArmor' and not vehicle.hasTurrets:
-                        continue
-                    if paramName == 'reloadTimeSecs' and vehicle.gun.isClipGun():
-                        (shellsCount, shellReloadingTime) = gun['clip']
-                        reloadMagazineTime = gun['reloadTime']
-                        shellReloadingTime_str = "%g" % round(shellReloadingTime, 2)  #nice representation
-                        reloadMagazineTime_str = "%g" % round(reloadMagazineTime, 2)
-                        result[-1].append([i18n.makeString('#menu:moduleInfo/params/shellsCount').replace('h>', 'h1>'), '<h1>' + str(shellsCount) + '</h1>'])
-                        result[-1].append([i18n.makeString('#menu:moduleInfo/params/shellReloadingTime').replace('h>', 'h1>'), '<h1>' + shellReloadingTime_str + '</h1>'])
-                        result[-1].append([i18n.makeString('#menu:moduleInfo/params/reloadMagazineTime').replace('h>', 'h1>'), '<h1>' + reloadMagazineTime_str + '</h1>'])
-                        continue
-                    result[-1].append(self._getParameterValue(paramName, vehicleCommonParams, vehicleRawParams))
-
-        # gun traverse limits
-        if gun['turretYawLimits']:
-            (traverseMin, traverseMax) = gun['turretYawLimits']
-            traverseLimits_str = str(int(round(degrees(traverseMin)))) + '..+' + str(int(round(degrees(traverseMax))))
-            result[-1].append(['<h1>' + l10n('traverseLimits') + '</h1>', '<h1>' + traverseLimits_str + '</h1>'])
-
-        # elevation limits
-        (pitchMax, pitchMin) = gun['pitchLimits']['absolute']
-        pitchLimits_str = str(int(round(degrees(-pitchMin)))) + '..+' + str(int(round(degrees(-pitchMax))))
-        result[-1].append(['<h1>' + l10n('pitchLimits') + '</h1>', '<h1>' + pitchLimits_str + '</h1>'])
-
-        # shooting range
-        from vehinfo import _getRanges
-        (viewRange, shellRadius, artiRadius) = _getRanges(vehicle.turret.descriptor, vehicle.gun.descriptor, vehicle.nationName, vehicle.type)
-        if vehicle.type == 'SPG':   # arti
-            result[-1].append(['<h1>' + l10n('shootingRadius') + ' <p>' + l10n('(m)') + '</p></h1>', '<h1>' + str(artiRadius)+ '</h1>'])
-        elif shellRadius < 707:     # not arti, short range weapons
-            result[-1].append(['<h1>' + l10n('shootingRadius') + ' <p>' + l10n('(m)') + '</p></h1>', '<h1>' + str(shellRadius)+ '</h1>'])
-
-        result.append([])
-        if crew:
-            currentCrewSize = 0
-            if vehicle.isInInventory:
-                currentCrewSize = len([ x for _, x in vehicle.crew if x is not None ])
-            result[-1].append({'label': 'crew',
-             'current': currentCrewSize,
-             'total': len(vehicle.descriptor.type.crewRoles)})
-        if eqs:
-            result[-1].append({'label': 'equipments',
-             'current': len([ x for x in vehicle.eqs if x ]),
-             'total': len(vehicle.eqs)})
-        if devices:
-            result[-1].append({'label': 'devices',
-             'current': len([ x for x in vehicle.descriptor.optionalDevices if x ]),
-             'total': len(vehicle.descriptor.optionalDevices)})
-        return result
-    except Exception, ex:
-        err(traceback.format_exc())
-        return base(self)
-
 '''#def _CustomFilesCache__get(base, self, url, showImmediately, checkedInCache):
 #    debug('_CustomFilesCache__get')
 #    base(self, url, showImmediately, checkedInCache)
@@ -405,9 +326,6 @@ def _RegisterEvents():
     from gui.Scaleform.daapi.view.meta.WaitingViewMeta import WaitingViewMeta
     OverrideMethod(WaitingViewMeta, 'showS', WaitingViewMeta_fix)
     OverrideMethod(WaitingViewMeta, 'hideS', WaitingViewMeta_fix)
-
-    from gui.shared.tooltips.vehicle import VehicleParamsField
-    OverrideMethod(VehicleParamsField, '_getValue', VehicleParamsField_getValue)
 
     # import account_helpers.CustomFilesCache as cache
     # cache._MIN_LIFE_TIME = 15
