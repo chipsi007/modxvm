@@ -16,7 +16,6 @@ import config
 from constants import *
 from logger import *
 from stats import getBattleStat, getBattleResultsStat, getUserData
-from dossier import getDossier
 from vehinfo import getVehicleInfoDataStr
 import vehstate
 import token
@@ -32,6 +31,9 @@ _LOG_COMMANDS = (
     COMMAND_LOGSTAT,
     COMMAND_TEST,
 )
+
+def l10n(value):
+    return as_xfw_cmd(XVM_AS_COMMAND_L10N, value)
 
 class Xvm(object):
     def __init__(self):
@@ -107,8 +109,6 @@ class Xvm(object):
                 getBattleResultsStat(proxy, args)
             elif cmd == COMMAND_LOADUSERDATA:
                 getUserData(proxy, args)
-            elif cmd == COMMAND_GETDOSSIER:
-                getDossier(proxy, args)
             elif cmd == COMMAND_OPEN_URL:
                 if len(args[0]):
                     utils.openWebBrowser(args[0], False)
@@ -247,7 +247,7 @@ class Xvm(object):
         g_currentVehicle.onChanged += self.updateTankParams
         BigWorld.callback(0, self.updateTankParams)
 
-        as_xvm_cmd(XVM_AS_COMMAND_SET_SVC_SETTINGS, token.networkServicesSettings)
+        as_xfw_cmd(XVM_AS_COMMAND_SET_SVC_SETTINGS, token.networkServicesSettings)
 
     def hangarDispose(self):
         from CurrentVehicle import g_currentVehicle
