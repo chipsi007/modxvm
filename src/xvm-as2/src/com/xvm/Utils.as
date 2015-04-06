@@ -2,10 +2,8 @@
  * ...
  * @author sirmax2
  */
-import flash.filters.DropShadowFilter;
-import com.xvm.Defines;
-import com.xvm.Logger;
-import com.xvm.Strings;
+import com.xvm.*;
+import flash.filters.*;
 
 class com.xvm.Utils
 {
@@ -14,20 +12,20 @@ class com.xvm.Utils
     public static function toInt(value:Object, defaultValue:Number):Number
     {
         if (!defaultValue)
-            defaultValue = 0;
+            defaultValue = NaN;
         if (!value)
             return defaultValue;
-        var n: Number = parseInt(value.toString());
+        var n:Number = parseInt(value.toString());
         return isNaN(n) ? defaultValue : n;
     }
 
     public static function toFloat(value:Object, defaultValue:Number):Number
     {
         if (!defaultValue)
-            defaultValue = 0;
+            defaultValue = NaN;
         if (!value)
             return defaultValue;
-        var n: Number = parseFloat(value.toString());
+        var n:Number = parseFloat(value.toString());
         return isNaN(n) ? defaultValue : n;
     }
 
@@ -41,28 +39,7 @@ class com.xvm.Utils
         return defaultValue ? value != "false" : value == "true";
     }
 
-    public static function Timeout(target:Object, callback:Function, timeout:Number)
-    {
-        return _global.setTimeout(function() { callback.call(target) }, timeout);
-    }
-
-    public static function Interval(target:Object, callback:Function, timeout:Number)
-    {
-        return _global.setInterval(function() { callback.call(target) }, timeout);
-    }
-
-    public static function elapsedMSec(start:Date, end:Date):Number
-    {
-        return end.getTime() - start.getTime();
-    }
-
-    public static function fixPath(path:String):String
-    {
-        path = path.split("\\").join("/");
-        if (!Strings.endsWith("/", path))
-            path += "/";
-        return path;
-    }
+    ////////////////////
 
     public static function vehicleClassToVehicleType(vclass:String):String
     {
@@ -77,61 +54,117 @@ class com.xvm.Utils
         }
     }
 
+    public static function getMarksOnGunText(value:Number):String
+    {
+        if (value == null || !Config.config.texts.marksOnGun["_" + value])
+            return null;
+        var v:String = Config.config.texts.marksOnGun["_" + value];
+        if (v.indexOf("{{l10n:") >= 0)
+            v = Locale.get(v);
+        return v;
+    }
+
+    public static function getSpottedText(value:String, isArty:Boolean):String
+    {
+        if (value == null)
+            return null;
+
+        if (isArty)
+            value += "_arty";
+
+        if (!Config.config.texts.spotted[value])
+            return null;
+
+        var v:String = Config.config.texts.spotted[value];
+        if (v.indexOf("{{l10n:") >= 0)
+            v = Locale.get(v);
+
+        return v;
+    }
+
+    public static function getXvmUserText(status:Number):String
+    {
+        var value:String = isNaN(status) ? 'none' : (status & 0x01) ? 'on' : 'off';
+
+        if (!Config.config.texts.xvmuser[value])
+            return null;
+
+        var v:String = Config.config.texts.xvmuser[value];
+        if (v.indexOf("{{l10n:") >= 0)
+            v = Locale.get(v);
+
+        return v;
+    }
+
+    public static function getBattleTypeText(battleType:Number):String
+    {
+        var value:String = getBattleTypeStr(battleType);
+
+        if (!Config.config.texts.battletype[value])
+            return null;
+
+        var v:String = Config.config.texts.battletype[value];
+        if (v.indexOf("{{l10n:") >= 0)
+            v = Locale.get(v);
+
+        return v;
+    }
+
+    public static function getBattleTypeStr(battleType:Number):String
+    {
+        switch (battleType)
+        {
+            case 1: return 'regular';
+            case 2: return 'training';
+            case 3: return 'company';
+            case 4: return 'tournament';
+            case 5: return 'clan';
+            case 6: return 'tutorial';
+            case 7: return 'cybersport';
+            case 8: return 'historical';
+            case 9: return 'event_battles';
+            case 10: return 'sortie';
+            case 11: return 'fort_battle';
+            case 12: return 'rated_cybersport';
+            default: return 'unknown';
+        }
+    }
+
+    public static function getTopClanText(clanInfoRank:Number):String
+    {
+        var value:String = isNaN(clanInfoRank) ? "regular" : clanInfoRank == 0 ? "persist" :
+            clanInfoRank <= Config.networkServicesSettings.topClansCount ? "top" : "regular";
+
+        if (!Config.config.texts.topclan[value])
+            return null;
+
+        var v:String = Config.config.texts.topclan[value];
+        if (v.indexOf("{{l10n:") >= 0)
+            v = Locale.get(v);
+
+        return v;
+    }
+
+    //   src: ally, squadman, enemy, unknown, player (allytk, enemytk - how to detect?)
+    public static function damageFlagToDamageSource(damageFlag:Number):String
+    {
+        switch (damageFlag)
+        {
+            case Defines.FROM_ALLY:
+                return "ally";
+            case Defines.FROM_ENEMY:
+                return "enemy";
+            case Defines.FROM_PLAYER:
+                return "player";
+            case Defines.FROM_SQUAD:
+                return "squadman";
+            case Defines.FROM_UNKNOWN:
+            default:
+                return "unknown";
+        }
+    }
+
     ////////////////////
-
-    public static function indexOf(array:Array, value:Object):Number
-    {
-        var i:Number = 0;
-        var len:Number = array.length;
-        while(i < len)
-        {
-            if (array[i] === value)
-                return i;
-            ++i;
-        }
-        return -1;
-    }
-
-    // 0 - equal, -1 - v1<v2, 1 - v1>v2, -2 - error
-    public static function compareVersions(v1:String, v2:String):Number
-    {
-        try
-        {
-            v1 = v1.split("-").join(".");
-            v2 = v2.split("-").join(".");
-
-            var a: Array = v1.split(".");
-            while (a.length < 4)
-                a.push("0");
-            var b: Array = v2.split(".");
-            while (b.length < 4)
-                b.push("0");
-
-            for (var i = 0; i < 4; ++i)
-            {
-                if (isNaN(parseInt(a[i])) && isNaN(parseInt(b[i])))
-                    return a[i] == b[i] ? 0 : a[i] < b[i] ? -1 : 1;
-
-                if (isNaN(parseInt(a[i])))
-                    return -1;
-
-                if (isNaN(parseInt(b[i])))
-                    return 1;
-
-                if (parseInt(a[i]) < parseInt(b[i]))
-                    return -1;
-
-                if (parseInt(a[i]) > parseInt(b[i]))
-                    return 1;
-            }
-
-            return 0;
-        }
-        catch (e)
-        {
-            return -2;
-        }
-    }
 
     public static function GetPlayerName(fullplayername:String):String
     {
@@ -139,24 +172,19 @@ class com.xvm.Utils
         return (pos < 0) ? fullplayername : Strings.trim(fullplayername.slice(0, pos));
     }
 
-    public static function GetNormalizedPlayerName(fullplayername:String):String
+    public static function GetClanNameWithoutBrackets(fullplayername:String):String
     {
-        return GetPlayerName(fullplayername).toUpperCase();
-    }
-
-    public static function GetClanName(fullplayername:String):String
-    {
-        var pos = fullplayername.indexOf("[");
+        var pos:Number = fullplayername.indexOf("[");
         if (pos < 0)
-            return "";
-        var n = fullplayername.slice(pos + 1);
+            return null;
+        var n:String = fullplayername.slice(pos + 1);
         return n.slice(0, n.indexOf("]"));
     }
 
     public static function GetClanNameWithBrackets(fullplayername:String):String
     {
-        var clan = GetClanName(fullplayername);
-        return clan ? "[" + clan + "]" : "";
+        var clan:String = GetClanNameWithoutBrackets(fullplayername);
+        return clan ? "[" + clan + "]" : null;
     }
 
     private static var xvmModules: Array = [];
@@ -170,6 +198,8 @@ class com.xvm.Utils
         xvmModules.push(moduleName);
         Logger.add("xvm -> [\"" + xvmModules.join("\", \"") + "\"]");
     }
+
+    ////////////////////
 
     /**
      * Get children MovieClips of MovieClip
@@ -192,33 +222,38 @@ class com.xvm.Utils
         return result;
     }
 
-    /**
-     * Array subtraction
-     * [1,2,3,4,5,6] - [1,2,3] = [4,5,6]
-     * minuend − subtrahend = difference
-     */
-    public static function subtractArray(minuend:Array, subtrahend:Array):Array
+    public static function removeChildren(mc:MovieClip, match:Function):Void
     {
-        var difference:Array = [];
-
-        for (var i in minuend)
+        var children:Array = getChildrenOf(mc, false);
+        var len:Number = children.length;
+        for (var i:Number = 0; i < len; ++i)
         {
-            var testVal = minuend[i];
-            var testIsAbcentInSubtrahend:Boolean = true;
-            for (var j in subtrahend)
-            {
-                if (testVal == subtrahend[j])
-                {
-                    testIsAbcentInSubtrahend = false;
-                    break;
-                }
-            }
-            if (testIsAbcentInSubtrahend)
-                difference.push(minuend[i])
+            var child:MovieClip = MovieClip(children[i]);
+            if (child == null)
+                continue;
+            if (match != null && !match(child))
+                continue
+            child.removeMovieClip();
         }
-
-        return difference;
     }
+
+    // Duplicate text field
+    public static function duplicateTextField(mc:MovieClip, name:String, textField:TextField, yOffset:Number, align:String):TextField
+    {
+        var res:TextField = mc.createTextField(name, mc.getNextHighestDepth(),
+            textField._x, textField._y + yOffset, textField._width, textField._height);
+        res.antiAliasType = "advanced";
+        res.html = true;
+        res.selectable = false;
+        res.autoSize = align; // http://theolagendijk.com/2006/09/07/aligning-htmltext-inside-flash-textfield/
+        var tf: TextFormat = textField.getNewTextFormat();
+        res.styleSheet = Utils.createStyleSheet(Utils.createCSS("xvm_" + name,
+            tf.color, tf.font, tf.size, align, tf.bold, tf.italic));
+
+        return res;
+    }
+
+    ////////////////////
 
     /**
      * Create CSS
@@ -257,126 +292,108 @@ class com.xvm.Utils
         return style;
     }
 
-    // Fix <img src='xvm://...'> to <img src='img://XVM_ROOT/...'> (res_mods/xvm)
-    // Fix <img src='xvmres://...'> to <img src='img://XVMRES_ROOT/...'> (res_mods/xvm/res)
+    /** Create DropShadowFilter from config section */
+    public static function extractShadowFilter(source:Object):DropShadowFilter
+    {
+        if (!source || !source.alpha || !source.strength || !source.blur)
+            return null;
+        return new DropShadowFilter(
+            source.distance, // distance
+            source.angle, // angle
+            parseInt(source.color, 16),
+            // DropShadowFilter accepts alpha be from 0 to 1.
+            // 90 at default config.
+            source.alpha * 0.01,
+            source.blur,
+            source.blur,
+            source.strength);
+    }
+
+    ////////////////////
+
+    // Fix <img src='xvm://...'> to <img src='img://XVM_IMG_RES_ROOT/...'> (res_mods/mods/shared_resources/xvm/res)
+    // Fix <img src='cfg://...'> to <img src='img://XVM_IMG_CFG_ROOT/...'> (res_mods/configs/xvm)
     public static function fixImgTag(str:String):String
     {
-        str = str.split("xvm://").join("img://" + Defines.XVM_IMG_ROOT);
-        str = str.split("xvmres://").join("img://" + Defines.XVMRES_IMG_ROOT);
+        str = str.split("xvm://").join("img://" + Defines.XVM_IMG_RES_ROOT);
+        str = str.split("cfg://").join("img://" + Defines.XVM_IMG_CFG_ROOT);
         return str;
     }
 
-    // Duplicate text field
-    public static function duplicateTextField(mc:MovieClip, name:String, textField:TextField, yOffset:Number, align:String):TextField
+    // Fix 'img://...' to '../...'> (res_mods/x.x.x/gui/maps/icons)
+    // Fix 'xvm://...' to '../../XVM_IMG_RES_ROOT/...'> (res_mods/mods/shared_resources/xvm/res)
+    // Fix 'cfg://...' to '../../XVM_IMG_CFG_ROOT/...'> (res_mods/configs/xvm)
+    public static function fixImgTagSrc(str:String):String
     {
-        var res:TextField = mc.createTextField(name, mc.getNextHighestDepth(),
-            textField._x, textField._y + yOffset, textField._width, textField._height);
-        res.antiAliasType = "advanced";
-        res.html = true;
-        res.selectable = false;
-        res.autoSize = align; // http://theolagendijk.com/2006/09/07/aligning-htmltext-inside-flash-textfield/
-        var tf: TextFormat = textField.getNewTextFormat();
-        res.styleSheet = Utils.createStyleSheet(Utils.createCSS("xvm_" + name,
-            tf.color, tf.font, tf.size, align, tf.bold, tf.italic));
-
-        return res;
+        if (Strings.startsWith("img://gui/maps/icons/", str.toLowerCase()))
+            return "../" + str.slice(10);
+        return "../../" + Utils.fixImgTag(str).split("img://").join("");
     }
 
-    public static function createButton(mc:MovieClip, name:String, x:Number, y:Number, txt:String, align:String):MovieClip
+    public static function indexOf(array:Array, value:Object):Number
     {
-        var b:MovieClip = mc.attachMovie("Button", name, mc.getNextHighestDepth());
-        b._x = x;
-        b._y = y;
-        b.autoSize = true;
-        b.label = txt;
-
-        if (align == "right")
-            b._x -= Math.round(b.textField.textWidth + 21);
-
-        b.addEventListener("rollOver", showTooltip);
-        b.addEventListener("rollOut", hideTooltip);
-
-        return b;
+        var i:Number = 0;
+        var len:Number = array.length;
+        while(i < len)
+        {
+            if (array[i] === value)
+                return i;
+            ++i;
+        }
+        return -1;
     }
 
-    public static function createRadioButton(mc:MovieClip, name:String, x:Number, y:Number, width:Number, txt:String, group:String):MovieClip
+    public static function getObjectValueByPath(obj, path:String)
     {
-        var b:MovieClip = mc.attachMovie("RadioButton", name, mc.getNextHighestDepth());
-        b._x = x;
-        b._y = y;
-        b.autoSize = false;
-        b.width = width;
-        b.label = txt;
-        b.group = group;
+        if (obj === undefined)
+            return undefined;
 
-        b.addEventListener("rollOver", showTooltip);
-        b.addEventListener("rollOut", hideTooltip);
+        if (path == "." || path == "")
+            return obj;
 
-        return b;
+        var p:Array = path.split("."); // "path.to.value"
+        var o = obj;
+        var p_len:Number = p.length;
+        for (var i:Number = 0; i < p_len; ++i)
+        {
+            var opi = o[p[i]];
+            if (opi === undefined)
+                return undefined;
+            o = opi;
+        }
+        return o == null ? null : Utils.clone(o);
     }
 
-    public static function createCheckBox(mc:MovieClip, name:String, x:Number, y:Number, txt:String, align:String):MovieClip
+    /**
+     * Deep copy
+     */
+    public static function clone(obj:Object):Object
     {
-        var b:MovieClip = mc.attachMovie("CheckBox", name, mc.getNextHighestDepth());
-        b._x = x;
-        b._y = y;
-        b.autoSize = true;
-        b.label = txt;
-
-        if (align == "right")
-            b._x -= Math.round(b.textField.textWidth + 21);
-
-        b.addEventListener("rollOver", showTooltip);
-        b.addEventListener("rollOut", hideTooltip);
-
-        return b;
+        /*var temp:ByteArray = new ByteArray();
+        temp.writeObject(obj);
+        temp.position = 0;
+        return temp.readObject();*/
+        return JSONx.parse(JSONx.stringify(obj, "", true));
     }
 
-    public static function createTextInput(mc:MovieClip, name:String, x:Number, y:Number, width:Number):gfx.controls.TextInput
+    public static function parseError(ex):String
     {
-        var c:gfx.controls.TextInput = gfx.controls.TextInput(mc.attachMovie("TextInput", name, mc.getNextHighestDepth()));
-        c._x = x;
-        c._y = y;
-        c._width = width;
-        return c;
-    }
+        if (ex.at == null)
+            return (ex.name != null ? Strings.trim(ex.name) + ": " : "") + Strings.trim(ex.message);
 
-    public static function duplicateButton(src:Object, name:String, offsetX:Number, offsetY:Number,
-        text:String, iconSource:String, toolTip:String):MovieClip
-    {
-        var mc = src.duplicateMovieClip(name, 0);
-        mc._x = src._x + offsetX;
-        mc._y = src._y + offsetY;
-        mc._autoSize = true;
-        mc._iconSource = iconSource;
-        mc.tooltipText = toolTip;
+        var head = ex.at > 0 ? ex.text.substring(0, ex.at) : "";
+        head = head.split("\r").join("").split("\n").join("");
+        while (head.indexOf("  ") != -1)
+            head = head.split("  ").join(" ");
+        head = head.substr(head.length - 75, 75);
 
-        mc.addEventListener("rollOver", showTooltip);
-        mc.addEventListener("rollOut", hideTooltip);
+        var tail = (ex.at + 1 < ex.text.length) ? ex.text.substring(ex.at + 1, ex.text.length) : "";
+        tail = tail.split("\r").join("").split("\n").join("");
+        while (tail.indexOf("  ") != -1)
+        tail = tail.split("  ").join(" ");
 
-        mc.configUI();
-
-        return mc;
-    }
-
-    public static function addEventListeners(obj:Object, target:Object, handlers:Object):Void
-    {
-        if (!obj || !target || !handlers)
-            return;
-        for (var name in handlers)
-            obj.addEventListener(name, target, handlers[name]);
-    }
-
-    private static function showTooltip(e:Object):Void
-    {
-        var b = e.target;
-        if (b.tooltipText)
-            net.wargaming.managers.ToolTipManager.instance.show(b.tooltipText);
-    }
-
-    private static function hideTooltip(e:Object):Void
-    {
-        net.wargaming.managers.ToolTipManager.instance.hide();
+        return "[" + ex.at + "] " + Strings.trim(ex.name) + ": " + Strings.trim(ex.message) + "\n  " +
+            head + ">>>" + ex.text.charAt(ex.at) + "<<<" + tail;
     }
 
     // http://www.koreanrandom.com/forum/topic/2625-/
@@ -412,33 +429,31 @@ class com.xvm.Utils
 
     public static function XWN8(WN8:Number):Number
     {
-        return WN8 > 3250 ? 100 :
+        return WN8 > 3400 ? 100 :
             Math.round(Math.max(0, Math.min(100,
                 WN8*(WN8*(WN8*(WN8*(WN8*(WN8*
-                0.0000000000000000000812
-                + 0.0000000000000001616)
-                - 0.000000000006736)
-                + 0.000000028057)
-                - 0.00004536)
-                + 0.06563)
-                - 0.01
+                0.00000000000000000009553
+                - 0.0000000000000001644)
+                - 0.00000000000426)
+                + 0.0000000197)
+                - 0.00003192)
+                + 0.056265)
+                - 0.157
             )));
     }
 
-    /** Create DropShadowFilter from config section */
-    public static function extractShadowFilter(source:Object):DropShadowFilter
+    public static function XWGR(WGR:Number):Number
     {
-        return new DropShadowFilter(
-            source.distance, // distance
-            source.angle, // angle
-            parseInt(source.color, 16),
-            // DropShadowFilter accepts alpha be from 0 to 1.
-            // 90 at default config.
-            source.alpha / 100,
-            source.blur,
-            source.blur,
-            source.strength,
-            3 // quality
-        )
+        return WGR > 11000 ? 100 :
+            Math.round(Math.max(0, Math.min(100,
+                WGR*(WGR*(WGR*(WGR*(WGR*(-WGR*
+                0.0000000000000000000004209
+                + 0.000000000000000012477)
+                - 0.00000000000014338)
+                + 0.0000000008309)
+                - 0.000002361)
+                + 0.01048)
+                + 0.4
+            )));
     }
 }

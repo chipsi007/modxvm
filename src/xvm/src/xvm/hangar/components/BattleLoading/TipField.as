@@ -1,9 +1,9 @@
 package xvm.hangar.components.BattleLoading
 {
+    import com.xfw.*;
     import com.xvm.*;
-    import com.xvm.utils.*;
     import flash.text.*;
-    import net.wg.gui.lobby.battleloading.BattleLoading;
+    import net.wg.gui.lobby.battleloading.*;
 
     public class TipField
     {
@@ -23,14 +23,6 @@ package xvm.hangar.components.BattleLoading
             var info:TextField = page.form.helpTip;
 
             info.text = "XVM v" + Defines.XVM_VERSION + "     " + Defines.XVM_INTRO;
-
-            if (Stat.infoVersion && Utils.compareVersions(Stat.infoVersion, Defines.XVM_VERSION) == 1)
-            {
-                info.textColor = 0x60FF60;
-                info.text = "XVM: v" + Defines.XVM_VERSION + ". " + Locale.get("New version available") + ": v" + String(Stat.infoVersion);
-                if (Stat.infoMessage && Stat.infoMessage != "")
-                    setTipText(Stat.infoMessage);
-            }
 
             if (Config.stateInfo.warning != null)
             {

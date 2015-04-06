@@ -1,24 +1,273 @@
-﻿XVM-5.3.0-dev:
+﻿XVM-6.1.0-dev:
+  * adaptation to WoT 0.9.7
+  * XFW-3.0.0
+  * added new section in config hangar/tooltips.xc, where you can choose desired tooltips for each type of vehicle
+  * in barracks added nation flag for tanksman and their skills
+  * added embedded fonts: 'xvm' (symbol) and 'mono' (monospace), recommended for default use
+  * new options:
+      "enableGoldLocker" - enable locker for gold
+      "enableFreeXpLocker" - enable locker for free XP
+      "defaultBoughtForCredits" - Use credits instead of gold as default currency for ammo and equipment
+      "combine_icons" - in tank tooltips combine icons of equipment and optional modules
+      "hide_bottom_text" - in tank tooltips hide text at bottom showing quantity of used equipment etc.
+  * new macro {{.}} for config value substitution: {{.path.to.config.value}}
+      ex. {{.language}}, {{.def.mycolors.ally}}
+  * in tank tooltips added feature of custom text and camo coefficients data
+  * new macro {{ally}} returns 'ally' for ally team and empty for enemy team
+  * new macro {{nation}} returns vehicle nation
+  * added new feature of sorting tanks in carousel from config (carousel.xc)
+  * in battle, in HE tooltip added explosion radius
+  * option hangar/autoPutPreviousCrewInTanks renamed to hangar/enableCrewAutoReturn
+  * when enableCrewAutoReturn enabled, the checkbox is shown in the hangar for enabling/disabling
+    crew auto return. Checkbox settings are stored for each tank separately.
+
+XVM-6.0.3:
+  * added macro {{r}} - player's rating (type of rating can be selected in the personal cabinet: http://www.modxvm.com/)
+  * macros renamed:
+      {{rating}} => {{winrate}}
+      {{t-rating}} => {{t-winrate}}
+  * colors and alpha sections renamed: "rating" => "winrate"
+
+XVM-6.0.2:
+  * new option hangar/autoPutPreviousCrewInTanks - automatically put previous crew upon vehicle change in hangar
+  * added global macro {{my-frags}}
+
+XVM-6.0.1:
+  * added new macro {{battletype}} - current battle type
+  * added texts/battletype section with text replacements for {{battletype}} macro
+  * added texts/topclan section with text replacements for {{topclan}} macro
+  * added new carousel macros:
+      {{v.xpToElite}} - XP required for elite vehicle
+      {{v.xpToEliteLeft}} - XP left to gain for elite vehicle
+      {{v.freeXP}} - free XP
+  * macros formatting:
+      added "'" flag for thousands separator (hangar only)
+      added "match" part for value matching ({{battletype=clan?CLAN WAR}})
+        allowed operators: =, !=, >, >=, <, <=
+  * added option minimap/labels/units/antiAliasType - text fields antialias type.
+  * new option battle/allowSpottedStatus - enable {{spotted}} macro in players panels and minimap.
+    WARNING: performance expensive
+  * new option hangar/allowExchangeXPInTechTree - consider the exchange of experience with gold in tech tree
+  * new option battle/sixthSenseIcon - path to sixth sense icon ("" for original icon).
+
+XVM-6.0.0.3:
+  * bugs fixed
+
+XVM-6.0.0:
+  * adaptation to Wot 0.9.6
+  * XFW: XVM Framework
+  * New mod xvm_quests for personal missions.
+    Currently implemented new filters and saving filters settings
+  * added config section for winChance colors: colors/winChance
+  * win chance calclulation changed - use standard normal distrubution for chance result.
+    Source: http://forum.worldoftanks.eu/index.php?/topic/468409-/
+  * added texts/xvmuser section with text replacements for {{xvm-user}} macro.
+    Available values: "on", "off", "none".
+  * added new mod xvm_export, and config section "export".
+  * top clans icons now taken from the XVM server and tops list is updated daily.
+  * added macro {{clanrank}} - Global map clan rating
+    Values from 1 to 1000, and "persist" for persistent clans (WG administration and XVM friends)
+    Detailed info: http://worldoftanks.eu/leaderboard/clans/
+  * added macro {{topclan}} - returns "top" for top clans, 'persist' for persistent clans, empty for other
+
+XVM-5.5.1.1:
+  * fixed Application.swf
+
+XVM-5.5.1:
+  * added new macros:
+      {{xvm-user}} - value 'on' for XVM users with stat in battle enabled,
+        value 'off' for XVM users with stat in battle disabled, else empty
+  * bugs fixed
+
+XVM-5.5.0:
+  * adaptation to Wot 0.9.5
+  * Macro in macro allowed: {{xvm-stat?{{alive?80|30}}|0}}
+  * added texts/spotted section with text replacements for vehicle spotted status.
+    Available values:
+      for usual vehicle: "neverSeen", "lost", "revealed", "dead"
+      for arty: "neverSeen_arty", "lost_arty", "revealed_arty", "dead_arty"
+  * added new macros:
+      {{language}} - player's client language
+      {{region}} - current game region (RU, EU, NA, CN, ASIA, VTC, KR, CT)
+      {{spotted}} with values from texts/spotted section
+      {{c:spotted}}, {{a:spotted}} for color and transparency by spotted status
+  * removed section playersPanel/enemySpottedMarker (use extra fields with {{spotted}} macro instead)
+  * added new option to extraFields: "bindToIcon" - if enabled, x position is binded to vehicle icon (default false)
+
+XVM-5.4.1.3:
+  * new in-battle macros:
+      {{selected}} - value 'sel' for selected player, empty for others
+      {{xvm-stat}} - value 'stat' is statistic is active, empty if not
+      {{position}} - position of the player in the beginning of the battle (1-15)
+  * added individual system colors for bases:
+      colors/system/ally_base and colors/system/enemy_base
+  * added option playersPanel/removeSelectedBackground - disable background of the selected player
+  * added option autoReloadConfig - monitor res_mods/xvm/configs/ directory for changes and
+    automatically reload config (currently only in hangar). Disabled by default, can reduce performance.
+
+XVM-5.4.1.2:
+  * fixed small bugs
+  * show capturing base number for battles with more then one base
+    WARNING: There are changes in the localization files
+  * added option minimap/hideCameraTriangle - hide camera direction green triangle
+
+XVM-5.4.1.1:
+  * fixed bug with online services activation
+
+XVM-5.4.1:
+  * adaptation to Wot 0.9.4
+
+XVM-5.4.0.2:
+  * fixed bug with online services setting
+
+XVM-5.4.0:
+  * new mod: xvm-comments, allow to change nicks of the friends and add comments.
+  * removed section "rating" - replaced with network services settings in the personal cabinet
+  * removed options "showChances", "showChancesLive" - moved to personal cabinet
+  * changed token location, now it is stored in the user preferences:
+      %APPDATA%\Wargaming.net\WorldOfTanks\xvm\
+    You need to reactivate XVM services (use "Add client" button in the personal cabinet on the
+    www.modxvm.com site). You can remove res_mods/xvm/db/ folder.
+  * added option battleLoading/darkenNotReadyIcon for customize icons are not ready players
+  * added options pingServers/leading and pingServers/topmost
+  * carousel: added macro {{v.selected}}, returns 'sel' for selected, empty for others
+  * playersPanel: in extra fields added options "scaleX" and "scaleY"
+
+XVM-5.3.6.1:
+  * fixed bug when xvm.xc is absent
+
+XVM-5.3.6:
+  * many bugs fixed
+  * macro {{gun-marks}} changed to {{marksOnGun}}, section "gunmarks" changed to "marksOnGun",
+    option "allowGunMarksInPanelsAndMinimap" changed "allowMarksOnGunInPanelsAndMinimap"
+    for unification
+  * changed macro value: {{v.hitsRatio}} is in percents now
+  * added macro {{v.c_hitsRatio}} and colors section "hitsRatio"
+  * added macro {{v.c_damageRating}} and colors section "damageRating"
+  * added option "onHold" to the hotkeys settings for alternative minimap and players panel mode
+  * added option hangar/clock/bgImage for background image in clock
+  * macros {{alive}}, {{ready}}, {{player}}, {{tk}}, {{squad}}, {{squad-num}}, {{hp-max}} works in the
+    battle loading screen
+
+XVM-5.3.5:
+  * adaptation to WoT 0.9.3
+  * dmg-kind values changed:
+      shot, fire, ramming, world_collision, death_zone, drowning, other
+  * new sections:
+      hangar/carousel - extended tank carousel settings
+      hangar/clock - hangar clock settings
+  * removed options:
+      hangar/masteryMarkInCarousel
+      hangar/hideTutorial
+  * new options:
+    battleResults/showTotalExperience - Display total experience in After Battle Screen
+    battleResults/showCrewExperience - Display crew experience in After Battle Screen
+  * player icon by accountId - loading from \res_mods\xvm\res\clanicons\ID\
+    Search order is:
+      id -> nick -> clan -> clan/default.png -> nick/default.png
+
+XVM-5.3.4:
+  * new macros:
+      {{ready}}, returns "ready" when player loaded to the game and empty if not
+      {{gun-marks}}, return count of the marks on gun for spotted vehicles
+  * new option battle/allowGunMarksInPanelsAndMinimap - enable {{gun-marks}}
+    macro in players panels and minimap. WARNING: performance expensive
+  * added texts/gunMarks config section
+  * added ability to disable some modes in the players panels
+  * new section "minimapAlt" for alternative minimap mode (disabled by default)
+  * localization:
+      added {{l10n:Not ready}}
+  * "hotkeys" section updated:
+     - added key bindings for minimap and players panel alt mode
+     - full keyboard can be used
+     ATTENTION: key codes were changed
+  * disabled color fogging of {{c:*}} macros for dead vehicles
+    use {{alive}} macro with alpha:
+      <font color='{{c:xwn}}' alpha='{{alive?#FF|#80}}'>{{xwn}}</font>
+  * section turretMarkers moved to markers/turretMarkers
+
+XVM-5.3.3:
+  * adaptation to WoT 0.9.2
+  * new macros:
+      {{player}}, returns "pl" for current player and empty string for others
+      {{tk}}, returns "tk" for teamkiller and empty string for others
+      {{wgr}}, {{c:wgr}}, {{a:wgr}}, {{xwgr}}, {{c:xwgr}}, {{a:xwgr}} for WG rating
+  * macros extended:
+      {{l10n:<id>}} now works in PlayersPanel
+  * new option:
+      playersPanel/altMode - mode with Alt key pressed
+  * localization:
+      added {{l10n:Destroyed}} and {{l10n:No data}}
+
+XVM-5.3.2:
+  * new options: captureBar/allyColor, captureBar/enemyColor
+
+XVM-5.3.1:
+  * adaptation to WoT 0.9.1
+  * show actual view range, gun reload time and signal range in the tank params in hangar
+
+XVM-5.3.0:
   [MAJOR UPDATES]
   * new macros formatting (see readme-en.txt)
+      {{name[%[flag][width][.prec]type][~suf][|def]}}
+      name  - macro name
+      flag  - "-" for left align, else right align
+              "0" for filling with leading zeros
+      width - minimum width
+      prec  - maximum width for lines or number of digits after comma for numbers
+      type  - type (s - string, d - decimal, f - float, ...)
+      suf   - suffix added at the end
+      def   - default value, set when value is absent:
+    Details: http://en.wikipedia.org/wiki/Printf
+    For example:
+      {{name%-16.16s}}      - cut names longer 10 chars, and fill names shorter 10 chars and align left
+      {{kb%4.01f~k|----}}   - width 4 chars, exactly 1 char after comma, align right
+                              if kb==null, display "----"
   * config version increased to 5.1.0
 
-XVM-5.2.1-test2:
+  [NEW FUNCTIONS]
+  * dynamic circles on the minimap. Options:
+      minimap/circles/artillery - maximum range of fire for artillery
+      minimap/circles/shell - maximum range of shooting for autocannon and semi-automatic cannon
+      minimap/circles/view - view range (dynamically changes when switching binocular telescope)
+      minimap/circles/major - removed, replaced with "view" section
+    Omegaice's code was used for this component
+  * new options in playersPanel for extra text fields
+  * new options in playersPanel for frags formatting
+  * new option playersPanel/startMode for initial players panels mode
+  * new option battle/allowHpInPanelsAndMinimap - enable {{hp}}, {{hp-ratio}}, {{hp-max}}
+    macros in players panels and minimap. WARNING: performance expensive
+
+  [MACROS]
+  * new macros:
+    {{frags}} - current frags
+    {{alive}} - 'alive' for alive, '' for dead
+    {{battletier}} - guessed current battle tier
+    {{squad-num}} - squad number or null if not in squad
+  * macros extended: {{hp:XX}} and {{hp-max:XX}} return value normalized to XX for current battle tier
+    ex.: {{hp:300}} - will return 300 for HP=700 at tier-5 battle, and for HP=3000 at tier-11 battle.
+  * macros extended: value replacement - {{macro?rep}}
+    ex.: "alpha": "{{alive?80|0}}" - set alpha to 80 for alive and 0 for dead
+  * changed value of macro {{squad}} from '1' to 'sq'
+  * removed macro {{vehicle-type}} as duplication of {{vehicle}}
+  * removed macro {{vehicle-name}} as duplication of {{vehiclename}}
+  * removed macro {{short-nick}} and option minimap/nickShrink as replaced by {{nick%.5s}}
+
+  [OTHER]
+  * source code now stored on http://dev.modxvm.com/
+
+XVM-5.2.1:
+  * adaptation to WoT 0.9.0
+
+  [NEW FUNCTIONS]
+  * new option login/saveLastServer - save last server (disabled by default)
+  * localization: New rules for localization submission. Details: https://code.google.com/p/wot-xvm/wiki/LocalizingXVM
+
   [FIXES]
   * players panels was not shown after battle loading
   * fixed displaying of elements on minimap
 
-  [NEW FUNCTIONS]
-  * new option login/saveLastServer - save last server (disabled by default)
-
-
-XVM-5.2.1-test1:
-  * adaptation to WoT 0.9.0
-
-  [NEW FUNCTIONS]
-  * localization: New rules for localization submission. Details: https://code.google.com/p/wot-xvm/wiki/LocalizingXVM
-
-XVM-5.2.0-test1:
+XVM-5.2.0:
   [MAJOR UPDATES]
   * main config file (xvm.xc) moved to res_mods/xvm/configs
   * statistics must be enabled in the personal cabinet on the http://www.modxvm.com/ site
@@ -144,7 +393,7 @@ XVM-4.1.1:
   * squad window: text field with vehicle tier no longer creates artefacts
 
   [OTHER]
-  * automation: XVM nightly builds http://wargaming.by-reservation.com/xvm/
+  * automation: XVM nightly builds http://nightly.modxvm.com/
 
 XVM-4.1.0:
   [NEW FUNCTIONS]

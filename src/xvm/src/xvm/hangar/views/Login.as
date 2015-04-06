@@ -1,18 +1,16 @@
 /**
  * XVM - login page
- * @author Maxim Schedriviy "m.schedriviy(at)gmail.com"
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
 package xvm.hangar.views
 {
+    import com.xfw.*;
     import com.xvm.*;
     import com.xvm.infrastructure.*;
-    import com.xvm.types.cfg.*;
-    import flash.events.*;
     import flash.utils.*;
-    import net.wg.gui.login.impl.LoginPage;
-    import net.wg.infrastructure.interfaces.IView;
-    import net.wg.infrastructure.events.LifeCycleEvent;
-    import xvm.hangar.*;
+    import net.wg.gui.login.impl.*;
+    import net.wg.infrastructure.events.*;
+    import net.wg.infrastructure.interfaces.*;
 
     public class Login extends XvmViewBase
     {

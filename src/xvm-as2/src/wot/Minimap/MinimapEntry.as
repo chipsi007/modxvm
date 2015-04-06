@@ -1,10 +1,3 @@
-import com.xvm.*;
-import wot.Minimap.dataTypes.Player;
-import wot.Minimap.MinimapEvent;
-import wot.Minimap.model.SyncModel;
-import wot.Minimap.model.externalProxy.MapConfig;
-import wot.Minimap.view.*;
-
 /**
  * MinimapEntry represent individual object on map.
  * One tank icon, base capture point, starting point or player himself.
@@ -16,17 +9,19 @@ import wot.Minimap.view.*;
  * ) Rescale child MovieClips to prevent inappropriate scale propagation.
  * ) Colorize icon.
  *
- * @author ilitvinov87@gmail.com
+ * @author ilitvinov87(at)gmail.com
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
+
+import com.xvm.*;
+import wot.Minimap.*;
+import wot.Minimap.model.externalProxy.*;
+import wot.Minimap.view.*;
 
 class wot.Minimap.MinimapEntry
 {
     /////////////////////////////////////////////////////////////////
     // wrapped methods
-
-    public static var STATIC_ICON_BASE:String = "base"; /** Team colored capture base */
-    public static var STATIC_ICON_CONTROL:String = "control"; /** Shared grey capture base */
-    public static var STATIC_ICON_SPAWN:String = "spawn"; /** Spawn point. Diamond shaped with number at center. */
 
     public var wrapper:net.wargaming.ingame.MinimapEntry;
     private var base:net.wargaming.ingame.MinimapEntry;
@@ -39,61 +34,133 @@ class wot.Minimap.MinimapEntry
         MinimapEntryCtor();
     }
 
-    function lightPlayer()
+    function init_xvm()
     {
-        return this.lightPlayerImpl.apply(this, arguments);
+        return this.init_xvmImpl.apply(this, arguments);
     }
 
-    function init()
+    function draw()
     {
-        return this.initImpl.apply(this, arguments);
+        return this.drawImpl.apply(this, arguments);
     }
 
-    function invalidate()
+    function onEnterFrameHandler()
     {
-        return this.invalidateImpl.apply(this, arguments);
+        return this.onEnterFrameHandlerImpl.apply(this, arguments);
     }
 
     // wrapped methods
     /////////////////////////////////////////////////////////////////
 
-    /** Entry type: enemy, ally, squadman, empty possible */
-    public static var MINIMAP_ENTRY_NAME_ENEMY:String = "enemy";
-    public static var MINIMAP_ENTRY_NAME_ALLY:String = "ally";
-    public static var MINIMAP_ENTRY_NAME_SQUAD:String = "squadman";
-    public static var MINIMAP_ENTRY_NAME_SELF:String = ""; /** Type of player himself and ? */
+    private static var _minimap_initialized:Boolean = false;
 
-    public static var MINIMAP_ENTRY_VEH_CLASS_LIGHT:String = "lightTank";
-    public static var MINIMAP_ENTRY_VEH_CLASS_MEDIUM:String = "mediumTank";
-    public static var MINIMAP_ENTRY_VEH_CLASS_HEAVY:String = "heavyTank";
-    public static var MINIMAP_ENTRY_VEH_CLASS_TD:String = "AT-SPG";
-    public static var MINIMAP_ENTRY_VEH_CLASS_SPG:String = "SPG";
-    public static var MINIMAP_ENTRY_VEH_CLASS_SUPER:String = "superheavyTank";
+    public var playerId:Number;
 
-    /**
-     * Subject of PlayersPanel <-> Minimap syncronization.
-     * Syncronized during light delegate event.
-     */
-    public var uid:Number;
-
-    public var player:Player;
-
-    /** Used only for camera entry to define if entry is processed with Lines class */
+    // Used only for camera entry to define if entry is processed with Lines class
     public var cameraExtendedToken:Boolean;
 
-    public var labelMc:MovieClip;
+    private var labelMc:MovieClip;
 
     function MinimapEntryCtor()
     {
         Utils.TraceXvmModule("Minimap");
     }
 
+    function init_xvmImpl(playerId:Number, isLit:Boolean, entryName:String, vClass:String)
+    {
+        //Logger.add("init_xvmImpl: id=" + playerId + " lit=" + isLit);
+        Cmd.profMethodStart("MinimapEntry.init_xvm()");
+
+        MarkerColor.setColor(wrapper);
+
+        if (playerId <= 0)
+        {
+            Cmd.profMethodEnd("MinimapEntry.init_xvm()");
+            return;
+        }
+
+        this.playerId = playerId;
+
+        if (IconsProxy.playerIds[playerId])
+        {
+            delete IconsProxy.playerIds[playerId];
+            GlobalEventDispatcher.dispatchEvent(new MinimapEvent(MinimapEvent.ENTRY_LOST, this, playerId));
+        }
+
+        if (isLit)
+        {
+            Cmd.profMethodEnd("MinimapEntry.init_xvm()");
+            return;
+        }
+
+        IconsProxy.playerIds[playerId] = this;
+
+        if (entryName == 'player')
+        {
+            var entry:MinimapEntry = IconsProxy.entry(playerId);
+            entry.wrapper.entryName = entryName;
+            entry.wrapper.vehicleClass = vClass;
+        }
+
+        //Logger.add("add:   " + playerId);
+        GlobalEventDispatcher.dispatchEvent(new MinimapEvent(MinimapEvent.ENTRY_INITED, this, playerId));
+
+        this.onEntryRevealed();
+
+        this.wrapper["_xvm_removeMovieClip"] = this.wrapper.removeMovieClip;
+        this.wrapper.removeMovieClip = function()
+        {
+            //Logger.add("remove: " + playerId);
+            delete IconsProxy.playerIds[playerId];
+            GlobalEventDispatcher.dispatchEvent(new MinimapEvent(MinimapEvent.ENTRY_LOST, this.xvm_worker, playerId));
+            this["_xvm_removeMovieClip"]()
+        }
+
+        Cmd.profMethodEnd("MinimapEntry.init_xvm()");
+    }
+
+    function drawImpl()
+    {
+        Cmd.profMethodStart("MinimapEntry.draw()");
+
+        //Logger.add('draw: ' + playerId + " " + wrapper.entryName + " " + wrapper.m_type + " " + wrapper.vehicleClass);
+
+        base.draw();
+
+        MarkerColor.setColor(wrapper);
+
+        if (!_minimap_initialized && wrapper._name == "MinimapEntry1")
+        {
+            _minimap_initialized = true;
+            //Logger.addObject(wrapper, 2);
+            GlobalEventDispatcher.dispatchEvent( { type: MinimapEvent.REFRESH } );
+        }
+
+        if (playerId)
+            GlobalEventDispatcher.dispatchEvent(new MinimapEvent(MinimapEvent.ENTRY_UPDATED, this, playerId));
+        else if (this.wrapper._name == "MinimapEntry0")
+            GlobalEventDispatcher.dispatchEvent(new MinimapEvent(MinimapEvent.CAMERA_UPDATED, this));
+
+        rescaleAttachments();
+
+        Cmd.profMethodEnd("MinimapEntry.draw()");
+    }
+
+    function onEnterFrameHandlerImpl()
+    {
+        base.onEnterFrameHandler();
+        labelMc._x = wrapper._x;
+        labelMc._y = wrapper._y;
+    }
+
+    // INTERNAL
+
     /**
      * All attachments container: TextFiels(Labels), Shapes.
      */
     public function get attachments():MovieClip
     {
-        if (!wrapper.xvm_attachments)
+        if (wrapper.xvm_attachments == null)
             wrapper.createEmptyMovieClip("xvm_attachments", wrapper.getNextHighestDepth());
         return wrapper.xvm_attachments;
     }
@@ -108,117 +175,39 @@ class wot.Minimap.MinimapEntry
      */
     public function rescaleAttachments():Void
     {
-        attachments._xscale = attachments._yscale = (1 / (wrapper._xscale / 100)) * 100;
-    }
-
-    function lightPlayerImpl(visibility)
-    {
-        /**
-         * Behavior of original icon highlighting is altered temporarily
-         * while sync flag is raised.
-         */
-        if (isSyncProcedureInProgress)
-        {
-            initExtendedBehaviour();
-        }
-        else
-        {
-            base.lightPlayer(visibility);
-        }
-    }
-
-    function initImpl()
-    {
-        base.init.apply(base, arguments);
-        MarkerColor.setColor(wrapper);
-    }
-
-    function invalidateImpl()
-    {
-        //Logger.add('invalidateImpl ' + Stat.s_loaded);
-        base.invalidate();
-        MarkerColor.setColor(wrapper);
-        LabelViewBuilder.updateTextField(labelMc);
-    }
-
-    public static function getVehicleClassSymbol(vehicleClass:String):String
-    {
-        switch (vehicleClass)
-        {
-            case MINIMAP_ENTRY_VEH_CLASS_LIGHT:
-                return MapConfig.lightSymbol;
-            case MINIMAP_ENTRY_VEH_CLASS_MEDIUM:
-                return MapConfig.mediumSymbol;
-            case MINIMAP_ENTRY_VEH_CLASS_HEAVY:
-                return MapConfig.heavySymbol;
-            case MINIMAP_ENTRY_VEH_CLASS_TD:
-                return MapConfig.tdSymbol;
-            case MINIMAP_ENTRY_VEH_CLASS_SPG:
-                return MapConfig.spgSymbol;
-            case MINIMAP_ENTRY_VEH_CLASS_SUPER:
-                return MapConfig.superSymbol;
-            default:
-                return "";
-        }
+        var scale = (1 / (wrapper._xscale / 100)) * 100;
+        if (attachments._xscale != scale)
+            attachments._xscale = attachments._yscale = scale;
     }
 
     // -- Private
 
-    private function initExtendedBehaviour():Void
+    private function onEntryRevealed()
     {
-        uid = SyncModel.instance.getTestUid();
-        /** Inform PlayersPanel */
-        GlobalEventDispatcher.dispatchEvent(new MinimapEvent(MinimapEvent.ENEMY_REVEALED, uid));
+        if (!MapConfig.enabled || !MapConfig.revealedEnabled)
+            return;
 
-        if (MapConfig.revealedEnabled)
+        this.labelMc = LabelsContainer.getLabel(playerId);
+        if (wrapper.entryName == MinimapConstants.STATIC_ICON_BASE)
         {
-            getLabel();
-            setLabelToMimicEntryMoves();
+            if (wrapper.orig_entryName == null)
+                wrapper.orig_entryName = wrapper.entryName;
+            wrapper.setEntryName(MinimapConstants.STATIC_ICON_CONTROL);
         }
-    }
-    private function getLabel():Void
-    {
-        labelMc = labelsContainer.getLabel(uid, wrapper.entryName, wrapper.vehicleClass);
-        if (wrapper.entryName == STATIC_ICON_BASE)
-            wrapper.setEntryName(STATIC_ICON_CONTROL);
+
+        setLabelToMimicEntryMoves();
     }
 
     private function setLabelToMimicEntryMoves():Void
     {
-        /**
-         * No FPS drop discovered.
-         * Okay.
-         */
-        wrapper.onEnterFrame = function()
+        this.wrapper.onEnterFrame = function()
         {
-            /**
-             * Seldom error workaround.
-             * Wreck sometimes is placed at map center.
-             */
-            if (!this._x && !this._y)
-            {
+            // Seldom error workaround. Wreck sometimes is placed at map center.
+            if (isNaN(this._x) || isNaN(this._y))
                 return;
-            }
 
-            var entry:wot.Minimap.MinimapEntry = this.xvm_worker;
-            entry.labelMc._x = this._x;
-            entry.labelMc._y = this._y;
-        }
-    }
-
-    private function get isSyncProcedureInProgress():Boolean
-    {
-        var ret:Boolean = SyncModel.instance.isSyncProcedureInProgress;
-        if (ret == null)
-        {
-            Logger.add("## ERROR wot.Minimap.MinimapEntry: SyncModel.instance.isSyncProcedureInProgress == null");
-        }
-
-        return ret;
-    }
-
-    private function get labelsContainer():LabelsContainer
-    {
-        return LabelsContainer.instance;
+            this.xvm_worker.labelMc._x = this._x;
+            this.xvm_worker.labelMc._y = this._y;
+        };
     }
 }

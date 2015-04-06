@@ -1,26 +1,19 @@
 /**
  * XVM - user info
- * @author Maxim Schedriviy "m.schedriviy(at)gmail.com"
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
 package xvm.profile
 {
+    import com.xfw.*;
     import com.xvm.*;
     import com.xvm.infrastructure.*;
-    import com.xvm.misc.*;
-    import com.xvm.utils.*;
-    import flash.events.*;
-    import flash.utils.*;
     import net.wg.gui.components.windows.*;
     import net.wg.gui.events.*;
     import net.wg.gui.lobby.profile.*;
-    import net.wg.gui.lobby.profile.components.*;
-    import net.wg.gui.lobby.profile.data.SectionLayoutManager;
-    import net.wg.gui.lobby.profile.pages.awards.ProfileAwards;
     import net.wg.gui.lobby.profile.pages.technique.*;
     import net.wg.gui.lobby.window.*;
     import net.wg.infrastructure.events.*;
     import net.wg.infrastructure.interfaces.*;
-    import scaleform.clik.events.*;
     import xvm.profile.components.*;
 
     public class ProfileXvmView extends XvmViewBase
@@ -75,7 +68,7 @@ package xvm.profile
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
             */
         }
@@ -88,7 +81,7 @@ package xvm.profile
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
 
@@ -107,26 +100,30 @@ package xvm.profile
 
             try
             {
-                //Logger.addObject(tabNavigator.initData, 3);
+                if (tabNavigator.xfw_initData == null)
+                {
+                    //Logger.add("tabNavigator.initData == null");
+                    App.utils.scheduler.envokeInNextFrame(tabNavigator_onAfterPopulate);
+                    return;
+                }
                 // initialize start page
-                var alias:String = tabNavigator.initData.selectedAlias;
+                var alias:String = tabNavigator.xfw_initData.selectedAlias;
                 if (alias == "profileSummaryPage" || alias == "")
                 {
                     var index:int = Config.config.userInfo.startPage - 1;
-                    if (index > 0 && index < tabNavigator.initData.sectionsData.length)
-                        tabNavigator.initData.selectedAlias = tabNavigator.initData.sectionsData[index].alias;
+                    if (index > 0 && index < tabNavigator.xfw_initData.sectionsData.length)
+                        tabNavigator.bar.selectedIndex = index;
                 }
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
 
         private function viewStack_ViewShowed(e:ViewStackEvent):void
         {
             //Logger.add("viewStack_ViewShowed: " + e.view);
-
             try
             {
                 var page:ProfileTechniquePage = e.view as ProfileTechniquePage;
@@ -136,7 +133,7 @@ package xvm.profile
                     {
                         page.listComponent.techniqueList.rowHeight = 32;
 
-                        var tp:TechniquePage = new TechniquePage(page, Globals[Globals.NAME]);
+                        var tp:TechniquePage = new TechniquePage(page, XvmGlobals[XvmGlobals.CURRENT_USER_NAME]);
                         page.addChild(tp);
                     }
                     return;
@@ -153,7 +150,10 @@ package xvm.profile
                         var playerName:String = WGUtils.GetPlayerName(((view as ProfileWindow).window as Window).title);
 
                         // get player id from the view name.
-                        var playerId:int = parseInt(view.as_name.replace("window_", ""));
+                        var playerId:int = parseInt(view.as_name.replace("profileWindow_", ""));
+
+                        //Logger.addObject(view);
+                        //Logger.add(playerId.toString());
 
                         var tw:TechniqueWindow = new TechniqueWindow(window, playerName, playerId);
                         window.addChild(tw);
@@ -163,7 +163,7 @@ package xvm.profile
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
     }

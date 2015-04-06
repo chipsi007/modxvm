@@ -3,28 +3,37 @@
  */
 {
   "locale": {
-    // Author of translation
-    "XVM_translator": "XVM Team",
+    // Common
+    "Warning": "Warning",
+    "Error": "Error",
+    "Information": "Information",
+    "OK": "OK",
+    "Cancel": "Cancel",
+    "Save": "Save",
+    "Remove": "Remove",
+    "Yes": "Yes",
+    "No": "No",
 
     // Ping
     "Initialization": "Initialization",
 
-    // BattleLoading
-    "New version available": "New version available",
-
     // Win chance
     "Chance error": "Chance error",
     "Chance to win": "Chance to win",
+    "Team strength": "Team strength",
     //"global": "global",
     //"per-vehicle": "per-vehicle",
     "chanceLive": "For alive",
     "chanceBattleTier": "Battle tier",
 
     // Hitlog
-    "attack": "attack",
+    "shot": "shot",
     "fire": "fire",
     "ramming": "ramming",
     "world_collision": "falling",
+    "death_zone": "death zone",
+    "drowning": "drowning",
+
     "Hits": "Hits",
     "Total": "Total",
     "Last": "Last",
@@ -33,16 +42,17 @@
     "hpLeftTitle": "Hitpoints left:",
 
     // Capture
-    "enemyBaseCapture": "Base capture by allies!",
-    "enemyBaseCaptured": "Base captured by allies!",
-    "allyBaseCapture": "Base capture by enemies!",
-    "allyBaseCaptured": "Base captured by enemies!",
+    "enemyBaseCapture": "Base{0} capture by allies!",
+    "enemyBaseCaptured": "Base{0} captured by allies!",
+    "allyBaseCapture": "Base{0} capture by enemies!",
+    "allyBaseCaptured": "Base{0} captured by enemies!",
     "Timeleft": "Timeleft",
     "Capturers": "Capturers",
 
     // BattleResults
     "Hit percent": "Hit percent",
     "Damage (assisted / own)": "Damage (assisted / own)",
+    "BR_xpCrew": "crew",
 
     // TeamRenderers
     "Friend": "Friend",
@@ -60,6 +70,7 @@
     "WN6": "WN6",
     "WN8": "WN8",
     "EFF": "EFF",
+    "WGR": "WGR",
     "updated": "updated",
     " to ": " to ",
     "avg": "avg",
@@ -92,8 +103,30 @@
     "PutOwnCrew": "Put own crew",
     "PutBestCrew": "Put best crew",
     "PutClassCrew": "Put same class crew",
+    "PutPreviousCrew": "Put previous crew",
+    "DropAllCrew": "Drop all crew",
+    "noSkills": "No skills",
+
+    // Vehicle Params
+    "gun_reload_time/actual": "Actual gun reload time",
+    "view_range/base": "base",
+    "view_range/actual": "actual",
+    "view_range/stereoscope": "with stereoscope",
+    "radio_range/base": "base",
+    "radio_range/actual": "actual",
+    "shootingRadius": "Shooting radius",
+    "pitchLimits": "Elevation arc",
+    "traverseLimits": "Gun traverse arc",
+    "terrainResistance": "Terrain resistance",
+    "gravity": "Gravity",
+    "shellSpeed": "Shell speed",
+    "camoCoeff": "Camo coefficients",
+    "(m/sec)": "(m/sec)",
+    "(sec)": "(sec)",
+    "(m)": "(m)",
 
     // Squad
+    "Squad battle tiers": "Squad battle tiers",
     "Vehicle": "Vehicle",
     "Battle tiers": "Battle tiers",
     "Type": "Type",
@@ -114,16 +147,61 @@
     // VehicleMarkersManager
     "blownUp": "Blown-up!",
 
+    // Check version
+    // XVM 5.3.4 (4321)
+    "ver/currentVersion": "XVM {0} ({1})",
+    "ver/newVersion": "Update available:<tab/><a href='#XVM_SITE_DL#'><font color='#00FF00'>v{0}</font></a>\n{1}",
+    "websock/not_connected": "<font color='#FFFF00'>no connection to XVM server</font>",
+
     // Token
-    "token/network_error": "Network error. XVM statistics is unavailable, try again later.",
-    "token/bad_token": "Bad token.\n{{l10n:token/notify_xvm_site}}",
-    "token/blocked": "Status: <font color='#FF0000'>Blocked</font><br>{{l10n:token/notify_xvm_site}}",
-    "token/inactive": "Status: <font color='#FFFF00'>Inactive</font><br>{{l10n:token/notify_xvm_site}}",
-    "token/active": "Status: <font color='#00FF00'>Active</font>",
-    "token/days_left": "Days left:<tab/><font color='#eeeeee'>{0}</font>",
-    "token/hours_left": "Hours left:<tab/><font color='#ffff00'>{0}</font>",
-    "token/cnt": "Requests count:<tab/><font color='#eeeeee'>{0}</font>",
+    "token/services_unavailable": "Network services unavailable.&nbsp;&nbsp;<a href='#XVM_SITE_UNAVAILABLE#'><font size='11'>more info</font></a>",
+    "token/services_inactive": "Network services inactive.&nbsp;&nbsp;<a href='#XVM_SITE_INACTIVE#'><font size='11'>more info</font></a>",
+    "token/blocked": "Status: <font color='#FF0000'>Blocked</font>&nbsp;&nbsp;<a href='#XVM_SITE_BLOCKED'><font size='11'>more info</font></a>",
+    "token/active": "Status:<tab/><font color='#00FF00'>Active</font>",
+    "token/time_left": "Time left:<tab/><font color='#EEEEEE'>{0}d. {1}h. {2}m.</font>",
+    "token/time_left_warn": "Time left:<tab/><font color='#EEEE00'>{0}d. {1}h. {2}m.</font>",
+    "token/cnt": "Requests count:<tab/><font color='#EEEEEE'>{0}</font>",
     "token/unknown_status": "Unknown status",
-    "token/notify_xvm_site": "Please go to the <a href='#XVM_SITE#'>XVM site</a> and activate statistics in the personal cabinet."
+
+    // Lobby
+    "lobby/header/gold_locked_tooltip": "Gold is locked",
+    "lobby/header/gold_unlocked_tooltip": "Gold is unlocked",
+    "lobby/header/freexp_locked_tooltip": "Free XP is locked",
+    "lobby/header/freexp_unlocked_tooltip": "Free XP is unlocked",
+
+    "lobby/crew/enable_prev_crew": "Automatically return crew",
+    "lobby/crew/enable_prev_crew_tooltip": "<b><font color='#FDF4CE'>{{l10n:lobby/crew/enable_prev_crew}}</font></b>\nAutomatically return the crew that fought\nin this vehicle in the previous battle",
+
+    // Carousel
+    "NonElite": "Non elite",
+    "Premium": "Premium",
+    "Normal": "Normal",
+    "MultiXP": "Multi XP",
+    "NoMaster": "No master",
+    "CompleteCrew": "Complete crew",
+
+    // Comments
+    "Network services unavailable": "Network services unavailable",
+    "Error loading comments": "Error loading comments",
+    "Error saving comments": "Error saving comments",
+    "Comments disabled": "Comments disabled",
+    "Edit data": "Edit data",
+    "Nick": "Nick",
+    "Group": "Group",
+    "Comment": "Comment",
+
+    // Vehicle status
+    "Destroyed": "Destroyed",
+    "No data": "No data",
+    "Not ready": "Not ready",
+
+    // Quests
+    "Hide with honors": "Hide with honors",
+    "Hide unavailable": "Hide unavailable",
+
+    // Config loading
+    "XVM config reloaded": "XVM config reloaded",
+    "Config file xvm.xc was not found, using the built-in config": "Config file xvm.xc was not found, using the built-in config",
+    "Error loading XVM config": "Error loading XVM config"
   }
 }

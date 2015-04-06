@@ -1,13 +1,11 @@
 /**
  * XVM
- * @author Maxim Schedriviy "m.schedriviy(at)gmail.com"
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
 package xvm.svcmsg.UI
 {
-    import com.xvm.*;
-    import com.xvm.misc.*;
+    import com.xfw.*;
     import flash.events.*;
-    import net.wg.gui.notification.*;
     import net.wg.gui.notification.vo.*;
     import xvm.svcmsg.*;
 
@@ -28,7 +26,7 @@ package xvm.svcmsg.UI
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
 
@@ -40,7 +38,7 @@ package xvm.svcmsg.UI
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
     }

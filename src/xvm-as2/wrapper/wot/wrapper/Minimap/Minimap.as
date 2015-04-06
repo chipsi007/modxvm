@@ -8,9 +8,8 @@ class wot.wrapper.Minimap.Minimap extends net.wargaming.ingame.Minimap
 
         var OVERRIDE_FUNCTIONS:Array = [
             "scaleMarkers",
-            "onEntryInited",
             "correctSizeIndex",
-            "sizeUp"
+            "draw"
         ];
         Wrapper.override(this, new wot.Minimap.Minimap(this, super), OVERRIDE_FUNCTIONS);
     }

@@ -1,35 +1,30 @@
-import com.xvm.*;
-import wot.Minimap.MinimapEntry
-
 /**
- * @author sirmax
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
+
+import com.xvm.*;
+import wot.Minimap.*;
+
 class wot.Minimap.view.MarkerColor
 {
     public static function setColor(wrapper:net.wargaming.ingame.MinimapEntry):Void
     {
-        if (wrapper.m_type == null || wrapper.vehicleClass == null || wrapper.entryName == null || wrapper.entryName == "")
+        var wr_entryName = wrapper.orig_entryName || wrapper.entryName;
+        if (wrapper.m_type == null || wrapper.vehicleClass == null || wr_entryName == null || wr_entryName == "")
             return;
 
-        if (wrapper.entryName == MinimapEntry.STATIC_ICON_CONTROL)
+        if (wr_entryName == MinimapConstants.STATIC_ICON_CONTROL)
             return;
 
-        if (wrapper.m_type == "player" && wrapper.entryName == "postmortemCamera")
+        if (wrapper.m_type == "player" && wr_entryName == "postmortemCamera")
             return;
-
-        if (Config.s_config == null)
-        {
-            // wait for config
-            setTimeout(function() { MarkerColor.setColor(wrapper); }, 1);
-            return;
-        }
 
         var color = null;
-        if (Config.s_config.markers.useStandardMarkers)
+        if (Config.config.markers.useStandardMarkers)
         {
-            if (wrapper.entryName == MinimapEntry.STATIC_ICON_BASE)
+            if (wr_entryName == MinimapConstants.STATIC_ICON_BASE)
                 return;
-            var schemeName = wrapper.entryName != "spawn" ? wrapper.colorSchemeName
+            var schemeName = wr_entryName != MinimapConstants.STATIC_ICON_SPAWN ? wrapper.colorSchemeName
                 : (wrapper.vehicleClass == "red") ? "vm_enemy" : (wrapper.vehicleClass == "blue") ? "vm_ally" : null;
             if (!schemeName)
                 return;
@@ -38,31 +33,37 @@ class wot.Minimap.view.MarkerColor
         else
         {
             // use standard team bases if color is not changed
-            if (wrapper.entryName == MinimapEntry.STATIC_ICON_BASE)
+            var isBase:Boolean = wr_entryName == MinimapConstants.STATIC_ICON_BASE;
+            var isSpawn:Boolean = wr_entryName == MinimapConstants.STATIC_ICON_SPAWN;
+            if (isBase)
             {
-                var aa = Config.s_config.colors.system["ally_alive"];
+                var aa = Config.config.colors.system["ally_base"];
                 var aad = Defines.C_ALLY_ALIVE;
                 if (wrapper.vehicleClass == "blue" && aa == aad)
                     return;
-                var ea = Config.s_config.colors.system["enemy_alive"];
+                var ea = Config.config.colors.system["enemy_base"];
                 var ead = Defines.C_ENEMY_ALIVE;
                 if (wrapper.vehicleClass == "red" && ea == ead)
                     return;
             }
-            var entryName = (wrapper.entryName != MinimapEntry.STATIC_ICON_BASE && wrapper.entryName != "spawn") ? wrapper.entryName
+            var entryName = (!isBase && !isSpawn) ? wr_entryName
                 : (wrapper.vehicleClass == "red") ? "enemy" : (wrapper.vehicleClass == "blue") ? "ally" : null;
             if (entryName == "teamKiller" && wrapper.m_type == "enemy")
                 entryName = "enemy";
             if (entryName != null)
-                color = ColorsManager.getSystemColor(entryName, wrapper.isDead);
-            if (wrapper.entryName == MinimapEntry.STATIC_ICON_BASE)
-                wrapper.setEntryName(MinimapEntry.STATIC_ICON_CONTROL);
+                color = ColorsManager.getSystemColor(entryName, wrapper.isDead, false, isBase);
+            if (wrapper.entryName == MinimapConstants.STATIC_ICON_BASE)
+            {
+                if (wrapper.orig_entryName == null)
+                    wrapper.orig_entryName = wrapper.entryName;
+                wrapper.setEntryName(MinimapConstants.STATIC_ICON_CONTROL);
+            }
         }
 
         if (color != null)
         {
             GraphicsUtil.colorize(wrapper.teamPoint || wrapper.player/*.litIcon*/, color,
-                wrapper.player ? Config.s_config.consts.VM_COEFF_MM_PLAYER : Config.s_config.consts.VM_COEFF_MM_BASE);
+                wrapper.player ? Config.config.consts.VM_COEFF_MM_PLAYER : Config.config.consts.VM_COEFF_MM_BASE);
         }
     }
 }

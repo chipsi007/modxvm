@@ -1,15 +1,13 @@
 /**
  * XVM
- * @author Maxim Schedriviy "m.schedriviy(at)gmail.com"
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
 package xvm.techtree
 {
+    import com.xfw.*;
     import com.xvm.*;
-    import com.xvm.misc.*;
     import com.xvm.types.dossier.*;
-    import flash.display.*;
     import flash.text.*;
-    import net.wg.gui.lobby.profile.pages.technique.data.*;
     import net.wg.gui.lobby.techtree.constants.*;
     import net.wg.gui.lobby.techtree.data.state.*;
     import net.wg.gui.lobby.techtree.data.vo.*;
@@ -64,15 +62,15 @@ package xvm.techtree
                 {
                     var id:Number = getID();
                     var dossier:AccountDossier = Dossier.getAccountDossier();
-                    if (dossier != null && dossier.vehicles.hasOwnProperty(id))
+                    if (dossier != null)
                     {
-                        var vdata:VehicleDossierCut = dossier.vehicles[id];
+                        var vdata:VehicleDossierCut = dossier.getVehicleDossierCut(id);
                         masteryStr = "<img src='img://gui/maps/icons/library/proficiency/class_icons_" + vdata.mastery + ".png' width='23' height='23'>";
                     }
                 }
                 catch (ex:Error)
                 {
-                    Logger.add(ex.getStackTrace());
+                    Logger.err(ex);
                 }
                 finally
                 {

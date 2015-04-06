@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Main XVM class, implements workflow logic.
  */
 import com.greensock.OverwriteManager;
@@ -20,8 +20,8 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
 {
     //private function trace(str:String):Void
     //{
-        //if (m_playerFullName == "...")
-        //Logger.add(m_playerFullName + "> " + str);
+        //if (m_playerName == "...")
+        //Logger.add(m_playerName + "> " + str);
     //}
 
     /**
@@ -79,11 +79,19 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
     function init(vClass:String, vIconSource:String, vType:String, vLevel:Number,
         pFullName:String, pName:String, pClan:String, pRegion:String,
         curHealth:Number, maxHealth:Number, entityName:String, speaking:Boolean, hunt:Boolean, entityType:String)
+        /* added by XVM: playerId:Number, marksOnGun:Number, vehicleState:Number, frags:Number*/
     {
+        Cmd.profMethodStart("Xvm.init()");
+
         m_playerName = pName; // alex
         m_playerClan = pClan; // "" || ALX
         m_playerRegion = pRegion; // null || ?
-        m_playerFullName = pFullName; // alex[ALX]
+        //m_playerFullName = pFullName; // alex[ALX] (MS-1)
+
+        //Logger.add(m_playerName);
+        //Logger.add(m_playerClan);
+        //Logger.add(m_playerRegion);
+        //Logger.add(m_playerFullName);
 
         //trace("Xvm::init(): " + entityName + ", " + entityType);
 
@@ -103,6 +111,11 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         m_isDead    = curHealth <= 0; // -1 for ammunition storage explosion
         m_curHealth = curHealth >= 0 ? curHealth : 0;
 
+        m_playerId = arguments[14];
+        m_marksOnGun = arguments[15];
+        m_isReady = (arguments[16] & 2) != 0; // 2 - IS_AVATAR_READY
+        m_frags = arguments[17];
+
         healthBarComponent.init();
         contourIconComponent.init(m_entityType);
         levelIconComponent.init();
@@ -110,10 +123,10 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         vehicleTypeComponent.init(vClass /*mediumTank*/, hunt);
         damageTextComponent.init();
 
-        Macros.RegisterMarkerData(Utils.GetNormalizedPlayerName(m_playerFullName),
+        Macros.RegisterMarkerData(m_playerName,
         {
             turret: turretStatusComponent.getMarker()
-        }, wrapper.m_team == "ally" ? Defines.TEAM_ALLY : Defines.TEAM_ENEMY);
+        });
 
         // Create clan icon and place to mc.
         clanIconComponent.initialize(wrapper);
@@ -125,15 +138,18 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         XVMUpdateStyle();
 
         // Load stat
-        if (Config.s_config.rating.showPlayersStatistics && !Stat.s_loaded)
+        if (!Stat.s_loaded)
         {
-            GlobalEventDispatcher.addEventListener(Stat.E_STAT_LOADED, this, onStatLoaded);
-            StatLoader.LoadData();
+            GlobalEventDispatcher.addEventListener(Defines.E_STAT_LOADED, this, onStatLoaded);
         }
+
+        Cmd.profMethodEnd("Xvm.init()");
     }
 
     public function setupMarkerFrame()
     {
+        vehicleTypeComponent.setMarkerLabel();
+
         // Remove standard fields for XVM
         if (wrapper.pNameField)
         {
@@ -233,13 +249,13 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
          * 0 - "FROM_UNKNOWN", 1 - "FROM_ALLY", 2 - "FROM_ENEMY", 3 - "FROM_SQUAD", 4 - "FROM_PLAYER"
          *
          * damageType - string:
-         *  "attack", "fire", "ramming", "world_collision", "death_zone", "drowning", "explosion"
+         *  "shot", "fire", "ramming", "world_collision", "death_zone", "drowning"
          */
 
         //Logger.add("Xvm::updateHealth(" + flag + ", " + damageType + ", " + newHealth +")");
 
         if (newHealth < 0)
-            s_blowedUp[m_playerFullName] = true;
+            s_blowedUp[m_playerName] = true;
 
         // can be dead with newHealth > 0 if crew is dead
         if (newHealth <= 0)
@@ -250,13 +266,13 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
 
         if (delta < 0) // Damage has been done
         {
-            // markers{ally{alive{normal
+            // markers.ally.alive.normal
             var vehicleStateCfg:Object = vehicleState.getCurrentConfig();
             healthBarComponent.updateState(vehicleStateCfg);
             healthBarComponent.showDamage(vehicleStateCfg, newHealth, m_maxHealth, -delta, flag, damageType);
             var cfg = flag == Defines.FROM_PLAYER ? vehicleStateCfg.damageTextPlayer
                 : flag == Defines.FROM_SQUAD ? vehicleStateCfg.damageTextSquadman : vehicleStateCfg.damageText;
-            //Logger.addObject(cfg, m_playerFullName);
+            //Logger.addObject(cfg, 1, m_playerName);
             damageTextComponent.showDamage(cfg, newHealth, -delta, flag, damageType);
         }
 
@@ -327,11 +343,34 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
     function onStatLoaded(event)
     {
         //trace("Xvm::onStatLoaded()");
-        if (event)
-            GlobalEventDispatcher.removeEventListener(Stat.E_STAT_LOADED, this, onStatLoaded);
+        GlobalEventDispatcher.removeEventListener(Defines.E_STAT_LOADED, this, onStatLoaded);
 
         initializeTextFields();
+        vehicleTypeComponent.setVehicleClass();
         XVMUpdateStyle();
+    }
+
+    function setMarkerStateXvm(targets:Number, vehicleStatus:Number, frags:Number, my_frags:Number)
+    {
+        var needUpdate:Boolean = false;
+
+        var prev:Boolean = m_isReady;
+        m_isReady = (vehicleStatus & 2) != 0; // 2 - IS_AVATAR_READY
+        if (prev != m_isReady)
+            needUpdate = true;
+
+        if (m_frags != frags)
+        {
+            //Logger.add('setMarkerStateXvm: ' + m_frags + " => " + ftags + " " + m_playerName);
+            m_frags = frags;
+            needUpdate = true;
+        }
+
+        if (Macros.UpdateMyFrags(my_frags))
+            needUpdate = true;
+
+        if (needUpdate)
+            XVMUpdateStyle();
     }
 
     function XVMUpdateDynamicTextFields()
@@ -351,7 +390,7 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
 
                     tfi.shadow.color = formatDynamicColor(tfi.sh_color, m_curHealth);
                     tfi.shadow.alpha = formatDynamicAlpha(tfi.sh_alpha, m_curHealth) / 100;
-                    tfi.field.filters = [  tfi.shadow ];
+                    tfi.field.filters = [ tfi.shadow ];
                 }
             }
         }
@@ -363,7 +402,7 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
 
     function initializeTextFields()
     {
-        var start = new Date();
+        //var start = (new Date()).getTime();
         //trace("Xvm::initializeTextFields()");
         try
         {
@@ -391,14 +430,15 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
 
                 // create text fields
                 var fields: Array = [];
-                for (var i in cfg.textFields)
+                var len = cfg.textFields.length;
+                for (var i = 0; i < len; ++i)
                 {
                     if (cfg.textFields[i].visible)
                     {
                         //if (m_team == "ally")
-                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerFullName + " " + st);
+                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerName + " " + st);
                         //if (m_team == "enemy")
-                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerFullName + " " + st);
+                        //    Logger.addObject(cfg.textFields[i], m_vname + " " + m_playerName + " " + st);
                         fields.push(createTextField(cfg.textFields[i]));
                     }
                 }
@@ -409,12 +449,14 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         {
             ErrorHandler.setText("ERROR: initializeTextFields():" + String(e));
         }
-        //Logger.add(Utils.elapsedMSec(start, new Date()) + " ms");
+        //Logger.add(((new Date()).getTime() - start).toString() + " ms");
     }
 
     function XVMUpdateStyle()
     {
-        //trace("XVMUpdateStyle: " + m_playerFullName + m_vname + " " + " scale=" + proxy.marker._xscale);
+        Cmd.profMethodStart("Xvm.XVMUpdateStyle()");
+
+        //trace("XVMUpdateStyle: " + m_playerName + m_vname + " " + " scale=" + proxy.marker._xscale);
         try
         {
             //var start = new Date(); // for debug
@@ -460,5 +502,7 @@ class wot.VehicleMarkersManager.Xvm extends XvmBase implements wot.VehicleMarker
         {
             ErrorHandler.setText("ERROR: XVMUpdateStyle():" + String(e));
         }
+
+        Cmd.profMethodEnd("Xvm.XVMUpdateStyle()");
     }
 }

@@ -1,11 +1,10 @@
 package xvm.hangar.components.BattleLoading
 {
-    import flash.display.*;
+    import com.xfw.*;
+    import com.xvm.*;
     import flash.text.*;
     import flash.utils.*;
-    import com.xvm.*;
-    import com.xvm.utils.Utils;
-    import net.wg.gui.lobby.battleloading.BattleLoading;
+    import net.wg.gui.lobby.battleloading.*;
 
     public class Clock
     {
@@ -41,7 +40,7 @@ package xvm.hangar.components.BattleLoading
 
         private function update():void
         {
-            clock.text = Utils.FormatDate(Config.config.battleLoading.clockFormat, new Date());
+            clock.text = XfwUtils.FormatDate(Config.config.battleLoading.clockFormat, new Date());
         }
     }
 

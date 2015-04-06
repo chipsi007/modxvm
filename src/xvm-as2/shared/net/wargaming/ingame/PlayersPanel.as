@@ -1,4 +1,5 @@
-﻿intrinsic class net.wargaming.ingame.PlayersPanel extends MovieClip
+﻿import gfx.core.UIComponent;
+intrinsic class net.wargaming.ingame.PlayersPanel extends UIComponent
 {
     /////////////////////////////////////////////////////////////////
     // XVM
@@ -14,7 +15,9 @@
     var m_vehicles: TextField;
     var m_list: MovieClip;
     var m_type: String;
+    var m_state: String;
     var players_bg: MovieClip;
+    var saved_params:Object;
 
     function setData(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStr, vehiclesStr, namesStr);
     function saveData(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStr, vehiclesStr, namesStr);
@@ -24,6 +27,7 @@
     function get state(); // none, short, medium, medium2, large
     function set state(state);
     function update();
+    function updateAlphas();
     function onRecreateDevice(width, height);
     function _setVehiclesStr(data, sel, isColorBlind, knownPlayersCount);
     function _setNamesStr(data, sel, isColorBlind, knownPlayersCount);

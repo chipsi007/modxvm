@@ -1,21 +1,22 @@
+import wot.Minimap.*;
+
 class wot.Minimap.MinimapEvent
 {
-    public static var MINIMAP_READY:String = "MINIMAP_READY";
-    public static var PANEL_READY:String = "PANEL_READY";
-    public static var LOST_PLAYERS_UPDATE:String = "LOST_PLAYERS_UPDATE";
-    public static var ENEMY_REVEALED:String = "ENEMY_REVEALED";
-
-    /** Used for camera atachments redraw */
-    public static var ON_ENTRY_INITED:String = "ON_ENTRY_INITED";
+    public static var ENTRY_INITED:String = "ENTRY_INITED";
+    public static var ENTRY_UPDATED:String = "ENTRY_UPDATED";
+    public static var CAMERA_UPDATED:String = "CAMERA_UPDATED";
+    public static var ENTRY_LOST:String = "ENTRY_LOST";
+    public static var REFRESH:String = "REFRESH";
 
     private var _type:String;
-    private var _payload:Object;
+    private var _entry:MinimapEntry;
+    private var _value:Object;
 
-    public function MinimapEvent(type:String, payload:Object)
+    public function MinimapEvent(type:String, entry:MinimapEntry, value:Object)
     {
         _type = type;
-        if (payload)
-            _payload = payload;
+        _entry = entry;
+        _value = value;
     }
 
     public function get type():String
@@ -23,8 +24,13 @@ class wot.Minimap.MinimapEvent
         return _type;
     }
 
-    public function get payload():Object
+    public function get entry():MinimapEntry
     {
-        return _payload;
+        return _entry;
+    }
+
+    public function get value():Object
+    {
+        return _value;
     }
 }

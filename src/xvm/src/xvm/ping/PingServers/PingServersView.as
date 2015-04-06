@@ -1,14 +1,14 @@
 package xvm.ping.PingServers
 {
+    import com.xfw.*;
+    import com.xfw.events.*;
     import com.xvm.*;
-    import com.xvm.types.cfg.*;
-    import com.xvm.events.*;
     import com.xvm.utils.*;
-    import flash.display.*;
+    import com.xvm.types.cfg.*;
     import flash.text.*;
-    import flash.filters.*;
+    import scaleform.clik.core.*;
 
-    public class PingServersView extends Sprite
+    public class PingServersView extends UIComponent
     {
         private static const QUALITY_BAD:String = "bad";
         private static const QUALITY_POOR:String = "poor";
@@ -25,7 +25,13 @@ package xvm.ping.PingServers
             fields = new Vector.<TextField>();
             var f:TextField = createNewField();
             f.htmlText = makeStyledRow( { cluster: Locale.get("Initialization"), time: "..." } );
-            PingServers.addListener(update);
+            PingServers.addEventListener(update);
+        }
+
+        override protected function onDispose():void
+        {
+            PingServers.removeEventListener(update);
+            super.onDispose();
         }
 
         // -- Private
@@ -43,7 +49,7 @@ package xvm.ping.PingServers
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
 
@@ -69,7 +75,7 @@ package xvm.ping.PingServers
             var cluster:String = pingObj.cluster;
             var time:String = pingObj.time;
             var raw:String = cluster + cfg.delimiter + time;
-            return "<span class='" + STYLE_NAME_PREFIX + defineQuality(time) + "'>" + raw + "</span>";
+            return "<textformat leading='" + cfg.leading + "'><span class='" + STYLE_NAME_PREFIX + defineQuality(time) + "'>" + raw + "</span></textformat>";
         }
 
         private function defineQuality(time:String):String
@@ -146,11 +152,11 @@ package xvm.ping.PingServers
             tf.multiline = true;
             tf.wordWrap = false;
             tf.selectable = false;
-            tf.styleSheet = Utils.createStyleSheet(createCss());
+            tf.styleSheet = WGUtils.createStyleSheet(createCss());
             tf.alpha = cfg.alpha / 100.0;
             tf.htmlText =  "";
             if (cfg.shadow.enabled)
-                tf.filters = [ Utils.extractShadowFilter(cfg.shadow) ];
+                tf.filters = [ Utils.createShadowFilterFromConfig(cfg.shadow) ];
             addChild(tf);
             return tf;
         }
@@ -176,7 +182,7 @@ package xvm.ping.PingServers
             var name:String = cfg.fontStyle.name;
             var color:Number = parseInt(cfg.fontStyle.color[quality], 16);
 
-            return Utils.createCSS(PingServersView.STYLE_NAME_PREFIX + quality, color, name, size, "left", bold, italic);
+            return WGUtils.createCSS(PingServersView.STYLE_NAME_PREFIX + quality, color, name, size, "left", bold, italic);
         }
     }
 }

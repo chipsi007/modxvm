@@ -2,23 +2,19 @@
  * ...
  * @author sirmax2
  */
-import com.xvm.Config;
-import com.xvm.Defines;
-import com.xvm.Strings;
-import com.xvm.Utils;
-import com.xvm.VehicleInfo;
-import flash.filters.DropShadowFilter;
-import flash.geom.ColorTransform;
-import com.xvm.DataTypes.VehicleData;
+import com.xvm.*;
+import com.xvm.DataTypes.*;
+import flash.filters.*;
+import flash.geom.*;
 
 class com.xvm.GraphicsUtil
 {
     public static function createShadowFilter(distance:Number, angle:Number, color:Number,
         alpha:Number, size:Number, strength:Number):DropShadowFilter
     {
-        if (alpha == null || strength == null || size == null)
+        if (!strength || !size)
             return null;
-        return new DropShadowFilter(distance, angle, color, alpha * 0.01, size, size, strength * 0.01, 3);
+        return new DropShadowFilter(distance, angle, color, alpha * 0.01, size, size, strength * 0.01);
     }
 
     public static function colorByRatio($value:Number, $start:Number, $end:Number):Number
@@ -66,7 +62,7 @@ class com.xvm.GraphicsUtil
         item.transform.colorTransform = tr;
     }
 
-    public static function brightenColor(hexColor: Number, percent: Number): Number
+    public static function brightenColor(hexColor:Number, percent:Number):Number
     {
         if (isNaN(percent))
             percent = 0;
@@ -104,20 +100,20 @@ class com.xvm.GraphicsUtil
         return rgbToHex(Math.round(rgb.r), Math.round(rgb.g), Math.round(rgb.b));
     }
 
-    public static function rgbToHex(r:Number, g:Number, b:Number): Number
+    public static function rgbToHex(r:Number, g:Number, b:Number):Number
     {
         return (r << 16 | g << 8 | b);
     }
 
-    public static function hexToRgb(hex:Number): Object
+    public static function hexToRgb(hex:Number):Object
     {
         return { r: (hex & 0xff0000) >> 16, g: (hex & 0x00ff00) >> 8, b: hex & 0x0000ff };
     }
 
-    public static function brightness(hex:Number): Number
+    public static function brightness(hex:Number):Number
     {
-        var max: Number = 0;
-        var rgb: Object = hexToRgb(hex);
+        var max:Number = 0;
+        var rgb:Object = hexToRgb(hex);
         if(rgb.r > max)
             max = rgb.r;
         if(rgb.g > max)
@@ -128,7 +124,7 @@ class com.xvm.GraphicsUtil
         return max;
     }
 
-    public static function GetVTypeColorValue(iconSource:String, prefix: String, darker: Boolean): String
+    public static function GetVTypeColorValue(iconSource:String, prefix:String):String
     {
         if (!prefix)
             prefix = "#";
@@ -136,19 +132,60 @@ class com.xvm.GraphicsUtil
         try
         {
             var vdata:VehicleData = VehicleInfo.getByIcon(iconSource);
-            var vtype = (Config.s_config.colors.vtype.usePremiumColor == true && vdata.premium) ? "premium" : vdata.vtype;
-            if (!vtype || !Config.s_config.colors.vtype[vtype])
+            var vtype = (Config.config.colors.vtype.usePremiumColor == true && vdata.premium) ? "premium" : vdata.vtype;
+            if (!vtype || !Config.config.colors.vtype[vtype])
                 return "";
-            return prefix + Strings.padLeft(Utils.toInt(Config.s_config.colors.vtype[vtype], 0xFFFFFE).toString(16), 6, "0");
+            return prefix + Strings.padLeft(Utils.toInt(Config.config.colors.vtype[vtype], 0xFFFFFE).toString(16), 6, "0");
         }
         catch (ex:Error)
         {
-            return prefix + "FFFEFE";
+            return null;
         }
-        return prefix + "FFFEFE";
+        return null;
     }
 
-    public static function GetDmgSrcValue(damageSource:String, damageDest:String, isDead:Boolean, isBlowedUp:Boolean, prefix: String): String
+    public static function GetSpottedColorValue(value:String, isArty:Boolean, prefix:String):String
+    {
+        if (!prefix)
+            prefix = "#";
+
+        try
+        {
+            if (!value)
+                return "";
+            if (isArty)
+                value += "_arty";
+            if (!Config.config.colors.spotted[value])
+                return "";
+            return prefix + Strings.padLeft(Utils.toInt(Config.config.colors.spotted[value], 0xFFFFFE).toString(16), 6, "0");
+        }
+        catch (ex:Error)
+        {
+            return null;
+        }
+        return null;
+    }
+
+    public static function GetSpottedAlphaValue(value:String, isArty:Boolean):Number
+    {
+        try
+        {
+            if (!value)
+                return NaN;
+            if (isArty)
+                value += "_arty";
+            if (Config.config.alpha.spotted[value] == null)
+                return NaN;
+            return Config.config.alpha.spotted[value];
+        }
+        catch (ex:Error)
+        {
+            return NaN;
+        }
+        return NaN;
+    }
+
+    public static function GetDmgSrcValue(damageSource:String, damageDest:String, isDead:Boolean, isBlowedUp:Boolean, prefix:String):String
     {
         if (!prefix)
             prefix = "#";
@@ -156,18 +193,20 @@ class com.xvm.GraphicsUtil
         try
         {
             if (!damageSource || !damageDest)
-                return "";
+                return null;
             var key:String = damageSource + "_" + damageDest + "_";
             key += !isDead ? "hit" : isBlowedUp ? "blowup" : "kill";
-            if (!Config.s_config.colors.damage[key])
+            var value = Config.config.colors.damage[key];
+            if (!value)
                 return "";
-            return prefix + Strings.padLeft(Utils.toInt(Config.s_config.colors.damage[key], 0xFFFFFE).toString(16), 6, "0");
+            //Logger.add(key + " => " + value);
+            return prefix + Strings.padLeft(Utils.toInt(value, 0xFFFFFE).toString(16), 6, "0");
         }
         catch (ex:Error)
         {
-            return prefix + "FFFEFE";
+            return null;
         }
-        return prefix + "FFFEFE";
+        return null;
     }
 
     public static function GetDmgKindValue(dmg_kind: String, prefix: String): String
@@ -177,34 +216,31 @@ class com.xvm.GraphicsUtil
 
         try
         {
-            if (!dmg_kind || !Config.s_config.colors.dmg_kind[dmg_kind])
-                return "";
-            return prefix + Strings.padLeft(Utils.toInt(Config.s_config.colors.dmg_kind[dmg_kind], 0xFFFFFE).toString(16), 6, "0");
+            if (!dmg_kind || !Config.config.colors.dmg_kind[dmg_kind])
+                return null;
+            return prefix + Strings.padLeft(Utils.toInt(Config.config.colors.dmg_kind[dmg_kind], 0xFFFFFE).toString(16), 6, "0");
         }
         catch (ex:Error)
         {
-            return prefix + "FFFEFE";
+            return null;
         }
-        return prefix + "FFFEFE";
+        return null;
     }
 
-    public static function GetDynamicColorValueInt(type: Number, value: Number, darker: Boolean): Number
+    public static function GetDynamicColorValueInt(type:Number, value:Number, darker:Boolean):Number
     {
         return Number(GetDynamicColorValue(type, value, "0x", darker));
     }
 
-    public static function GetDynamicColorValue(type: Number, value: Number, prefix: String, darker: Boolean): String
+    public static function GetDynamicColorValue(type:Number, value:Number, prefix:String, darker:Boolean):String
     {
-        if (value == null)
-            return "";
+        if (value == null || isNaN(value))
+            return null;
 
         if (!prefix)
             prefix = "#";
 
-        if (isNaN(value))
-            return prefix + "FFFBFB";
-
-        var cfg_root: Object = Config.s_config.colors;
+        var cfg_root: Object = Config.config.colors;
         var cfg: Array;
         switch (type)
         {
@@ -214,8 +250,9 @@ class com.xvm.GraphicsUtil
             case Defines.DYNAMIC_COLOR_E:               cfg = cfg_root.e; break;
             case Defines.DYNAMIC_COLOR_WN6:             cfg = cfg_root.wn6; break;
             case Defines.DYNAMIC_COLOR_WN8:             cfg = cfg_root.wn8; break;
+            case Defines.DYNAMIC_COLOR_WGR:             cfg = cfg_root.wgr; break;
             case Defines.DYNAMIC_COLOR_X:               cfg = cfg_root.x; break;
-            case Defines.DYNAMIC_COLOR_RATING:          cfg = cfg_root.rating; break;
+            case Defines.DYNAMIC_COLOR_RATING:          cfg = cfg_root.winrate; break;
             case Defines.DYNAMIC_COLOR_KB:              cfg = cfg_root.kb; break;
             case Defines.DYNAMIC_COLOR_AVGLVL:          cfg = cfg_root.avglvl; break;
             case Defines.DYNAMIC_COLOR_TBATTLES:        cfg = cfg_root.t_battles; break;
@@ -223,7 +260,8 @@ class com.xvm.GraphicsUtil
             case Defines.DYNAMIC_COLOR_TDV:             cfg = cfg_root.tdv; break;
             case Defines.DYNAMIC_COLOR_TFB:             cfg = cfg_root.tfb; break;
             case Defines.DYNAMIC_COLOR_TSB:             cfg = cfg_root.tsb; break;
-            default: return prefix + "FFFEFE";
+            case Defines.DYNAMIC_COLOR_WINCHANCE:       cfg = cfg_root.winChance; break;
+            default: return null;
         }
 
         var cfg_len:Number = cfg.length;
@@ -239,15 +277,15 @@ class com.xvm.GraphicsUtil
             }
         }
 
-        return prefix + "FFFFFF";
+        return null;
     }
 
     public static function GetDynamicAlphaValue(type: Number, value: Number): Number
     {
-        if (isNaN(value) || value == null)
-            return 0;
+        if (value == null || isNaN(value))
+            return NaN;
 
-        var cfg_root:Object = Config.s_config.alpha;
+        var cfg_root:Object = Config.config.alpha;
         var cfg: Array;
         switch (type)
         {
@@ -257,8 +295,9 @@ class com.xvm.GraphicsUtil
             case Defines.DYNAMIC_ALPHA_E:               cfg = cfg_root.e; break;
             case Defines.DYNAMIC_ALPHA_WN6:             cfg = cfg_root.wn6; break;
             case Defines.DYNAMIC_ALPHA_WN8:             cfg = cfg_root.wn8; break;
+            case Defines.DYNAMIC_ALPHA_WGR:             cfg = cfg_root.wgr; break;
             case Defines.DYNAMIC_ALPHA_X:               cfg = cfg_root.x; break;
-            case Defines.DYNAMIC_ALPHA_RATING:          cfg = cfg_root.rating; break;
+            case Defines.DYNAMIC_ALPHA_RATING:          cfg = cfg_root.winrate; break;
             case Defines.DYNAMIC_ALPHA_KB:              cfg = cfg_root.kb; break;
             case Defines.DYNAMIC_ALPHA_AVGLVL:          cfg = cfg_root.avglvl; break;
             case Defines.DYNAMIC_ALPHA_TBATTLES:        cfg = cfg_root.t_battles; break;
@@ -267,7 +306,7 @@ class com.xvm.GraphicsUtil
             case Defines.DYNAMIC_ALPHA_TFB:             cfg = cfg_root.tfb; break;
             case Defines.DYNAMIC_ALPHA_TSB:             cfg = cfg_root.tsb; break;
           default:
-              return 100;
+              return NaN;
         }
 
         var cfg_len:Number = cfg.length;
@@ -279,7 +318,7 @@ class com.xvm.GraphicsUtil
                 return alpha;
         }
 
-        return 100;
+        return NaN;
     }
 
     public static function fillRect(target:MovieClip, x:Number, y:Number,

@@ -1,8 +1,8 @@
 import com.xvm.*;
 import flash.geom.*;
-import wot.Minimap.dataTypes.Player;
-import wot.Minimap.model.externalProxy.MapConfig;
-import wot.Minimap.view.LabelsContainer;
+import wot.Minimap.dataTypes.*;
+import wot.Minimap.model.externalProxy.*;
+import wot.Minimap.view.*;
 
 class wot.Minimap.view.LabelViewBuilder
 {
@@ -12,6 +12,8 @@ class wot.Minimap.view.LabelViewBuilder
 
     public static function createTextField(label:MovieClip):Void
     {
+        removeTextField(label);
+
         var status:Number = label[LabelsContainer.STATUS_FIELD_NAME];
         var playerInfo:Player = label[LabelsContainer.PLAYER_INFO_FIELD_NAME];
         var entryName:String = label[LabelsContainer.ENTRY_NAME_FIELD_NAME];
@@ -20,7 +22,8 @@ class wot.Minimap.view.LabelViewBuilder
         var offset:Point = MapConfig.unitLabelOffset(entryName, status);
 
         var textField:TextField = label.createTextField(TEXT_FIELD_NAME, TF_DEPTH, offset.x, offset.y, 100, 40);
-        textField.antiAliasType = "advanced";
+        label[TEXT_FIELD_NAME] = textField;
+        textField.antiAliasType = Config.config.minimap.labels.units.antiAliasType;
         textField.html = true;
         textField.multiline = true;
         textField.selectable = false;
@@ -63,18 +66,23 @@ class wot.Minimap.view.LabelViewBuilder
 
         var format:String = MapConfig.unitLabelFormat(entryName, status);
 
-        var obj = Defines.battleStates[Utils.GetPlayerName(playerInfo.userName)] || { };
+        var obj = { };
+        var playerState = BattleState.getUserData(playerInfo.userName);
+        for (var i in playerState)
+            obj[i] = playerState[i];
         for (var i in playerInfo)
             obj[i] = playerInfo[i];
         var text:String = Macros.Format(playerInfo.userName, format, obj);
-        if (text == "undefined" || !text)
-        {
-            /**
-             * Skip creation of textFields with "undefined" string.
-             * Happens for oneSelf icon at replay rewind.
-             */
-            text = "";
-        }
+        //Logger.add(playerInfo.userName + ": " + text);
         textField.htmlText = text;
+    }
+
+    public static function removeTextField(label:MovieClip):Void
+    {
+        var textField:TextField = label[TEXT_FIELD_NAME];
+        if (textField == null)
+            return;
+        textField.removeTextField();
+        label[TEXT_FIELD_NAME] = null;
     }
 }

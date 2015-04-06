@@ -1,12 +1,9 @@
 package xvm.profile.components
 {
+    import com.xfw.*;
     import com.xvm.*;
-    import com.xvm.misc.*;
     import com.xvm.types.dossier.*;
-    import flash.utils.*;
-    import net.wg.gui.lobby.profile.pages.summary.*;
     import net.wg.gui.lobby.profile.pages.technique.*;
-    import net.wg.infrastructure.events.*;
 
     public class TechniquePage extends Technique
     {
@@ -15,7 +12,7 @@ package xvm.profile.components
             super(page, playerName);
 
             _playerId = 0;
-            Dossier.loadAccountDossier(this, dossierLoaded);
+            Dossier.loadAccountDossier(this, dossierLoaded, PROFILE.PROFILE_DROPDOWN_LABELS_ALL);
 
             page.listComponent.addEventListener(TechniqueListComponent.DATA_CHANGED, initializeInHangarCheckBox);
         }
