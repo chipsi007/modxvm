@@ -1,7 +1,7 @@
-import com.greensock.TweenLite;
-import com.greensock.easing.Cubic;
-import com.xvm.GraphicsUtil;
-import wot.VehicleMarkersManager.components.HealthBarProxy;
+import com.xvm.*;
+import com.greensock.*;
+import com.greensock.easing.*;
+import wot.VehicleMarkersManager.components.*;
 
 class wot.VehicleMarkersManager.components.HealthBarComponent
 {
@@ -29,7 +29,7 @@ class wot.VehicleMarkersManager.components.HealthBarComponent
      * Show floating damage indicator
      * @param	delta absolute damage
      * @param	flag  damage source: 0 - "FROM_UNKNOWN", 1 - "FROM_ALLY", 2 - "FROM_ENEMY", 3 - "FROM_SQUAD", 4 - "FROM_PLAYER"
-     * @param	damageType damage kind: "attack", "fire", "ramming", "world_collision", "death_zone", "drowning", "explosion"
+     * @param	damageType damage kind: "shot", "fire", "ramming", "world_collision", "death_zone", "drowning"
      */
     public function showDamage(state_cfg:Object, curHealth:Number, maxHealth:Number, delta:Number, flag:Number, damageType:String)
     {

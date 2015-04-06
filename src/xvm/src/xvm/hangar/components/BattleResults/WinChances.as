@@ -1,11 +1,9 @@
 package xvm.hangar.components.BattleResults
 {
+    import com.xfw.*;
     import com.xvm.*;
-    import com.xvm.misc.*;
-    import com.xvm.types.stat.StatData;
-    import com.xvm.types.veh.VehicleData;
+    import com.xvm.types.stat.*;
     import com.xvm.utils.*;
-    import flash.display.Sprite;
     import flash.text.*;
     import net.wg.gui.lobby.battleResults.*;
 
@@ -17,14 +15,12 @@ package xvm.hangar.components.BattleResults
 
         public function WinChances(page:BattleResults)
         {
-            if (Config.config.rating.showPlayersStatistics == false)
-                return;
-            if (Config.config.battleResults.showChances == false && Config.config.battleResults.showBattleTier == false)
+            if (Config.networkServicesSettings.chance == false && Config.config.battleResults.showBattleTier == false)
                 return;
             this.page = page;
 
             // Add stat loading handler
-            Stat.loadBattleResultsStat(this, onStatLoaded, page.as_name.replace("battleResults", ""));
+            Stat.loadBattleResultsStat(this, onStatLoaded, page.as_name.replace("battleResults_", ""));
         }
 
         private function onStatLoaded(response:Object):void
@@ -39,7 +35,7 @@ package xvm.hangar.components.BattleResults
                 textField.y = 2;
                 textField.width = 400;
                 textField.height = 30;
-                textField.styleSheet = Utils.createTextStyleSheet("txt", new TextFormat("$FieldFont", 16, Defines.UICOLOR_LABEL));
+                textField.styleSheet = WGUtils.createTextStyleSheet("txt", new TextFormat("$FieldFont", 16, XfwConst.UICOLOR_LABEL));
                 page.addChild(textField);
             }
 
@@ -52,18 +48,18 @@ package xvm.hangar.components.BattleResults
                 var sd:StatData = Stat.getData(name);
                 if (sd == null)
                     continue;
-                sd.team = Defines.TEAM_ENEMY;
+                sd.team = XfwConst.TEAM_ENEMY;
                 for each (var pl:Object in page.data.team1)
                 {
                     if (pl.userName == sd.name)
                     {
-                        sd.team = Defines.TEAM_ALLY;
+                        sd.team = XfwConst.TEAM_ALLY;
                         break;
                     }
                 }
             }
 
-            var chanceText:String = Chance.GetChanceText(playerNames, Config.config.battleResults.showChances, Config.config.battleResults.showBattleTier);
+            var chanceText:String = Chance.GetChanceText(playerNames, Config.networkServicesSettings.chance, Config.config.battleResults.showBattleTier);
             if (chanceText)
             {
                 chanceText = "<p class='txt' align='right'>" + chanceText + '</p>';

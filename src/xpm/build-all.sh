@@ -1,22 +1,50 @@
-#!/bin/sh
+#!/bin/bash
 
-### Path vars can be assigned at .bashrc
-[ "$GAME_VER" = "" ] && GAME_VER="0.9.0"
-#[ "$GAME_VER" = "" ] && GAME_VER="0.9.0 Common Test"
-[ "$WOT_DIRECTORY" = "" ] && WOT_DIRECTORY=/cygdrive/d/work/games/WoT
+#############################
+# CONFIG
 
-cd $(dirname $0)
+RUN_TEST=1
+
+#############################
+# INTERNAL
 
 ### Find Python executable
-  PY_EXEC="/cygdrive/c/Python27/python.exe"
-  if [ ! -f $PY_EXEC ]; then
-    PY_EXEC="python2.7" # Installed by cygwin or *nix
-  fi
+PY_EXEC="/cygdrive/c/Python27/python.exe"
+if [ ! -f $PY_EXEC ]; then
+  PY_EXEC="python2.7" # Installed by cygwin or *nix
+fi
 ###
 
 clear()
 {
-  rm -rf "../../bin/xpm"
+  rm -rf "../../~output/~ver/gui/flash"
+  rm -rf "../../~output/~ver/scripts"
+  rm -rf "../../~output/mods/xfw"
+
+  # remove _version_.py files
+  for dir in $(find . -maxdepth 1 -type "d" ! -path "."); do
+    rm -f $dir/__version__.py
+  done
+
+  find . -depth -empty -delete -type d
+}
+
+make_dirs()
+{
+  mkdir -p ../../~output/~ver/gui/flash/
+  mkdir -p ../../~output/~ver/scripts
+  mkdir -p ../../~output/configs/
+  mkdir -p ../../~output/mods/shared_resources/
+  mkdir -p ../../~output/mods/xfw/actionscript/
+  mkdir -p ../../~output/mods/xfw/python/
+  mkdir -p ../../~output/mods/xfw/resources/
+}
+
+build_xfw()
+{
+  pushd ../xfw/src/python/ >/dev/null
+  ./build.sh
+  popd >/dev/null
 }
 
 build()
@@ -24,46 +52,44 @@ build()
   echo "Build: $1"
   f=${1#*/}
   d=${f%/*}
+
   [ "$d" = "$f" ] && d=""
 
   "$PY_EXEC" -c "import py_compile; py_compile.compile('$1')"
   [ ! -f $1c ] && exit
 
-  if [ -z "$2" ]; then
-    mkdir -p "../../bin/xpm/scripts/client/gui/$d"
-    cp $1c "../../bin/xpm/scripts/client/gui/${f}c"
-  else
-    mkdir -p "../../bin/xpm/scripts/client/gui/$2/$d"
-    cp $1c "../../bin/xpm/scripts/client/gui/$2/${f}c"
-  fi
+  mkdir -p "../../~output/$2/python/$d"
+  cp $1c "../../~output/$2/python/${f}c"
   rm -f $1c
 }
 
+# MAIN
+
+pushd $(dirname $0) >/dev/null
+
 clear
 
-for dir in $(find . -maxdepth 1 -type "d" ! -path "./xpm*" ! -path "."); do
+make_dirs
+
+build_xfw
+
+# create __version__.py files
+for dir in $(find . -maxdepth 1 -type "d" ! -path "."); do
   echo "# This file was created automatically from build script" > $dir/__version__.py
   echo "__revision__ = '`cd $dir && hg parent --template "{rev}"`'" >> $dir/__version__.py
   echo "__branch__ = '`cd $dir && hg parent --template "{branch}"`'" >> $dir/__version__.py
 done
 
+# build *.py files
 for fn in $(find . -type "f" -name "*.py"); do
   f=${fn#./}
   m=${f%%/*}
-  if [ "$m" = "xpm" ]; then
-    build $f
-  else
-    build $f mods/$m
-  fi
+  build $f mods/packages/$m
 done
 
-if [ "$OS" = "Windows_NT" ]; then
-  run()
-  {
-    rm -rf "$WOT_DIRECTORY/res_mods/$GAME_VER/scripts"
-    cp -R ../../bin/xpm/scripts "$WOT_DIRECTORY/res_mods/$GAME_VER"
-    sh "../../utils/test.sh" --no-deploy
-  }
+popd >/dev/null
 
-  run
+# run test
+if [ "$OS" = "Windows_NT" -a "$XFW_DEVELOPMENT" = "1" -a "$RUN_TEST" = "1" ]; then
+  sh "$(dirname $(realpath $(cygpath --unix $0)))/../../utils/test.sh"
 fi

@@ -1,22 +1,21 @@
 /**
- * XVM - lobby
- * @author Maxim Schedriviy "m.schedriviy(at)gmail.com"
+ * XVM
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
 package xvm.autologin
 {
+    import com.xfw.*;
     import com.xvm.*;
     import com.xvm.infrastructure.*;
-    import flash.display.*;
     import flash.ui.*;
-    import net.wg.gui.components.controls.*;
-    import net.wg.gui.components.windows.*;
+    import flash.utils.*;
+    import net.wg.gui.events.*;
     import net.wg.gui.intro.*;
-    import net.wg.gui.lobby.dialogs.*;
     import net.wg.gui.login.impl.*;
+    import net.wg.gui.login.impl.views.*;
     import net.wg.infrastructure.events.*;
     import net.wg.infrastructure.interfaces.*;
     import scaleform.clik.constants.*;
-    import scaleform.clik.core.*;
     import scaleform.clik.events.*;
     import scaleform.clik.ui.*;
 
@@ -31,10 +30,23 @@ package xvm.autologin
 
         public override function onAfterPopulate(e:LifeCycleEvent):void
         {
-            initAutoLogin();
+            init();
         }
 
-        private function initAutoLogin():void
+        override public function onBeforeDispose(e:LifeCycleEvent):void
+        {
+            if (loginPage != null)
+                loginPage.viewStackLoginForm.removeEventListener(ViewStackEvent.VIEW_CHANGED, autoLogin);
+        }
+
+        // PRIVATE
+
+        private function get loginPage():LoginPage
+        {
+            return super.view as LoginPage;
+        }
+
+        private function init():void
         {
             switch (view.as_alias)
             {
@@ -45,10 +57,8 @@ package xvm.autologin
                     break;
 
                 case "login":
-                    if (Config.config.login.autologin == true)
-                        autoLogin(view as LoginPage);
-                    if (Config.config.login.confirmOldReplays == true)
-                        confirmOldReplays(view as LoginPage);
+                    if (loginPage != null)
+                        loginPage.viewStackLoginForm.addEventListener(ViewStackEvent.VIEW_CHANGED, autoLogin);
                     break;
 
                 case "lobby":
@@ -62,35 +72,42 @@ package xvm.autologin
             intro.videoPlayer.stopPlayback();
         }
 
-        private function autoLogin(page:LoginPage):void
+        private function autoLogin(e:ViewStackEvent):void
         {
-            App.utils.scheduler.envokeInNextFrame(function():void
+            if (Config.config.login.autologin != true)
+                return;
+
+            if (!ready)
+                return;
+            ready = false;
+
+            if (e.view is SocialForm)
             {
-                if (!ready)
-                    return;
-                ready = false;
-                var rememberPwdCheckbox:CheckBox = page.form.rememberPwdCheckbox;
-                if (rememberPwdCheckbox.selected)
-                    page.dispatchEvent(new InputEvent(InputEvent.INPUT, new InputDetails(null, Keyboard.ENTER, InputValue.KEY_DOWN)));
-            });
+                doAutologin();
+            }
+            else
+            {
+                var form:SimpleForm = e.view as SimpleForm;
+                if (form)
+                {
+                    var $this:AutoLoginXvmView = this;
+                    setTimeout(function():void
+                    {
+                        if (form.rememberPwdCheckbox.selected)
+                            $this.doAutologin();
+                    }, 300);
+                }
+            }
         }
 
-        private function confirmOldReplays(page:LoginPage):void
+        private function doAutologin():void
         {
-            App.utils.scheduler.envokeInNextFrame(function():void {
-                App.utils.scheduler.envokeInNextFrame(function():void {
-                    var submit:SoundButton = page.stage.focus as SoundButton;
-                    if (submit == null)
-                        return;
-
-                    if (submit.label != DIALOGS.REPLAYNOTIFICATION_SUBMIT)
-                        return;
-
-                    (page.form as UIComponent).visible = false;
-
-                    submit.dispatchEvent(new ButtonEvent(ButtonEvent.CLICK));
-                });
-            });
+            var $this:AutoLoginXvmView = this;
+            setTimeout(function():void
+            {
+                if ($this.loginPage != null)
+                    $this.loginPage.dispatchEvent(new InputEvent(InputEvent.INPUT, new InputDetails(null, Keyboard.ENTER, InputValue.KEY_DOWN)));
+            }, 100);
         }
     }
 }

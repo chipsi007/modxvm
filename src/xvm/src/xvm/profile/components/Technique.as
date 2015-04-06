@@ -1,11 +1,12 @@
 package xvm.profile.components
 {
+    import com.xfw.*;
     import com.xvm.*;
-    import com.xvm.misc.*;
     import com.xvm.types.dossier.*;
     import flash.display.*;
     import flash.events.*;
     import flash.utils.*;
+    import net.wg.data.constants.*;
     import net.wg.gui.lobby.profile.pages.technique.*;
     import net.wg.gui.components.advanced.*;
     import scaleform.clik.events.*;
@@ -19,7 +20,7 @@ package xvm.profile.components
 
         protected var filter:FilterControl;
 
-        private var techniqueListAdjuster:TechniqueListAdjuster;
+        //private var techniqueListAdjuster:TechniqueListAdjuster;
 
         public function Technique(page:ProfileTechnique, playerName:String):void
         {
@@ -45,7 +46,7 @@ package xvm.profile.components
                 return;
 
                 // Add summary item to the first line of technique list
-                techniqueListAdjuster = new TechniqueListAdjuster(page);
+                //techniqueListAdjuster = new TechniqueListAdjuster(page);
 
                 // TODO
                 // create filter controls
@@ -56,7 +57,7 @@ package xvm.profile.components
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
 
@@ -98,7 +99,7 @@ package xvm.profile.components
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
 
@@ -118,7 +119,7 @@ package xvm.profile.components
                 }
                 bb.selectedIndex = -1;
                 bb.selectedIndex = btnIndex;
-                b.sortDirection = Config.config.userInfo.sortColumn < 0 ? SortingButton.DESCENDING_SORT : SortingButton.ASCENDING_SORT;
+                b.sortDirection = Config.config.userInfo.sortColumn < 0 ? SortingInfo.DESCENDING_SORT : SortingInfo.ASCENDING_SORT;
                 list.selectedIndex = 0;
 
                 // Focus filter
@@ -126,12 +127,12 @@ package xvm.profile.components
                     filter.setFocus();
 
                 // stat
-                if (Config.config.rating.showPlayersStatistics  && Config.config.rating.enableUserInfoStatistics)
+                if (Config.networkServicesSettings.statAwards)
                     Stat.loadUserData(this, onStatLoaded, playerName, false);
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
         }
 
@@ -143,9 +144,9 @@ package xvm.profile.components
         // virtual
         protected function createFilters():void
         {
-            filter = new FilterControl();
-            filter.addEventListener(Event.CHANGE, techniqueListAdjuster.applyFilter);
-            page.addChild(filter);
+            //filter = new FilterControl();
+            //filter.addEventListener(Event.CHANGE, techniqueListAdjuster.applyFilter);
+            //page.addChild(filter);
         }
 
         // PRIVATE

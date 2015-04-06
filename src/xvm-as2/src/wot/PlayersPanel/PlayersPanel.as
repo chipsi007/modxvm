@@ -1,11 +1,13 @@
 ﻿/**
- * @author sirmax2, ilitvinov87
+/**
+ * XVM
+ * @author Maxim Schedriviy <max(at)modxvm.com>
+ * @author ilitvinov87
  */
 import com.xvm.*;
-import wot.Minimap.*;
-import wot.PlayersPanel.*;
+import com.xvm.events.*;
 
-class wot.PlayersPanel.PlayersPanel
+class wot.PlayersPanel.PlayersPanel extends XvmComponent
 {
     /////////////////////////////////////////////////////////////////
     // wrapped methods
@@ -31,105 +33,308 @@ class wot.PlayersPanel.PlayersPanel
         return this.onRecreateDeviceImpl.apply(this, arguments);
     }
 
+    function update()
+    {
+        return this.updateImpl.apply(this, arguments);
+    }
+
+    function updateAlphas()
+    {
+        return this.updateAlphasImpl.apply(this, arguments);
+    }
+
     function updateWidthOfLongestName()
     {
         // stub
     }
 
-    function update()
-    {
-        _lastAdjustedState = "";
-        //Logger.add("update");
-        base.update();
-    }
-
     // wrapped methods
     /////////////////////////////////////////////////////////////////
 
-    /**
-     * Sorted list of all UIDs in panel.
-     * Used for Minimap syncronization.
-     */
-    public var m_uids:Array;
-
-    static var DEBUG_TIMES = false;
-
+    private var m_data_arguments:Array;
     private var m_data:Object;
+    private var m_dead_noticed:Object = { };
 
     private var m_knownPlayersCount:Number = 0; // for Fog of War mode.
     private var m_postmortemIndex:Number = 0;
 
-    private var spotStatusModel:SpotStatusModel;
+    private var m_lastPosition:Number = 0;
+
+    private var cfg:Object;
 
     public function PlayersPanelCtor()
     {
         Utils.TraceXvmModule("PlayersPanel");
 
-        spotStatusModel = null;
-
-        GlobalEventDispatcher.addEventListener(Config.E_CONFIG_LOADED, StatLoader.LoadData);
-        GlobalEventDispatcher.addEventListener(Config.E_CONFIG_LOADED, this, onConfigLoaded);
-        GlobalEventDispatcher.addEventListener(Stat.E_STAT_LOADED, this, update);
-        GlobalEventDispatcher.addEventListener(Defines.E_BATTLE_STATE_CHANGED, this, update);
-
-        Config.LoadConfig();
-
-        /** Minimap needs to know loaded status */
-        checkLoading();
+        GlobalEventDispatcher.addEventListener(Defines.E_CONFIG_LOADED, this, onConfigLoaded);
+        GlobalEventDispatcher.addEventListener(Defines.E_UPDATE_STAGE, this, invalidate);
+        GlobalEventDispatcher.addEventListener(Defines.E_STAT_LOADED, this, invalidate);
+        GlobalEventDispatcher.addEventListener(Events.E_BATTLE_STATE_CHANGED, this, onBattleStateChanged);
     }
 
-    private function onConfigLoaded(event):Void
-    {
-        //Logger.add("PlayersPanel.onConfigLoaded()");
-
-        GlobalEventDispatcher.removeEventListener(Config.E_CONFIG_LOADED, this, onConfigLoaded);
-
-        // init enemy spotter markers
-        if (Config.s_config.playersPanel.enemySpottedMarker.enabled && isEnemyPanel)
-        {
-            GlobalEventDispatcher.addEventListener(AutoUpdate.UPDATE_BY_TIMER_EVENT, this, updateSpotStatusMarkers);
-            spotStatusModel = new SpotStatusModel();
-        }
-    }
-
-    /**
-     * Refreshes Enemy spot status marker.
-     * Invoked by AutoUpdate event each 300ms.
-     */
-    public function updateSpotStatusMarkers():Void
-    {
-        //Logger.add("PlayersPanel.updateSpotStatusMarkers()");
-
-        /** Redraw every renderer */
-        var len:Number = wrapper.m_list.renderers.length;
-        for (var i:Number = 0; i < len; ++i)
-        {
-            var renderer:net.wargaming.ingame.PlayerListItemRenderer = net.wargaming.ingame.PlayerListItemRenderer(wrapper.m_list.renderers[i]);
-            var uid:Number = renderer.data.uid;
-            var status:Number = spotStatusModel.defineStatus(uid, renderer.data.vehicleState);
-            var subjectIsArtillery:Boolean = spotStatusModel.isArty(uid);
-            var worker:PlayerListItemRenderer = renderer.xvm_worker;
-            if (worker.spotStatusView != null)
-                worker.spotStatusView.update(status, subjectIsArtillery);
-        }
-    }
-
-    private function setDataImpl(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStr, vehiclesStr, namesStr)
-    {
-        //Logger.add("PlayersPanel.setData()");
-        //var start = new Date();
-        setData2(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStr, vehiclesStr, namesStr);
-        //if (PlayersPanel.DEBUG_TIMES)
-        //    Logger.add("DEBUG TIME: PlayersPanel: setData2(" + this.base.m_type + "): " + Utils.elapsedMSec(start, new Date()) + " ms");
-    }
-
-    private var _init:Boolean = false;
-    private var _lastAdjustedState = "";
+    // PRIVATE
 
     // Centered _y value of text field
     private var centeredTextY:Number;
-    private var leadingNames:Number;
-    private var leadingVehicles:Number;
+
+    private var m_altMode:String = null;
+    private var m_savedState:String = null;
+    private var m_initialized = false;
+
+    private function onConfigLoaded()
+    {
+        cfg = Config.config.playersPanel;
+        var startMode:String = String(cfg.startMode).toLowerCase();
+        if (net.wargaming.ingame.PlayersPanel.STATES[startMode] == null)
+            startMode = net.wargaming.ingame.PlayersPanel.STATES.large.name;
+        cfg[startMode].enabled = true;
+        setStartMode(startMode, wrapper);
+
+        m_savedState = null;
+        m_altMode = String(cfg.altMode).toLowerCase();
+        if (net.wargaming.ingame.PlayersPanel.STATES[m_altMode] == null)
+            m_altMode = null;
+        if (m_altMode != null)
+            GlobalEventDispatcher.addEventListener(Defines.E_PP_ALT_MODE, this, setAltMode);
+
+        _root.switcher_mc.noneBtn.enabled = cfg[net.wargaming.ingame.PlayersPanel.STATES.none.name].enabled;
+        _root.switcher_mc.shortBtn.enabled = cfg[net.wargaming.ingame.PlayersPanel.STATES.short.name].enabled;
+        _root.switcher_mc.mediumBtn.enabled = cfg[net.wargaming.ingame.PlayersPanel.STATES.medium.name].enabled;
+        _root.switcher_mc.mediumBtn2.enabled = cfg[net.wargaming.ingame.PlayersPanel.STATES.medium2.name].enabled;
+        _root.switcher_mc.largeBtn.enabled = cfg[net.wargaming.ingame.PlayersPanel.STATES.large.name].enabled;
+        _root.switcher_mc.noneBtn._alpha = _root.switcher_mc.noneBtn.enabled ? 100 : 50;
+        _root.switcher_mc.shortBtn._alpha = _root.switcher_mc.shortBtn.enabled ? 100 : 50;
+        _root.switcher_mc.mediumBtn._alpha = _root.switcher_mc.mediumBtn.enabled ? 100 : 50;
+        _root.switcher_mc.mediumBtn2._alpha = _root.switcher_mc.mediumBtn2.enabled ? 100 : 50;
+        _root.switcher_mc.largeBtn._alpha = _root.switcher_mc.largeBtn.enabled ? 100 : 50;
+    }
+
+    private function setStartMode(mode:String, wrapper:net.wargaming.ingame.PlayersPanel)
+    {
+        if (wrapper.state == "none")
+        {
+            var $this = this;
+            setTimeout(function() { $this.setStartMode(mode, wrapper); }, 1);
+            return;
+        }
+
+        m_initialized = true;
+
+        wrapper.state = mode;
+        updateSwitcherButton();
+
+        // initialize
+
+        centeredTextY = wrapper.m_names._y - 5;
+
+        // for incomplete team - cannot set to "center"
+        wrapper.m_names.verticalAlign = "top";
+        wrapper.m_vehicles.verticalAlign = "top";
+        wrapper.m_frags.verticalAlign = "top";
+    }
+
+    private var isAltMode:Boolean = false;
+    private function setAltMode(e:Object)
+    {
+        //Logger.add("setAltMode: " + e.isDown + " " + m_altMode + " " + wrapper.state);
+
+        if (m_altMode == null)
+            return;
+
+        if (Config.config.hotkeys.playersPanelAltMode.onHold)
+            isAltMode = e.isDown;
+        else if (e.isDown)
+            isAltMode = !isAltMode;
+        else
+            return;
+
+        if (isAltMode)
+        {
+            if (m_savedState == null)
+                m_savedState = wrapper.state;
+            wrapper.state = m_altMode;
+        }
+        else
+        {
+            if (m_savedState != null)
+                wrapper.state = m_savedState;
+            m_savedState = null;
+        }
+
+        updateSwitcherButton();
+    }
+
+    private function setDataImpl()
+    {
+        m_data_arguments = arguments;
+        validateNow();
+        //invalidate(10);
+    }
+
+    private function draw()
+    {
+        setDataInternal.apply(this, m_data_arguments);
+    }
+
+    var prevState:String = null;
+    var prevNamesStr:String = null;
+    var prevVehiclesStr:String = null;
+    var prevFragsStr:String = null;
+    private function setDataInternal(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStrOrig, vehiclesStrOrig, namesStrOrig)
+    {
+        //Logger.add("PlayersPanel.setData(): " + wrapper.state);
+        //Logger.addObject(data, 3);
+        //Logger.addObject(wrapper.m_list, 3);
+        //Logger.add(vehiclesStrOrig);
+        //Logger.add(namesStr);
+
+        try
+        {
+            m_data = data;
+
+            if (data == null)
+                return;
+
+            Cmd.profMethodStart("PlayersPanel.setData(): " + wrapper.type);
+
+            //wrapper.m_list._visible = true; // _visible == false for "none" mode
+            Cmd.profMethodStart("PlayersPanel.setData(): #0 - split");
+            var values:Array = vehiclesStrOrig.split("<br/>");
+            Cmd.profMethodEnd("PlayersPanel.setData(): #0 - split");
+            Cmd.profMethodStart("PlayersPanel.setData(): #1 - prepare");
+            var len = data.length;
+            var namesArr:Array = [];
+            var vehiclesArr:Array = [];
+            var fragsArr:Array = [];
+            for (var i = 0; i < len; ++i)
+            {
+                Cmd.profMethodStart("PlayersPanel.setData(): #1.0 - register macros");
+                var item = data[i];
+                var value = values[i];
+
+                fixBattleState(item);
+
+                //Logger.addObject(item);
+                if (item.himself)
+                    Macros.UpdateMyFrags(item.frags);
+                Macros.RegisterPlayerData(item.userName, item, wrapper.type == "left" ? Defines.TEAM_ALLY : Defines.TEAM_ENEMY);
+                Cmd.profMethodEnd("PlayersPanel.setData(): #1.0 - register macros");
+
+                var value_splitted:Array = value.split(item.vehicle);
+                var cfg_state:Object = cfg[wrapper.state];
+//                Cmd.profMethodStart("PlayersPanel.setData(): #1.1 - format names");
+                namesArr.push(value_splitted.join(getTextValue(cfg_state, Defines.FIELDTYPE_NICK, item, item.userName)));
+//                Cmd.profMethodEnd("PlayersPanel.setData(): #1.1 - format names");
+//                Cmd.profMethodStart("PlayersPanel.setData(): #1.2 - format vehicle");
+                vehiclesArr.push(value_splitted.join(getTextValue(cfg_state, Defines.FIELDTYPE_VEHICLE, item, item.vehicle)));
+//                Cmd.profMethodEnd("PlayersPanel.setData(): #1.2 - format vehicle");
+//                Cmd.profMethodStart("PlayersPanel.setData(): #1.3 - format frags");
+                fragsArr.push(value_splitted.join(getTextValue(cfg_state, Defines.FIELDTYPE_FRAGS, item, item.frags)));
+//                Cmd.profMethodEnd("PlayersPanel.setData(): #1.3 - format frags");
+            }
+            Cmd.profMethodEnd("PlayersPanel.setData(): #1 - prepare");
+
+            Cmd.profMethodStart("PlayersPanel.setData(): #2 - join arrays and set htmlText");
+            var namesStr:String = namesArr.join("\n");
+            var vehiclesStr:String = vehiclesArr.join("\n");
+            var fragsStr:String = fragsArr.join("\n");
+
+            //Logger.add(vehiclesStr);
+
+            var deadCountPrev:Number = wrapper.saved_params[wrapper.m_type].dPC;
+
+            var needAdjustSize:Boolean = false;
+            //Logger.addObject(wrapper.m_names.text);
+            var text:String = wrapper.m_names.text;
+            if (prevNamesStr != namesStr || text == "" || text == "\r")
+            {
+                needAdjustSize = true;
+                prevNamesStr = namesStr;
+                wrapper.m_names.htmlText = namesStr;
+                AdjustLeading(wrapper.m_names);
+            }
+
+            text = wrapper.m_vehicles.text;
+            if (prevVehiclesStr != vehiclesStr || text == "" || text == "\r")
+            {
+                needAdjustSize = true;
+                prevVehiclesStr = vehiclesStr;
+                wrapper.m_vehicles.htmlText = vehiclesStr;
+                AdjustLeading(wrapper.m_vehicles);
+            }
+
+            text = wrapper.m_frags.text;
+            if (prevFragsStr != fragsStr || text == "" || text == "\r")
+            {
+                prevFragsStr = fragsStr;
+                wrapper.m_frags.htmlText = fragsStr;
+                //AdjustLeading(wrapper.m_frags);
+            }
+            Cmd.profMethodEnd("PlayersPanel.setData(): #2 - join arrays and set htmlText");
+
+            Cmd.profMethodStart("PlayersPanel.setData(): #3 - base.setData()");
+            base.setData(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStrOrig, vehiclesStrOrig, namesStrOrig);
+            Cmd.profMethodEnd("PlayersPanel.setData(): #3 - base.setData()");
+
+            Cmd.profMethodStart("PlayersPanel.setData(): #4");
+            // new player added in the FoW mode
+            if (m_knownPlayersCount != data.length)
+                m_knownPlayersCount = data.length;
+
+            if (prevState != wrapper.state)
+            {
+                needAdjustSize = true;
+                prevState = wrapper.state;
+            }
+
+            if (needAdjustSize)
+                XVMAdjustPanelSize();
+
+            // notice about dead players
+            if (dead_players_count != deadCountPrev)
+            {
+                for (var i = len - dead_players_count; i < len; ++i)
+                {
+                    var item = data[i];
+                    var uid:Number = item.uid;
+                    if (!m_dead_noticed.hasOwnProperty(uid.toString()))
+                    {
+                        m_dead_noticed[uid] = true;
+                        //Logger.add("dead: " + item.uid);
+                        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_PLAYER_DEAD, value: item.uid } );
+                    }
+                }
+            }
+            Cmd.profMethodEnd("PlayersPanel.setData(): #4");
+        }
+        catch (ex:Error)
+        {
+            Logger.add(ex.toString());
+        }
+
+        Cmd.profMethodEnd("PlayersPanel.setData(): " + wrapper.type);
+    }
+
+    private function fixBattleState(data)
+    {
+        // fix battlestate
+        var obj = BattleState.getUserData(data.userName);
+        obj.frags = data.frags || NaN;
+        //Logger.addObject(data);
+        obj.ready = (data.vehicleState & net.wargaming.ingame.VehicleStateInBattle.IS_AVATAR_READY) != 0 && !Boolean(data.isOffline);
+        obj.dead = (data.vehicleState & net.wargaming.ingame.VehicleStateInBattle.IS_ALIVE) == 0;
+        if (obj.dead == true && (!isNaN(obj.curHealth) && obj.curHealth > 0))
+            obj.curHealth = 0;
+        obj.blowedUp = obj.dead && (!isNaN(obj.curHealth) && obj.curHealth < 0);
+        obj.teamKiller = data.teamKiller == true;
+        obj.entityName = wrapper.type != "left" ? "enemy" : data.squad > 10 ? "squadman" : obj.teamKiller ? "teamKiller" : "ally";
+        obj.selected = data.isPostmortemView;
+        if (obj.position == null)
+            obj.position = ++m_lastPosition;
+
+        if (data.himself)
+            BattleState.setSelfUserName(data.userName);
+    }
 
     private function selectPlayer(event):Void
     {
@@ -142,342 +347,307 @@ class wot.PlayersPanel.PlayersPanel
         gfx.io.GameDelegate.call("Battle.selectPlayer", [m_data[pos].vehId]);
     }
 
-    private function setData2(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count,
-        fragsStrOrig, vehiclesStrOrig, namesStrOrig)
-    {
-        //Logger.add("PlayersPanel.setData2()");
-        //Logger.add("_lastAdjustedState: " + _lastAdjustedState);
-        //Logger.addObject(data, 3);
-        //Logger.add(vehiclesStrOrig);
-        //Logger.add(namesStr);
-        try
-        {
-            m_data = data;
-
-            if (data == null)
-                return;
-
-            wrapper.m_names.condenseWhite = !Stat.s_loaded;
-            wrapper.m_vehicles.condenseWhite = !Stat.s_loaded;
-
-            if (!_init)
-            {
-                _init = true;
-                centeredTextY = wrapper.m_names._y - 5;
-                wrapper.m_names.verticalAlign = "top"; // for incomplete team - cannot set to "center"
-                wrapper.m_vehicles.verticalAlign = "top"; // for incomplete team - cannot set to "center"
-
-                // [1/3] fix WG bug - this function is slow, don't call it if not required.
-                wrapper.m_list["invalidateData2"] = wrapper.m_list["invalidateData"];
-            }
-
-            var namesStr:String = "";
-            var vehiclesStr:String = "";
-            var values:Array = vehiclesStrOrig.split("<br/>");
-            var len = data.length;
-            for (var i = 0; i < len; ++i)
-            {
-                var item = data[i];
-                var value = values[i];
-
-                Macros.RegisterPlayerData(Utils.GetNormalizedPlayerName(item.label), item,
-                    wrapper.type == "left" ? Defines.TEAM_ALLY : Defines.TEAM_ENEMY);
-
-                if (i != 0)
-                {
-                    namesStr += "<br/>";
-                    vehiclesStr += "<br/>";
-                }
-                namesStr += value.split(item.vehicle).join(getTextValue(Defines.FIELDTYPE_NICK, item, item.userName));
-                vehiclesStr += value.split(item.vehicle).join(getTextValue(Defines.FIELDTYPE_VEHICLE, item, item.vehicle));
-            }
-
-            //Logger.add("_lastAdjustedState: " + _lastAdjustedState);
-            //Logger.add(vehiclesStr);
-
-            // [2/3] fix WG bug - this function is slow, don't call it if not required.
-            wrapper.m_list["invalidateData"] = function() {}
-
-            base.setData(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStrOrig, vehiclesStr, namesStr);
-            base.saveData(data, sel, postmortemIndex, isColorBlind, knownPlayersCount, dead_players_count, fragsStrOrig, vehiclesStrOrig, namesStrOrig);
-
-            // [3/3] fix WG bug - this function is slow, don't call it if not required.
-            wrapper.m_list["invalidateData"] = wrapper.m_list["invalidateData2"];
-
-            wrapper.players_bg._alpha = Config.s_config.playersPanel.alpha;
-            wrapper.m_list._alpha = Config.s_config.playersPanel.iconAlpha;
-
-            // new player added in the FoW mode
-            if (m_knownPlayersCount != data.length)
-            {
-                m_knownPlayersCount = data.length;
-                _lastAdjustedState = "";
-            }
-
-            // panel mode switched
-            if (wrapper.state != _lastAdjustedState)
-            {
-                XVMAdjustPanelSize();
-                _lastAdjustedState = wrapper.state;
-            }
-
-            // FIXIT: this code is not optimal. Find how to set default leading for text fields and remove this code.
-            wrapper.m_names.htmlText = wrapper.m_names.htmlText.split('LEADING="9"').join('LEADING="' + leadingNames + '"');
-            wrapper.m_names._y = centeredTextY + leadingNames / 2.0; // centering on cell, because of align=top
-
-            wrapper.m_vehicles.htmlText = wrapper.m_vehicles.htmlText.split('LEADING="9"').join('LEADING="' + leadingVehicles + '"');
-            wrapper.m_vehicles._y = centeredTextY + leadingVehicles / 2.0; // centering on cell, because of align=top
-        }
-        catch (e:Error)
-        {
-            Logger.add(e.toString());
-        }
-    }
-
     private function onRecreateDeviceImpl(width, height)
     {
         //Logger.add("PlayersPanel.onRecreateDevice()");
         base.onRecreateDevice(width, height);
-        XVMAdjustPanelSize();
+        wrapper.update();
+    }
+
+    private function updateImpl()
+    {
+        //Logger.add("up: " + wrapper.state);
+        if (m_initialized && m_savedState == null && Config.config.playersPanel[wrapper.state].enabled == false)
+        {
+            switch (wrapper.state)
+            {
+                case net.wargaming.ingame.PlayersPanel.STATES.none.name:
+                    wrapper.state = net.wargaming.ingame.PlayersPanel.STATES.short.name;
+                    break;
+                case net.wargaming.ingame.PlayersPanel.STATES.short.name:
+                    wrapper.state = net.wargaming.ingame.PlayersPanel.STATES.medium.name;
+                    break;
+                case net.wargaming.ingame.PlayersPanel.STATES.medium.name:
+                    wrapper.state = net.wargaming.ingame.PlayersPanel.STATES.medium2.name;
+                    break;
+                case net.wargaming.ingame.PlayersPanel.STATES.medium2.name:
+                    wrapper.state = net.wargaming.ingame.PlayersPanel.STATES.large.name;
+                    break;
+                case net.wargaming.ingame.PlayersPanel.STATES.large.name:
+                    wrapper.state = net.wargaming.ingame.PlayersPanel.STATES.none.name;
+                    break;
+            }
+            updateSwitcherButton();
+            return;
+        }
+
+        base.update();
+    }
+
+    private function updateAlphasImpl()
+    {
+        if (wrapper.m_names.condenseWhite)
+            wrapper.m_names.condenseWhite = false;
+        if (wrapper.m_vehicles.condenseWhite)
+            wrapper.m_vehicles.condenseWhite = false;
+        if (wrapper.m_frags.wordWrap)
+            wrapper.m_frags.wordWrap = false;
+        wrapper.players_bg._alpha = Config.config.playersPanel.alpha;
+        wrapper.m_list._alpha = 100;
     }
 
     // PRIVATE
 
-    private function getTextValue(fieldType, data, text)
+    private function updateSwitcherButton()
     {
-        //Logger.add("getTextValue()");
-        var format: String = null;
+        var btn:Object;
         switch (wrapper.state)
         {
-            case "medium":
-                if (fieldType == Defines.FIELDTYPE_VEHICLE)
-                    break;
-                format = (wrapper.type == "left")
-                    ? Config.s_config.playersPanel.medium.formatLeft
-                    : Config.s_config.playersPanel.medium.formatRight;
+            case net.wargaming.ingame.PlayersPanel.STATES.none.name:
+                btn = _root.switcher_mc.noneBtn;
                 break;
-            case "medium2":
-                if (fieldType == Defines.FIELDTYPE_NICK)
-                    break;
-                format = (wrapper.type == "left")
-                    ? Config.s_config.playersPanel.medium2.formatLeft
-                    : Config.s_config.playersPanel.medium2.formatRight;
+            case net.wargaming.ingame.PlayersPanel.STATES.short.name:
+                btn = _root.switcher_mc.shortBtn;
                 break;
-            case "large":
-                if (fieldType == Defines.FIELDTYPE_NICK)
-                {
-                    format = (wrapper.type == "left")
-                        ? Config.s_config.playersPanel.large.nickFormatLeft
-                        : Config.s_config.playersPanel.large.nickFormatRight;
-                }
-                else if (fieldType == Defines.FIELDTYPE_VEHICLE)
-                {
-                    format = (wrapper.type == "left")
-                        ? Config.s_config.playersPanel.large.vehicleFormatLeft
-                        : Config.s_config.playersPanel.large.vehicleFormatRight;
-                }
+            case net.wargaming.ingame.PlayersPanel.STATES.medium.name:
+                btn = _root.switcher_mc.mediumBtn;
                 break;
-            default:
+            case net.wargaming.ingame.PlayersPanel.STATES.medium2.name:
+                btn = _root.switcher_mc.mediumBtn2;
+                break;
+            case net.wargaming.ingame.PlayersPanel.STATES.large.name:
+                btn = _root.switcher_mc.largeBtn;
                 break;
         }
+        //currentType = value;
+        btn.selected = true;
+    }
 
-        if (format != null)
+    private function onBattleStateChanged(e:EBattleStateChanged)
+    {
+        //updateWithoutHideMenu
+        invalidate(300);
+    }
+
+    // update without hide menu
+    /*
+    private function updateWithoutHideMenu()
+    {
+        if (wrapper.m_list instanceof ScrollingList)
         {
-            //Logger.add("before: " + text);
-            var deadState = ((data.vehicleState & net.wargaming.ingame.VehicleStateInBattle.IS_AVIVE) == 0) ? Defines.DEADSTATE_DEAD : Defines.DEADSTATE_ALIVE;
-            var state = wrapper.state;
-            var field = state == "medium2" ? wrapper.m_vehicles : wrapper.m_names;
-            //var nm = Utils.GetPlayerName(data.label);
-            //var key = "PP/" + deadState + "/" + nm + "/" + state + "/" + fieldType + "/" +
-            //    (Stat.s_data[nm] ? Stat.s_data[nm].loadstate : "0");
-            //Logger.add(Stat.s_data[nm]);
-            //Logger.add(key);
-            //text = Cache.Get(key, function()
-            //{
-                var obj = Defines.battleStates[Utils.GetPlayerName(data.label)] || { };
-                obj.darken = deadState == Defines.DEADSTATE_DEAD;
+            var p = wrapper.saved_params[wrapper.m_type];
+            wrapper.setData(p.data, p.sel, p.pIdx, p.isCB, p.kPC, p.dPC, p.fragsStr, p.vehiclesStr, p.namesStr);
+        } // end if
+    }
+    */
 
-                if ((state != "medium" && state != "medium2" && state != "large") ||
-                    (format.indexOf("{{nick}}") == -1 && format.indexOf("{{name}}") == -1 && format.indexOf("{{clan}}") == -1))
-                {
-                    return Macros.Format(data.label, format, obj);
-                }
-
-                obj.skip = { nick:1, name:1, clan:1 };
-
-                var fmt = Macros.Format(data.label, format, obj);
-                return PlayersPanel.formatNamesForWidth(
-                    fmt,
-                    Macros.Format(data.label, "{{nick}}"),
-                    Config.s_config.playersPanel[state].width,
-                    field.getNewTextFormat());
-            //});
-            //Logger.add("after: " + text);
+    private function getTextValue(cfg_state, fieldType, data, text)
+    {
+        //Logger.add("getTextValue()");
+        var format:String = null;
+        var isLeftPanel:Boolean = wrapper.type == "left";
+        if (fieldType == Defines.FIELDTYPE_FRAGS)
+        {
+            format = isLeftPanel ? cfg_state.fragsFormatLeft : cfg_state.fragsFormatRight;
         }
-
-        return text;
-    }
-
-    private static var s_widthTester:TextField;
-    private static function createWidthTester(textFormat:TextFormat)
-    {
-        s_widthTester = _root.createTextField("widthTester", _root.getNextHighestDepth(), 0, 0, 268, 20);
-        s_widthTester.autoSize = false;
-        s_widthTester.html = true;
-        s_widthTester._visible = false;
-        s_widthTester.setNewTextFormat(textFormat);
-    }
-
-    private static function formatNamesForWidth(format:String, playerName: String, width:Number, textFormat:TextFormat):String
-    {
-        if (width < 0 || !textFormat)
-            return format;
-
-        var pname:String = "";
-        var cname:String = "";
-        if (width > 0)
+        else
         {
-            // cut player name for field width
-            pname = Utils.GetPlayerName(playerName);
-            cname = Utils.GetClanNameWithBrackets(playerName);
+            switch (wrapper.state)
             {
-                if (s_widthTester == null)
-                    createWidthTester();
-                s_widthTester.condenseWhite = !Stat.s_loaded;
-                while (pname + cname != "")
-                {
-                    s_widthTester.htmlText = format
-                        .split("{{nick}}").join(pname + cname)
-                        .split("{{name}}").join(pname)
-                        .split("{{clan}}").join(cname);
-                    if (Math.round(s_widthTester.getLineMetrics(0).width) + 4 <= width) // 4 is a size of gutters
-                    {
-                        //Logger.add("width=" + width + " _width=" + s_widthTester._width + " lineWidth=" + Math.round(s_widthTester.getLineMetrics(0).width) + " " + str);
-                        break;
-                    }
-                    if (cname != "")
-                        cname = cname.substr(0, cname.length - 1);
-                    else
-                        pname = pname.substr(0, pname.length - 1);
-                }
+                case "medium":
+                    if (fieldType == Defines.FIELDTYPE_NICK)
+                        format = isLeftPanel ? cfg_state.formatLeft : cfg_state.formatRight;
+                    break;
+                case "medium2":
+                    if (fieldType == Defines.FIELDTYPE_VEHICLE)
+                        format = isLeftPanel ? cfg_state.formatLeft : cfg_state.formatRight;
+                    break;
+                case "large":
+                    if (fieldType == Defines.FIELDTYPE_NICK)
+                        format = isLeftPanel ? cfg_state.nickFormatLeft : cfg_state.nickFormatRight;
+                    else if (fieldType == Defines.FIELDTYPE_VEHICLE)
+                        format = isLeftPanel ? cfg_state.vehicleFormatLeft : cfg_state.vehicleFormatRight;
+                    break;
             }
         }
 
-        format = format.split("{{nick}}").join(pname + cname);
-        format = format.split("{{name}}").join(pname);
-        format = format.split("{{clan}}").join(cname);
-        return format;
+        if (format == null)
+            return text;
+
+        //Logger.add("before: " + text);
+        var obj:Object = BattleState.getUserData(data.userName);
+        var fmt:String = Macros.Format(data.userName, format, obj);
+        //Logger.add("after: " + fmt);
+        return fmt;
     }
 
     private function XVMAdjustPanelSize()
     {
         //Logger.add("PlayersPanel.XVMAdjustPanelSize()");
 
-        var namesWidthDefault = 46;
-        var namesWidth = namesWidthDefault;
-        var vehiclesWidthDefault = 65;
-        var vehiclesWidth = vehiclesWidthDefault;
-        var widthDelta = 0;
-        var squadSize = 0;
+        var namesWidthDefault:Number = 46;
+        var namesWidth:Number = namesWidthDefault;
+        var vehiclesWidthDefault:Number = 65;
+        var vehiclesWidth:Number = vehiclesWidthDefault;
+        var widthDelta:Number = 0;
+        var squadSize:Number = 0;
+
+        var isLeftPanel:Boolean = wrapper.type == "left";
+        var w:Number = Macros.FormatGlobalNumberValue(cfg[wrapper.state].width);
+        var value:Number;
+
         switch (wrapper.state)
         {
+            case "short":
+                widthDelta = -w;
+                break;
             case "medium":
-                namesWidth = Math.max(XVMGetMaximumFieldWidth(wrapper.m_names), Config.s_config.playersPanel.medium.width);
+                namesWidth = Math.max(XVMGetMaximumFieldWidth(wrapper.m_names), w);
                 widthDelta = namesWidthDefault - namesWidth;
                 break;
             case "medium2":
-                vehiclesWidth = Config.s_config.playersPanel.medium2.width;
+                vehiclesWidth = w;
                 widthDelta = vehiclesWidthDefault - vehiclesWidth;
                 break;
             case "large":
                 namesWidthDefault = 296;
-                namesWidth = Math.max(XVMGetMaximumFieldWidth(wrapper.m_names), Config.s_config.playersPanel.large.width);
+                namesWidth = Math.max(XVMGetMaximumFieldWidth(wrapper.m_names), w);
                 vehiclesWidth = XVMGetMaximumFieldWidth(wrapper.m_vehicles);
                 //Logger.add("w: " + vehiclesWidth + " " + wrapper.m_vehicles.htmlText);
-                squadSize = Config.s_config.playersPanel.removeSquadIcon ? 0 : net.wargaming.ingame.PlayersPanel.SQUAD_SIZE;
+                squadSize = cfg.removeSquadIcon ? 0 : net.wargaming.ingame.PlayersPanel.SQUAD_SIZE;
                 widthDelta = namesWidthDefault - namesWidth + vehiclesWidthDefault - vehiclesWidth - squadSize + net.wargaming.ingame.PlayersPanel.SQUAD_SIZE;
                 break;
             default:
-                wrapper.m_list._x = wrapper.players_bg._x = (wrapper.type == "left")
+                value = isLeftPanel
                     ? net.wargaming.ingame.PlayersPanel.STATES[wrapper.state].bg_x
                     : wrapper.players_bg._width - net.wargaming.ingame.PlayersPanel.STATES[wrapper.state].bg_x;
+                if (wrapper.m_list._x != value || wrapper.players_bg._x != value)
+                {
+                    wrapper.m_list._x = value;
+                    wrapper.players_bg._x = value;
+                    GlobalEventDispatcher.dispatchEvent({
+                        type: isLeftPanel ? Defines.E_LEFT_PANEL_SIZE_ADJUSTED : Defines.E_RIGHT_PANEL_SIZE_ADJUSTED,
+                        state: wrapper.state
+                    });
+                }
                 return;
         }
 
-        wrapper.m_names._width = namesWidth;
-        wrapper.m_vehicles._width = vehiclesWidth;
+        var changed:Boolean = false;
 
-        if (wrapper.m_names && wrapper.m_names._visible)
-            leadingNames = 29 - XVMGetMaximumFieldHeight(wrapper.m_names);
-
-        if (wrapper.m_vehicles && wrapper.m_vehicles._visible)
-            leadingVehicles = 29 - XVMGetMaximumFieldHeight(wrapper.m_vehicles);
-
-        if (wrapper.type == "left")
+        if (wrapper.m_names._visible && wrapper.m_names._width != namesWidth)
         {
-            wrapper.m_names._x = squadSize;
-            wrapper.m_frags._x = wrapper.m_names._x + wrapper.m_names._width;
-            wrapper.m_vehicles._x = wrapper.m_frags._x + wrapper.m_frags._width;
-            wrapper.m_list._x = wrapper.players_bg._x = net.wargaming.ingame.PlayersPanel.STATES[wrapper.state].bg_x - widthDelta;
-            if (squadSize > 0)
+            changed = true;
+            wrapper.m_names._width = namesWidth;
+        }
+
+        if (wrapper.m_vehicles._visible && wrapper.m_vehicles._width != vehiclesWidth)
+        {
+            changed = true;
+            wrapper.m_vehicles._width = vehiclesWidth;
+        }
+
+        if (isLeftPanel)
+        {
+            value = squadSize;
+            if (wrapper.m_names._x != value)
+            {
+                changed = true;
+                wrapper.m_names._x = value;
+            }
+
+            value = wrapper.m_names._x + wrapper.m_names._width;
+            if (wrapper.m_frags._x != value)
+            {
+                changed = true;
+                wrapper.m_frags._x = value;
+            }
+
+            value = wrapper.m_frags._x + wrapper.m_frags._width;
+            if (wrapper.m_vehicles._x != value)
+            {
+                changed = true;
+                wrapper.m_vehicles._x = wrapper.m_frags._x + wrapper.m_frags._width;
+            }
+
+            value = wrapper.players_bg._x = net.wargaming.ingame.PlayersPanel.STATES[wrapper.state].bg_x - widthDelta;
+            if (wrapper.m_list._x != value)
+            {
+                changed = true;
+                wrapper.m_list._x = value;
+            }
+
+            if (squadSize > 0 && changed)
                 wrapper.m_list.updateSquadIconPosition(-wrapper.m_list._x);
         }
         else
         {
-            wrapper.m_names._x = wrapper.players_bg._width - wrapper.m_names._width - squadSize;
-            wrapper.m_frags._x = wrapper.m_names._x - wrapper.m_frags._width;
-            wrapper.m_vehicles._x = wrapper.m_frags._x - wrapper.m_vehicles._width;
-            wrapper.m_list._x = wrapper.players_bg._x = wrapper.players_bg._width - net.wargaming.ingame.PlayersPanel.STATES[wrapper.state].bg_x + widthDelta;
-            if (squadSize > 0)
+            value = wrapper.players_bg._width - wrapper.m_names._width - squadSize;
+            if (wrapper.m_names._x != value)
+            {
+                changed = true;
+                wrapper.m_names._x = value;
+            }
+
+            value = wrapper.m_names._x - wrapper.m_frags._width;
+            if (wrapper.m_frags._x != value)
+            {
+                changed = true;
+                wrapper.m_frags._x = value;
+            }
+
+            value = wrapper.m_frags._x - wrapper.m_vehicles._width;
+            if (wrapper.m_vehicles._x != value)
+            {
+                changed = true;
+                wrapper.m_vehicles._x = value;
+            }
+
+            value = wrapper.players_bg._x = wrapper.players_bg._width - net.wargaming.ingame.PlayersPanel.STATES[wrapper.state].bg_x + widthDelta;
+            if (wrapper.m_list._x != value)
+            {
+                changed = true;
+                wrapper.m_list._x = value;
+            }
+
+            if (squadSize > 0 && changed)
                 wrapper.m_list.updateSquadIconPosition(-440 + wrapper.m_frags._width + wrapper.m_names._width + wrapper.m_vehicles._width + squadSize);
+        }
+
+        if (changed)
+        {
+            GlobalEventDispatcher.dispatchEvent({
+                type: isLeftPanel ? Defines.E_LEFT_PANEL_SIZE_ADJUSTED : Defines.E_RIGHT_PANEL_SIZE_ADJUSTED,
+                state: wrapper.state
+            });
         }
     }
 
-    private function XVMGetMaximumFieldWidth(field: TextField)
+    private function XVMGetMaximumFieldWidth(field:TextField)
     {
         var max_width = 0;
-        for (var i = 0; i < field.numLines; ++i)
+        var len:Number = field.numLines;
+        for (var i = 0; i < len; ++i)
         {
-            var w = Math.round(field.getLineMetrics(i).width) + 4; // 4 is a size of gutters
+            var w:Number = field.getLineMetrics(i).width;
             if (w > max_width)
                 max_width = w;
         }
-        return max_width;
+        return Math.round(max_width) + 4; // 4 is the size of gutters
     }
 
-    private function XVMGetMaximumFieldHeight(field: TextField)
+    // set leading and centering on cell, because of align=top
+    private function AdjustLeading(field:TextField)
     {
-        var max_height = 0;
-        for (var i = 0; i < field.numLines; ++i)
-        {
-            var w = Math.round(field.getLineMetrics(i).height) + 4; // 4 is a size of gutters
-            if (w > max_height)
-                max_height = w;
-        }
-        return max_height;
-    }
+        if (!field._visible)
+            return;
 
-    /** Informs Minimap when PlayersPanel is loaded */
-    private function checkLoading():Void
-    {
-        //Logger.add("PlayersPanel.checkLoading()");
+        var leading:Number = Math.round(33.95 - (field.textHeight + 9) / field.numLines);
+        if (leading != 9)
+            field.htmlText = field.htmlText.split('LEADING="9"').join('LEADING="' + leading + '"');
 
-        wrapper.m_list.onEnterFrame = function()
-        {
-            //Logger.add("PlayersPanel.checkLoading(): frame");
-            if (this._dataProvider.length > 0)
-            {
-                delete this.onEnterFrame;
+        field._y = centeredTextY + leading / 2.0;
 
-                this._parent.updateUids();
-
-                GlobalEventDispatcher.dispatchEvent(new MinimapEvent(MinimapEvent.PANEL_READY));
-            }
-        }
-    }
-
-    private function get isEnemyPanel():Boolean
-    {
-        return wrapper.type == "right";
+        //Logger.add(field.htmlText);
     }
 }

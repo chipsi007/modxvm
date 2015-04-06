@@ -2,10 +2,8 @@
  * ...
  * @author sirmax2
  */
-import com.xvm.Config;
-import com.xvm.Defines;
-import com.xvm.IconLoader;
-import net.wargaming.controls.UILoaderAlt;
+import com.xvm.*;
+import net.wargaming.controls.*;
 
 class com.xvm.PlayerInfo extends MovieClip
 {
@@ -38,13 +36,13 @@ class com.xvm.PlayerInfo extends MovieClip
         return icon;
     }
 
-    public static function setSource(icon: UILoaderAlt, nick: String, clan: String)
+    public static function setSource(icon:UILoaderAlt, playerId:Number, nick:String, clan:String, emblem:String)
     {
         if (icon["nick"] == nick)
             return;
         icon["nick"] = nick;
 
-        // Load order: nick -> clan -> default clan -> default nick
+        // Load order: id -> nick -> clan -> default clan -> default nick
         var paths = [ ];
         var src = s_playersIconSources[nick];
         if (src != undefined)
@@ -58,8 +56,15 @@ class com.xvm.PlayerInfo extends MovieClip
         }
         else
         {
-            var prefix:String = Defines.XVMRES_ROOT + Config.s_config.battle.clanIconsFolder + Config.s_game_region + "/";
+            var prefix:String = Defines.XVMRES_ROOT + Config.config.battle.clanIconsFolder;
+            paths.push(prefix + "ID/" + playerId + ".png");
+            prefix += Config.config.region + "/";
             paths.push(prefix + "nick/" + nick + ".png");
+            if (emblem != null)
+            {
+                //Logger.add('emblem: ' + Utils.fixImgTag(emblem));
+                paths.push(Utils.fixImgTag(emblem));
+            }
             if (clan)
             {
                 paths.push(prefix + "clan/" + clan + ".png");

@@ -33,10 +33,11 @@ class wot.VehicleMarkersManager.log.HitLog
 
     public function HitLog(cfg:Object)
     {
-        x = cfg.x;
-        y = cfg.y;
-        w = cfg.w;
-        h = cfg.h;
+        x = Macros.FormatGlobalNumberValue(cfg.x);
+        y = Macros.FormatGlobalNumberValue(cfg.y);
+        w = Macros.FormatGlobalNumberValue(cfg.w);
+        h = Macros.FormatGlobalNumberValue(cfg.h);
+
         lines = Math.min(100, Math.max(0, cfg.lines));
         direction = cfg.direction.toLowerCase() == "up" ? Defines.DIRECTION_UP : Defines.DIRECTION_DOWN;
         insertOrder = cfg.insertOrder.toLowerCase() == "begin" ? Defines.INSERTORDER_BEGIN : Defines.INSERTORDER_END;
@@ -120,10 +121,14 @@ class wot.VehicleMarkersManager.log.HitLog
         player.dead = last_player_hit_data.dead;
         player.damageType = last_player_hit_data.damageType;
 
-        Macros.RegisterHitlogMacros(playerName, player, hits, total);
+        player.global = {
+            hits: hits,
+            total: total
+        };
 
         //Logger.addObject(player);
         var header:String = Macros.Format(playerName, formatHeader, player);
+        //Logger.add(formatHeader);
 
         if (lines <= 0)
         {
@@ -186,6 +191,6 @@ class wot.VehicleMarkersManager.log.HitLog
         style.parseCSS("." + STYLE_NAME + "{font-family:$FieldFont;font-size:15px;color:#f4efe8;}");
         textField.styleSheet = style;
 
-        saveText(defaultHeader);
+        saveText(Macros.FormatGlobalStringValue(defaultHeader));
     }
 }

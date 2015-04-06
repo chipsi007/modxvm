@@ -1,11 +1,15 @@
 ﻿/**
- * @author sirmax2
+ * XVM
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
-import flash.external.*;
 import com.greensock.*;
 import com.greensock.plugins.*;
 import com.xvm.*;
 import com.xvm.DataTypes.*;
+import com.xvm.events.*;
+import flash.external.*;
+import gfx.io.*;
+import net.wargaming.managers.*;
 import wot.battle.*;
 
 class wot.battle.BattleMain
@@ -13,45 +17,58 @@ class wot.battle.BattleMain
     static var instance: BattleMain;
     var sixthSenseIndicator:SixthSenseIndicator;
 
-    private static var soundManager = new net.wargaming.managers.SoundManager();
+    private static var soundManager = new SoundManager();
 
     static function main()
     {
         Utils.TraceXvmModule("Battle");
 
-        GlobalEventDispatcher.addEventListener(Config.E_CONFIG_LOADED, BattleMainConfigLoaded);
-        GlobalEventDispatcher.addEventListener(Config.E_CONFIG_LOADED, StatLoader.LoadData);
-        Config.LoadConfig();
+        // ScaleForm optimization
+        _global.gfxExtensions = true;
+        _global.noInvisibleAdvance = true;
 
         // initialize TweenLite
         OverwriteManager.init(OverwriteManager.AUTO);
         TweenPlugin.activate([TintPlugin]);
 
+        ExternalInterface.addCallback(Cmd.RESPOND_CONFIG, Config.instance, Config.instance.GetConfigCallback);
+        GlobalEventDispatcher.addEventListener(Defines.E_CONFIG_LOADED, BattleMainConfigLoaded);
+        GlobalEventDispatcher.addEventListener(Defines.E_CONFIG_LOADED, StatLoader.LoadData);
+
         instance = new BattleMain();
-        gfx.io.GameDelegate.addCallBack("battle.showPostmortemTips", instance, "showPostmortemTips");
-        gfx.io.GameDelegate.addCallBack("Stage.Update", instance, "onUpdateStage");
+        GameDelegate.addCallBack("Stage.Update", instance, "onUpdateStage");
+        GameDelegate.addCallBack("battle.showPostmortemTips", instance, "showPostmortemTips");
 
-        BattleInputHandler.upgrade();
+        GameDelegate.addCallBack("battle.damagePanel.setMaxHealth", instance, "setMaxHealth");
+        GameDelegate.addCallBack("battle.damagePanel.updateHealth", instance, "updateHealth");
+        GameDelegate.addCallBack("battle.damagePanel.updateState", instance, "updateState");
+        GameDelegate.addCallBack("battle.damagePanel.updateSpeed", instance, "updateSpeed");
 
-        ExternalInterface.addCallback(Cmd.RESPOND_BATTLESTATE, instance, instance.onBattleStateChanged);
+        ExternalInterface.addCallback(Cmd.RESPOND_KEY_EVENT, instance, instance.onKeyEvent);
+        ExternalInterface.addCallback(Cmd.RESPOND_BATTLE_STATE, instance, instance.onBattleStateChanged);
         ExternalInterface.addCallback("xvm.debugtext", instance, instance.onDebugText);
+
+        // TODO: dirty hack
+        _root.consumablesPanel.addOptionalDeviceSlot_x = _root.consumablesPanel.addOptionalDeviceSlot;
+        _root.consumablesPanel.addOptionalDeviceSlot = instance.addOptionalDeviceSlot;
+        _root.consumablesPanel.setCoolDownTime_x = _root.consumablesPanel.setCoolDownTime;
+        _root.consumablesPanel.setCoolDownTime = instance.setCoolDownTime;
     }
 
     private static function BattleMainConfigLoaded()
     {
         //Logger.add("BattleMainConfigLoaded()");
-        GlobalEventDispatcher.removeEventListener(Config.E_CONFIG_LOADED, BattleMainConfigLoaded);
 
         // Initialize Sixth Sense Indicator
         instance.sixthSenseIndicator = new SixthSenseIndicator();
 
         // TODO: remove (replace by setup elements)
         // Panels Mode Switcher
-        if (Config.s_config.playersPanel.removePanelsModeSwitcher)
+        if (Config.config.playersPanel.removePanelsModeSwitcher)
             _root.switcher_mc._visible = false;
 
         // Show Clocks
-        ShowClock(Config.s_config.battle.clockFormat);
+        ShowClock(Config.config.battle.clockFormat);
 
         // Setup Visual Elements
         Elements.SetupElements();
@@ -60,6 +77,85 @@ class wot.battle.BattleMain
 
         ExpertPanel.modify();
     }
+
+    function showPostmortemTips(movingUpTime, showTime, movingDownTime)
+    {
+        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_SELF_DEAD } );
+
+        //Logger.add("Battle::showPostmortemTips");
+        if (Config.config.battle.showPostmortemTips)
+            _root.showPostmortemTips(movingUpTime, showTime, movingDownTime);
+    }
+
+    function onUpdateStage(width, height, scale)
+    {
+        _root.onUpdateStage(width, height, scale);
+        Elements.width = width;
+        Elements.height = height;
+        Elements.scale = scale;
+        Elements.SetupElements();
+
+        fixMinimapSize();
+
+        BattleState.setScreenSize(width, height, scale);
+        //Logger.add("update stage: " + width + "," + height + "," + scale);
+        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_UPDATE_STAGE, width: width, height: height, scale: scale });
+    }
+
+    function addOptionalDeviceSlot(idx, timeRemaining, deviceIconPath, tooltipText)
+    {
+        //Logger.add("addOptionalDeviceSlot: " + deviceIconPath);
+        _root.consumablesPanel.addOptionalDeviceSlot_x.apply(_root.consumablesPanel, arguments);
+        if (deviceIconPath.indexOf("/stereoscope.") > 0)
+            GlobalEventDispatcher.dispatchEvent( { type: Defines.E_STEREOSCOPE_TOGGLED, value: timeRemaining != 0 } );
+    }
+
+    function setCoolDownTime(idx, timeRemaining)
+    {
+        //Logger.add("setCoolDownTime: " + idx);
+        _root.consumablesPanel.setCoolDownTime_x.apply(_root.consumablesPanel, arguments);
+        var renderer = _root.consumablesPanel.getRendererBySlotIdx(idx);
+        if (renderer.iconPath.indexOf("/stereoscope.") > 0)
+            GlobalEventDispatcher.dispatchEvent( { type: Defines.E_STEREOSCOPE_TOGGLED, value: timeRemaining != 0 } );
+    }
+
+    private var maxHealth:Number = NaN;
+    function setMaxHealth(health)
+    {
+    	_root.damagePanel.setMaxHealth.apply(_root.damagePanel, arguments);
+        maxHealth = health;
+    }
+
+    function updateHealth(health)
+    {
+    	_root.damagePanel.updateHealth.apply(_root.damagePanel, arguments);
+        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_UPDATE_SELF_HEALTH, value: health, maxHealth: maxHealth } );
+    }
+
+    private var isMoving:Boolean = true;
+    function updateSpeed(speed)
+    {
+    	_root.damagePanel.updateSpeed.apply(_root.damagePanel, arguments);
+
+        var sp:Number = isMoving ? 1 : 0;
+        if ((speed == 0 && !isMoving) || (speed != 0 && isMoving))
+            return;
+        isMoving = speed != 0;
+        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_MOVING_STATE_CHANGED, value: isMoving } );
+    }
+
+    function updateState(moduleName:String, state:String)
+    {
+        //Logger.add("updateState: " + moduleName + ", " + state);
+    	_root.damagePanel.updateState.apply(_root.damagePanel, arguments);
+
+        if (state == "destroyed")
+            GlobalEventDispatcher.dispatchEvent( { type: Defines.E_MODULE_DESTROYED, value: moduleName } );
+        else if (state == "repaired" || state == "normal")
+            GlobalEventDispatcher.dispatchEvent( { type: Defines.E_MODULE_REPAIRED, value: moduleName } );
+    }
+
+    // PRIVATE
 
     private static function ShowClock(format)
     {
@@ -76,30 +172,11 @@ class wot.battle.BattleMain
         var tf: TextFormat = fps.getNewTextFormat();
         clock.styleSheet = Utils.createStyleSheet(Utils.createCSS("xvm_clock",
             tf.color, tf.font, tf.size, "left", tf.bold, tf.italic));
-        clock.filters = [new flash.filters.DropShadowFilter(1, 90, 0, 100, 5, 5, 1.5, 3)];
+        clock.filters = [new flash.filters.DropShadowFilter(1, 90, 0, 100, 5, 5, 1.5)];
 
         _global.setInterval(function() {
             clock.htmlText = Utils.fixImgTag("<span class='xvm_clock'>" + Strings.FormatDate(format, new Date()) + "</span>");
         }, 1000);
-    }
-
-    function showPostmortemTips(movingUpTime, showTime, movingDownTime)
-    {
-        GlobalEventDispatcher.dispatchEvent( { type: "self_dead" } );
-
-        //Logger.add("Battle::showPostmortemTips");
-        if (Config.s_config.battle.showPostmortemTips)
-            _root.showPostmortemTips(movingUpTime, showTime, movingDownTime);
-    }
-
-    function onUpdateStage(width, height)
-    {
-        _root.onUpdateStage(width, height);
-        Elements.width = width;
-        Elements.height = height;
-        Elements.SetupElements();
-
-        fixMinimapSize();
     }
 
     private function fixMinimapSize():Void
@@ -117,13 +194,55 @@ class wot.battle.BattleMain
         }
     }
 
-    private function onBattleStateChanged(str:String):Void
+    private function onKeyEvent(key:Number, isDown:Boolean):Void
     {
-        var obj = JSONx.parse(str);
-        var data:BattleStateData = obj; // as2 type casting is strange
-        //Logger.addObject(data);
-        Defines.battleStates[data.playerName] = data;
-        GlobalEventDispatcher.dispatchEvent( { type: Defines.E_BATTLE_STATE_CHANGED } );
+        //Logger.add("onKeyEvent: " + key + " " + isDown);
+        var cfg = Config.config.hotkeys
+        if (cfg.minimapZoom.enabled && cfg.minimapZoom.keyCode == key)
+            GlobalEventDispatcher.dispatchEvent( { type: Defines.E_MM_ZOOM, isDown: isDown } );
+        if (cfg.minimapAltMode.enabled && cfg.minimapAltMode.keyCode == key)
+            GlobalEventDispatcher.dispatchEvent( { type: Defines.E_MM_ALT_MODE, isDown: isDown } );
+        if (cfg.playersPanelAltMode.enabled && cfg.playersPanelAltMode.keyCode == key)
+            GlobalEventDispatcher.dispatchEvent( { type: Defines.E_PP_ALT_MODE, isDown: isDown } );
+    }
+
+    private function onBattleStateChanged(targets:Number, playerName:String, playerId:Number, vehId:Number,
+        dead:Boolean, curHealth:Number, maxHealth:Number, marksOnGun:Number, spotted:String):Void
+    {
+        try
+        {
+            //Logger.addObject(arguments);
+            var data:Object = { };
+            if (playerName != null)
+                data["playerName"] = playerName;
+            if (!isNaN(playerId))
+                data["playerId"] = playerId;
+            if (!isNaN(vehId))
+                data["vehId"] = vehId;
+            data["dead"] = dead;
+            if (Config.config.battle.allowHpInPanelsAndMinimap && !isNaN(curHealth))
+            {
+                data["curHealth"] = curHealth;
+            }
+            if (Config.config.battle.allowHpInPanelsAndMinimap && !isNaN(maxHealth))
+                data["maxHealth"] = maxHealth;
+            if ((Config.config.battle.allowHpInPanelsAndMinimap || Config.config.battle.allowMarksOnGunInPanelsAndMinimap) && !isNaN(marksOnGun))
+                data["marksOnGun"] = marksOnGun;
+            if (Config.config.battle.allowSpottedStatus && spotted != null)
+                data["spotted"] = spotted;
+
+            //Logger.addObject(data);
+            var updated:Boolean = BattleState.updateUserData(playerName, data);
+            if (updated)
+            {
+                //Logger.add("updated: " + playerName);
+                GlobalEventDispatcher.dispatchEvent(new EBattleStateChanged(playerName));
+            }
+        }
+        catch (ex:Error)
+        {
+            Logger.add("onBattleStateChanged: [" + ex.name + "] " + ex.message);
+        }
     }
 
     private var debugTextField:TextField = null;

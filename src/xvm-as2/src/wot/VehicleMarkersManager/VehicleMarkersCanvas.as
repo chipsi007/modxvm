@@ -2,14 +2,13 @@
  * Proxy class for vehicle marker canvas
  * Used only for config preloading in the begin of the battle
  */
-import com.xvm.Config;
-import com.xvm.Utils;
+import com.xvm.*;
+import flash.external.*;
 
 class wot.VehicleMarkersManager.VehicleMarkersCanvas
 {
     /////////////////////////////////////////////////////////////////
-
-    public var wrapper:net.wargaming.ingame.VehicleMarkersCanvas;
+    private var wrapper:net.wargaming.ingame.VehicleMarkersCanvas;
     private var base:net.wargaming.ingame.VehicleMarkersCanvas;
 
     public function VehicleMarkersCanvas(wrapper:net.wargaming.ingame.VehicleMarkersCanvas, base:net.wargaming.ingame.VehicleMarkersCanvas)
@@ -28,8 +27,46 @@ class wot.VehicleMarkersManager.VehicleMarkersCanvas
     {
         Utils.TraceXvmModule("VMM");
 
-        // Check config
-        if (Config.s_loaded != true)
-            Config.LoadConfig();
+        // ScaleForm optimization
+        _global.gfxExtensions = true;
+        _global.noInvisibleAdvance = true;
+
+        GlobalEventDispatcher.addEventListener(Defines.E_CONFIG_LOADED, StatLoader.LoadData);
+        GlobalEventDispatcher.addEventListener(Defines.E_CONFIG_LOADED, onConfigLoaded);
+        ExternalInterface.addCallback(Cmd.RESPOND_CONFIG, Config.instance, Config.instance.GetConfigCallback);
+    }
+
+    private function onConfigLoaded()
+    {
+        for (var i in _root.vehicleMarkersCanvas)
+        {
+            var marker:net.wargaming.ingame.VehicleMarker = _root.vehicleMarkersCanvas[i];
+            if (marker != null)
+            {
+                if (Config.config.markers.useStandardMarkers == true)
+                    marker.marker.marker.icon["_xvm_colorized"] = false;
+                marker.m_markerLabel = "";
+                marker.updateMarkerLabel();
+                //var e = marker.m_entityName;
+                //marker.setEntityName("");
+                //marker.setEntityName(e);
+                marker.update();
+/*                if (Config.config.markers.useStandardMarkers == true)
+                {
+                    marker.marker.marker.icon["_xvm_colorized"] = false;
+                    marker.initMarkerLabel();
+                    marker.update();
+                }
+                else
+                {
+                    var x:wot.VehicleMarkersManager.Xvm = wot.VehicleMarkersManager.Xvm(marker);
+                    if (x != null)
+                    {
+                        x.vehicleTypeComponent.
+                        x.update();
+                    }
+                }*/
+            }
+        }
     }
 }

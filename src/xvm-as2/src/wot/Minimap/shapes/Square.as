@@ -8,36 +8,44 @@ import wot.PlayersPanel.*;
 class wot.Minimap.shapes.Square extends ShapeAttach
 {
     /**
-     * Draw 1km x 1km box.
-     * Represents maximun draw distance.
+     * Draw 1km x 1km rectangle.
+     * Represents maximum draw distance.
      * Game engine limitation.
      */
 
     private static var SQUARE_SIDE_IN_METERS:Number = 1000;
 
-    private var squareClip:MovieClip;
+    private var squareClip:MovieClip = null;
 
     public function Square()
     {
-        /** Disable square mod if user is artillery class*/
+        // Disable square mod if user is artillery class
         if (!MapConfig.artiEnabled && isArtillery())
-        {
             return;
-        }
 
         super();
 
         squareClip = createSquareClip();
+        squareClip._visible = !isSelfDead;
         defineStyle();
         drawLines();
         updatePosition();
+    }
+
+    public function Dispose()
+    {
+        if (squareClip != null)
+        {
+            squareClip.removeMovieClip();
+            delete squareClip;
+        }
     }
 
     //--Private
 
     private function createSquareClip():MovieClip
     {
-        return IconsProxy.createEmptyMovieClip("square", Minimap.SQUARE_1KM_INDEX);
+        return IconsProxy.createEmptyMovieClip("square", MinimapConstants.SQUARE_1KM_ZINDEX);
     }
 
     private function defineStyle():Void
@@ -84,9 +92,10 @@ class wot.Minimap.shapes.Square extends ShapeAttach
         return vdata == null ? false : vdata.vclass == "SPG";
     }
 
-    /** overwrite */
-    private function postmortemMod(event) {
-		squareClip._visible = false;
-		super.postmortemMod.apply(arguments);
+    // override
+    private function postmortemMod(event)
+    {
+        squareClip._visible = false;
+        super.postmortemMod(event);
     }
 }

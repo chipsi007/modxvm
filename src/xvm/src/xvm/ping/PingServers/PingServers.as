@@ -1,16 +1,16 @@
 package xvm.ping.PingServers
 {
-    import com.xvm.types.cfg.*;
-    import com.xvm.*;
-    import com.xvm.events.*;
-    import com.xvm.io.*;
+    import com.xfw.*;
+    import com.xfw.events.*;
     import flash.events.*;
     import flash.utils.*;
-    import flash.external.ExternalInterface;
-    import org.idmedia.as3commons.util.StringUtils;
+    import org.idmedia.as3commons.util.*;
 
     public class PingServers extends EventDispatcher
     {
+        private static const COMMAND_PING:String = "xvm_ping.ping";
+        private static const COMMAND_AS_PINGDATA:String = "xvm_ping.as.pingdata";
+
         private static var _instance:PingServers = null;
         private static function get instance():PingServers
         {
@@ -24,6 +24,15 @@ package xvm.ping.PingServers
 
         public static function initFeature(enabled:Boolean, interval:Number = 0):void
         {
+            if (!enabled || interval <= 0)
+                return;
+
+            instance.ping();
+            instance.pingTimer = setInterval(instance.ping, interval);
+        }
+
+        public static function stop():void
+        {
             if (instance.pingTimer > 0)
             {
                 clearInterval(instance.pingTimer);
@@ -36,37 +45,24 @@ package xvm.ping.PingServers
                     clearTimeout(t);
                 instance.pingTimeouts = null;
             }
-
-            if (!enabled)
-                return;
-
-            // immediately
-            instance.ping();
-            // after 1, 3, 5, 7 sec
-            //instance.pingTimeouts = [
-                //setTimeout(instance.ping, 1000),
-                //setTimeout(instance.ping, 3000),
-                //setTimeout(instance.ping, 5000),
-                //setTimeout(instance.ping, 7000)
-            //];
-
-            if (interval > 0)
-            {
-                // periodically
-                instance.pingTimer = setInterval(instance.ping, interval);
-            }
         }
 
-        public static function addListener(listener:Function):void
+        public static function addEventListener(listener:Function):void
         {
             instance.addEventListener(Event.COMPLETE, listener);
+        }
+
+        public static function removeEventListener(listener:Function):void
+        {
+            instance.removeEventListener(Event.COMPLETE, listener);
         }
 
         // PRIVATE
 
         function PingServers()
         {
-            ExternalInterface.addCallback(Cmd.RESPOND_PINGDATA, pingCallback);
+            Xfw.addCommandListener(COMMAND_AS_PINGDATA, pingCallback);
+
             pingTimer = 0;
             pingTimeouts = null;
         }
@@ -74,21 +70,21 @@ package xvm.ping.PingServers
         private function ping():void
         {
             //Logger.add("ping");
-            Cmd.ping();
+            Xfw.cmd(COMMAND_PING);
         }
 
-        private function pingCallback(answer:String):void
+        private function pingCallback(answer:Object):void
         {
+            //Logger.addObject(answer, 2);
             //Logger.add("pingCallback:" + arguments.toString());
-            if (answer == null || answer == "")
+            if (!answer)
                 return;
 
-            var parsedAnswerObj:Object = JSONx.parse(answer);
             var responseTimeList:Array = [];
-            for (var name:String in parsedAnswerObj)
+            for (var name:String in answer)
             {
                 var cluster:String = StringUtils.startsWith(name, "WOT ") ? name.substring(4) : name;
-                responseTimeList.push({ cluster: cluster, time: parsedAnswerObj[name] });
+                responseTimeList.push({ cluster: cluster, time: answer[name] });
             }
             responseTimeList.sortOn(["cluster"]);
 

@@ -1,80 +1,56 @@
-import flash.external.ExternalInterface;
-import com.xvm.Sandbox;
-import com.xvm.Config;
+/**
+ * XVM
+ * @author Maxim Schedriviy <max(at)modxvm.com>
+ */
+import com.xvm.*;
+import flash.external.*;
 
 class com.xvm.Cmd
 {
     private static var COMMAND_LOG:String = "log";
-    private static var COMMAND_LOAD_FILE:String = "loadFile";
-    private static var COMMAND_GET_CONFIG:String = "getConfig";
-    private static var COMMAND_GETSCREENSIZE:String = "getScreenSize";
-    private static var COMMAND_GETGAMEREGION:String = "getGameRegion";
-    private static var COMMAND_GETLANGUAGE:String = "getLanguage";
-    private static var COMMAND_LOADBATTLESTAT:String = "loadBattleStat";
-    private static var COMMAND_LOADUSERDATA:String = "loadUserData";
-    private static var COMMAND_LOGSTAT:String = "logstat";
-    private static var COMMAND_SAVE_SETTINGS:String = "save_settings";
-    private static var COMMAND_LOAD_SETTINGS:String = "load_settings";
-    private static var COMMAND_GETVEHICLEINFODATA:String = "getVehicleInfoData";
+    private static var COMMAND_GET_SCREEN_SIZE:String = "get_screen_size";
+    private static var COMMAND_LOAD_BATTLE_STAT:String = "load_battle_stat";
+    private static var COMMAND_CAPTURE_BAR_GET_BASE_NUM:String = "capture_bar_get_base_num";
+    private static var COMMAND_PROF_METHOD_START:String = "prof_method_start";
+    private static var COMMAND_PROF_METHOD_END:String = "prof_method_end";
 
-    public static var RESPOND_BATTLEDATA = "xvm.battledata";
-    public static var RESPOND_BATTLESTATE = "xvm.battleState";
+    public static var RESPOND_CONFIG:String = "xvm.config";
+    public static var RESPOND_KEY_EVENT:String = "xvm.keyevent";
+
+    public static var RESPOND_BATTLE_STAT_DATA:String = "xvm.battle_stat_data";
+    public static var RESPOND_BATTLE_STATE:String = "xvm.battle_state";
 
     public static function log(str:String)
     {
         _call(null, null, [COMMAND_LOG, str]);
     }
 
-    public static function loadFile(filename:String, target:Object, callback:Function)
-    {
-        _call(target, callback, [COMMAND_LOAD_FILE, filename]);
-    }
-
-    public static function getConfig(target:Object, callback:Function)
-    {
-        _call(target, callback, [COMMAND_GET_CONFIG]);
-    }
-
     public static function getScreenSize(target:Object, callback:Function)
     {
-        _call(target, callback, [COMMAND_GETSCREENSIZE]);
-    }
-
-    public static function getGameRegion(target:Object, callback:Function)
-    {
-        _call(target, callback, [COMMAND_GETGAMEREGION]);
-    }
-
-    public static function getLanguage(target:Object, callback:Function)
-    {
-        _call(target, callback, [COMMAND_GETLANGUAGE]);
+        _call(target, callback, [COMMAND_GET_SCREEN_SIZE]);
     }
 
     public static function loadBattleStat(players:Array)
     {
-        _call(null, null, [COMMAND_LOADBATTLESTAT, Config.s_config.rating.showPlayersStatistics, players]);
+        _call(null, null, [COMMAND_LOAD_BATTLE_STAT, players]);
     }
 
-    public static function logStat()
+    public static function captureBarGetBaseNum(target:Object, callback:Function, id:Number)
     {
-        _call(null, null, [COMMAND_LOGSTAT]);
+        _call(target, callback, [COMMAND_CAPTURE_BAR_GET_BASE_NUM, id]);
     }
 
-    public static function loadSettings(target:Object, callback:Function)
+    public static function profMethodStart(name:String)
     {
-        _call(target, callback, [COMMAND_LOAD_SETTINGS]);
+        if (Config.IS_DEVELOPMENT)
+            _call(null, null, [COMMAND_PROF_METHOD_START, name]);
     }
 
-    public static function saveSettings(settingsStr)
+    public static function profMethodEnd(name:String)
     {
-        _call(null, null, [COMMAND_SAVE_SETTINGS, settingsStr]);
+        if (Config.IS_DEVELOPMENT)
+            _call(null, null, [COMMAND_PROF_METHOD_END, name]);
     }
-
-    public static function getVehicleInfoData(target:Object, callback:Function)
-    {
-        _call(target, callback, [COMMAND_GETVEHICLEINFODATA]);
-    }
-
 
     /////////////////////////////////////////////////////////////////
 

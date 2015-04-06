@@ -57,8 +57,8 @@ class wot.VehicleMarkersManager.components.ContourIconComponent
             m_iconset = new IconLoader(this, completeLoadContourIcon);
             m_iconset.init(proxy.iconLoader,
                 [ proxy.source.split(Defines.WG_CONTOUR_ICON_PATH).join(Defines.XVMRES_ROOT + ((team == "ally")
-                ? Config.s_config.iconset.vehicleMarkerAlly
-                : Config.s_config.iconset.vehicleMarkerEnemy)), proxy.source ]);
+                ? Config.config.iconset.vehicleMarkerAlly
+                : Config.config.iconset.vehicleMarkerEnemy)), proxy.source ]);
         }
 
         proxy.iconLoader.source = m_iconset.currentIcon;
@@ -104,8 +104,8 @@ class wot.VehicleMarkersManager.components.ContourIconComponent
             var visible = cfg.visible;
             if (visible)
             {
-                proxy.iconLoader._x = cfg.x - (proxy.iconLoader.contentHolder._width / 2.0);
-                proxy.iconLoader._y = cfg.y - (proxy.iconLoader.contentHolder._height / 2.0);
+                proxy.iconLoader._x = cfg.x - (proxy.iconLoader.content._width / 2.0);
+                proxy.iconLoader._y = cfg.y - (proxy.iconLoader.content._height / 2.0);
                 proxy.iconLoader._alpha = proxy.formatDynamicAlpha(cfg.alpha);
             }
             proxy.iconLoader._visible = visible;

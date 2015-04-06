@@ -4,11 +4,11 @@
  */
 package xvm.squad
 {
-    import com.xvm.*;
-    import com.xvm.types.veh.*;
-    import com.xvm.utils.*;
+    import com.xfw.*;
+    import com.xfw.types.veh.*;
+    import com.xfw.utils.*;
+    import flash.events.*;
     import flash.text.*;
-    import net.wg.gui.prebattle.squad.SquadItemRenderer;
 
     public class SquadItemRenderer
     {
@@ -21,11 +21,11 @@ package xvm.squad
             this.vehicleTierField = null;
         }
 
-        private var configUI:Boolean = false;
+        private var initialized:Boolean = false;
 
-        public function setUIConfigured():void
+        public function configUI():void
         {
-            configUI = true;
+            initialized = true;
             proxy.vehicleLevelField.alpha = 0; // TODO: use this text field
         }
 
@@ -49,7 +49,13 @@ package xvm.squad
                 Locale.get("Nation") + ": " + Locale.get(vdata.nation);
         }
 
-        public function displayVehicleTier():void
+        public function afterSetData():void
+        {
+            draw();
+            proxy.owner.dispatchEvent(new Event("item_updated"));
+        }
+
+        public function draw():void
         {
             if (!Config.config.squad.enabled)
                 return;
@@ -66,7 +72,7 @@ package xvm.squad
                 return;
 
             // UI ready
-            if (!configUI)
+            if (!initialized)
                 return;
 
             // Display vehicle info
@@ -75,14 +81,14 @@ package xvm.squad
             {
                 if (vehicleTierField == null)
                     createVehicleTierField();
-                Macros.RegisterMinimalMacrosData(proxy.data.fullName, vdata.vid);
+                Macros.RegisterMinimalMacrosData(proxy.data.dbID, proxy.data.fullName, vdata.vid);
                 vehicleTierField.htmlText = "<p class='xvm_vehicleTier' align='right'>" +
-                    Macros.Format(proxy.data.fullName, Config.config.squad.formatInfoField) + "</p>";
+                    Macros.Format(proxy.data.userName, Config.config.squad.formatInfoField) + "</p>";
             }
 
             // Remove clan tag from player name
             if (Config.config.squad.showClan == false)
-                proxy.data.fullName = proxy.data.userName;
+                proxy.data.clanAbbrev = "";
         }
 
         // -- Private

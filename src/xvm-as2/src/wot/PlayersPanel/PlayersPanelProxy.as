@@ -55,29 +55,11 @@ class wot.PlayersPanel.PlayersPanelProxy
         return _getPlayerInfoFrom(_allyPlayers, uid) || _getPlayerInfoFrom(_enemyPlayers, uid);
     }
 
-    public static function get allyUids():Array
-    {
-        //Logger.add("PlayersPanelProxy.allyUids()");
-        return _allUidsOfTeam(_allyPlayers);
-    }
-
-    public static function get enemyUids():Array
-    {
-        //Logger.add("PlayersPanelProxy.enemyUids()");
-        return _allUidsOfTeam(_enemyPlayers);
-    }
-
-    public static function get allUids():Array
-    {
-        //Logger.add("PlayersPanelProxy.allUids()");
-        return allyUids.concat(enemyUids);
-    }
-
-    public static function isDead(uid:Number):Boolean
+    public static function isDead(playerId:Number):Boolean
     {
         //Logger.add("PlayersPanelProxy.isDead()");
-        var player:Object = getPlayerInfo(uid);
-        return (player.vehicleState & net.wargaming.ingame.VehicleStateInBattle.IS_AVIVE) == 0;
+        var player:Object = getPlayerInfo(playerId);
+        return (player.vehicleState & net.wargaming.ingame.VehicleStateInBattle.IS_ALIVE) == 0;
     }
 
     public static function get self():Player
@@ -90,7 +72,6 @@ class wot.PlayersPanel.PlayersPanelProxy
             if (player.himself == true)
                 return player;
         }
-
         return null;
     }
 
@@ -99,20 +80,11 @@ class wot.PlayersPanel.PlayersPanelProxy
     private static function _getPlayerInfoFrom(players:Array, uid:Number):Player
     {
         for (var i:Number = 0; i < players.length; i++)
+        {
             if (players[i].uid == uid)
                 return players[i];
-
+        }
         return null;
-    }
-
-    private static function _allUidsOfTeam(players:Array):Array
-    {
-        var all:Array = [];
-
-        for (var i:Number = 0; i < players.length; i++)
-            all.push(players[i].uid);
-
-        return all;
     }
 
     private static function get _allyPlayers():Array

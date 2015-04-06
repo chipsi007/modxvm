@@ -1,11 +1,9 @@
 /**
  * XVM Config
- * @author Maxim Schedriviy <m.schedriviy@gmail.com>
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
-import com.xvm.Config;
-import com.xvm.JSONx;
-import com.xvm.DataTypes.VehicleData;
-import com.xvm.Logger;
+import com.xvm.*;
+import com.xvm.DataTypes.*;
 
 class com.xvm.VehicleInfo
 {
@@ -35,9 +33,12 @@ class com.xvm.VehicleInfo
     {
         // vtype = HT
         // return: HT text
-        if (!vtype || !Config.s_config.texts.vtype[vtype])
+        if (!vtype || !Config.config.texts.vtype[vtype])
             return "";
-        return Config.s_config.texts.vtype[vtype];
+        var v:String = Config.config.texts.vtype[vtype];
+        if (v.indexOf("{{l10n:") >= 0)
+            v = Locale.get(v);
+        return v;
     }
 
     public static function getVIconName(vkey:String):String
@@ -86,7 +87,7 @@ class com.xvm.VehicleInfo
                 var obj:Object = data_array[n];
                 var data:VehicleData = new VehicleData(obj);
 
-                var preferredNames:Object = Config.s_config.vehicleNames[data.key.split(':').join('-')];
+                var preferredNames:Object = Config.config.vehicleNames[data.key.split(':').join('-')];
                 if (preferredNames != null)
                 {
                     if (preferredNames['name'] != null && preferredNames['name'] != '')
@@ -102,9 +103,9 @@ class com.xvm.VehicleInfo
                 vehiclesMapName[data.localizedShortName] = data.vid; // for getByLocalizedShortName
             }
         }
-        catch (e:Error)
+        catch (ex)
         {
-            Logger.add(e.message);
+            Logger.add(Utils.parseError(ex));
         }
     }
 

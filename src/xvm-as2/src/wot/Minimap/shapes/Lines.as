@@ -1,11 +1,9 @@
-import flash.geom.Point;
-import com.xvm.GlobalEventDispatcher;
-import wot.Minimap.MinimapEntry;
-import wot.Minimap.MinimapEvent;
-import wot.Minimap.model.externalProxy.IconsProxy;
-import wot.Minimap.model.externalProxy.MapConfig;
-import wot.Minimap.shapes.ShapeAttach;
-import wot.Minimap.dataTypes.cfg.LineCfg;
+import com.xvm.*;
+import flash.geom.*;
+import wot.Minimap.*;
+import wot.Minimap.model.externalProxy.*;
+import wot.Minimap.shapes.*;
+import wot.Minimap.dataTypes.cfg.*;
 
 /**
  * Draws lines of sight and horizontal focusing angles
@@ -13,6 +11,10 @@ import wot.Minimap.dataTypes.cfg.LineCfg;
 
 class wot.Minimap.shapes.Lines extends ShapeAttach
 {
+    private var camAttach:MovieClip = null;
+    private var vehLines:MovieClip = null;
+    private var traverseAngle:MovieClip = null;
+
     public function Lines()
     {
         super();
@@ -32,7 +34,34 @@ class wot.Minimap.shapes.Lines extends ShapeAttach
          * Warning! Workaround!
          * Camera entry (MinimapEntry0) is reinitialized spontaniously many times in a round.
          */
-        GlobalEventDispatcher.addEventListener(MinimapEvent.ON_ENTRY_INITED, this, onEntryInited);
+        GlobalEventDispatcher.addEventListener(MinimapEvent.ENTRY_INITED, this, onEntryInited);
+        GlobalEventDispatcher.addEventListener(MinimapEvent.CAMERA_UPDATED, this, onEntryInited);
+    }
+
+    public function Dispose()
+    {
+        GlobalEventDispatcher.removeEventListener(MinimapEvent.ENTRY_INITED, this, onEntryInited);
+        GlobalEventDispatcher.removeEventListener(MinimapEvent.CAMERA_UPDATED, this, onEntryInited);
+
+        if (camAttach != null)
+        {
+            camAttach.removeMovieClip();
+            delete camAttach;
+        }
+
+        if (vehLines != null)
+        {
+            vehLines.removeMovieClip();
+            delete vehLines;
+        }
+
+        if (traverseAngle != null)
+        {
+            traverseAngle.removeMovieClip();
+            delete traverseAngle;
+        }
+
+        super.Dispose();
     }
 
     // -- Private
@@ -40,26 +69,26 @@ class wot.Minimap.shapes.Lines extends ShapeAttach
     private function attachVehicleDirectionLines():Void
     {
         var depth:Number = selfAttachments.getNextHighestDepth();
-        var vehLines:MovieClip = selfAttachments.createEmptyMovieClip("vehLine" + depth, depth);
+        vehLines = selfAttachments.createEmptyMovieClip("vehLine" + depth, depth);
         attachLines(vehLines, MapConfig.linesVehicle, 0);
     }
 
     private function attachVehicleTraverseAngle():Void
     {
         var depth:Number = selfAttachments.getNextHighestDepth();
-        var traverseAgnle:MovieClip = selfAttachments.createEmptyMovieClip("traverseAngle" + depth, depth);
-        attachLines(traverseAgnle, MapConfig.linesTraverseAngle, rightAngle);
-        attachLines(traverseAgnle, MapConfig.linesTraverseAngle, -leftAngle);
+        traverseAngle = selfAttachments.createEmptyMovieClip("traverseAngle" + depth, depth);
+        attachLines(traverseAngle, MapConfig.linesTraverseAngle, rightAngle);
+        attachLines(traverseAngle, MapConfig.linesTraverseAngle, -leftAngle);
     }
 
     private function attachCameraLines():Void
     {
         var cameraEntry:MinimapEntry = IconsProxy.cameraEntry;
         cameraEntry.cameraExtendedToken = true;
-        var camAttach:MovieClip = cameraEntry.attachments;
+        camAttach = cameraEntry.attachments;
         var depth:Number = camAttach.getNextHighestDepth();
-        var vehLines:MovieClip = camAttach.createEmptyMovieClip("cameraLine" + depth, 10000);
-        attachLines(vehLines, MapConfig.linesCamera, 0);
+        var cameraLine:MovieClip = camAttach.createEmptyMovieClip("cameraLine" + depth, 10000);
+        attachLines(cameraLine, MapConfig.linesCamera, 0);
     }
 
     private function attachLines(mc:MovieClip, linesCfg:Array, angle:Number):Void

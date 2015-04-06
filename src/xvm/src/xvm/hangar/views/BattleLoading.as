@@ -1,18 +1,16 @@
 /**
  * XVM - login page
- * @author Maxim Schedriviy "m.schedriviy(at)gmail.com"
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
 package xvm.hangar.views
 {
+    import com.xfw.*;
     import com.xvm.*;
     import com.xvm.infrastructure.*;
-    import flash.events.*;
-    import flash.utils.*;
-    import net.wg.infrastructure.interfaces.*;
-    import net.wg.infrastructure.events.*;
+    import com.xvm.types.*;
     import net.wg.gui.lobby.battleloading.*;
-    import net.wg.gui.components.controls.*;
-    import xvm.hangar.*;
+    import net.wg.infrastructure.events.*;
+    import net.wg.infrastructure.interfaces.*;
     import xvm.hangar.components.BattleLoading.*;
     import xvm.hangar.UI.battleLoading.*;
 
@@ -32,10 +30,9 @@ package xvm.hangar.views
         {
             //Logger.add("onAfterPopulate: " + view.as_alias);
 
-            logBriefConfigurationInfo();
+            Config.networkServicesSettings = new NetworkServicesSettings(Xfw.cmd(XvmCommands.GET_SVC_SETTINGS));
 
-            page.form.team1List.itemRenderer = UI_LeftItemRenderer;
-            page.form.team2List.itemRenderer = UI_RightItemRenderer;
+            logBriefConfigurationInfo();
 
             waitInit();
         }
@@ -65,15 +62,18 @@ package xvm.hangar.views
                 "                               XVM_VERSION=" + Defines.XVM_VERSION + " for WoT " + Defines.WOT_VERSION +"\n" +
                 "                               gameRegion=" + Config.gameRegion + "\n" +
                 "                               configVersion=" + Config.config.configVersion + "\n" +
-                "                               showPlayersStatistics=" + Config.config.rating.showPlayersStatistics + "\n" +
-                // TODO "                               loadEnemyStatsInFogOfWar=" + Config.config.rating.loadEnemyStatsInFogOfWar + "\n" +
-                "                               useStandardMarkers=" + Config.config.markers.useStandardMarkers);
+                "                               autoReloadConfig=" + Config.config.autoReloadConfig + "\n" +
+                "                               useStandardMarkers=" + Config.config.markers.useStandardMarkers + "\n" +
+                "                               servicesActive=" + Config.networkServicesSettings.servicesActive + "\n" +
+                "                               statBattle=" + Config.networkServicesSettings.statBattle);
         }
 
         private function init():void
         {
             try
             {
+                initRenderers();
+
                 // Components
                 new WinChances(page); // Winning chance info above players list.
                 new TipField(page);   // Information field below players list.
@@ -81,8 +81,21 @@ package xvm.hangar.views
             }
             catch (ex:Error)
             {
-                Logger.add(ex.getStackTrace());
+                Logger.err(ex);
             }
+        }
+
+        private function initRenderers():void
+        {
+            page.form.team1List.validateNow();
+            page.form.team2List.validateNow();
+            page.form.team1List.itemRenderer = UI_LeftItemRenderer;
+            page.form.team2List.itemRenderer = UI_RightItemRenderer;
+            App.utils.scheduler.envokeInNextFrame(function():void
+            {
+                page.form.team1List.itemRenderer = UI_LeftItemRenderer;
+                page.form.team2List.itemRenderer = UI_RightItemRenderer;
+            });
         }
     }
 }

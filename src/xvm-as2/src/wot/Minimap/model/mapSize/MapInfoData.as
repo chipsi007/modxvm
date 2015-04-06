@@ -2,7 +2,7 @@
  * @author ilitvinov87@gmail.com
  * @author Pavel Máca
  * @author Mr.A
- * @author Maxim Schedriviy <m.schedriviy@gmail.com>
+ * @author Maxim Schedriviy <max(at)modxvm.com>
  */
 import net.wargaming.managers.Localization;
 
@@ -25,7 +25,7 @@ class wot.Minimap.model.mapSize.MapInfoData
 
     private static var _systemMapnameList:Object =
     {
-        //$00_tank_tutorial
+        $00_tank_tutorial:      { size: 100 }, // (Tutorial)
         $01_karelia:            { size: 100 }, // Karelia
         $02_malinovka:          { size: 100 }, // Malinovka
         $03_campania:           { size: 60 },  // Province
@@ -35,7 +35,7 @@ class wot.Minimap.model.mapSize.MapInfoData
         $07_lakeville:          { size: 80 },  // Lakeville
         $08_ruinberg:           { size: 80 },  // Ruinberg
         $10_hills:              { size: 80 },  // Mines
-        $11_murovanka:          { size: 80 },  // Murovanka
+        $11_murovanka:          { size: 100 }, // Murovanka
         $13_erlenberg:          { size: 100 }, // Erlenberg
         $14_siegfried_line:     { size: 100 }, // Siegfried Line
         $15_komarin:            { size: 80 },  // Komarin
@@ -65,10 +65,19 @@ class wot.Minimap.model.mapSize.MapInfoData
         $60_asia_miao:          { size: 100 }, // Pearl River
         $63_tundra:             { size: 80 },  // Tundra
         $73_asia_korea:         { size: 100 }, // Sacred Valley
+        $83_kharkiv:            { size: 80 },  // Kharkiv
         $84_winter:             { size: 100 }, // Windstorm
         $85_winter:             { size: 100 }, // Severogorsk
         $86_himmelsdorf_winter: { size: 70 },  // Winter Himmelsdorf
         $87_ruinberg_on_fire:   { size: 80 },  // Ruinberg on Fire
+        $92_stalingrad:         { size: 95 },  // Stalingrad
+        $95_lost_city:          { size: 80 },  // Lost City
+        $96_prohorovka_defense: { size: 100 }, // Fiery Salient
+        $99_himmelball:         { size: 70 },  // Himmelsdorf Football
+        $100_thepit:            { size: 60 },  // The Pit
+        $101_dday:              { size: 100 }, // Overlord
+        $103_ruinberg_winter:   { size: 80 },  // Winter Ruinberg
+        $109_battlecity_ny:     { size: 50 },  // Battle City
         __end__: null
     }
 
@@ -83,13 +92,13 @@ class wot.Minimap.model.mapSize.MapInfoData
 
     private static function setupData():Void
     {
-        //var start = new Date();
+        //var start = (new Date()).getTime();
         _localizedMapnameList = { };
         for (var key:String in _systemMapnameList) {
             var systemMapName:String = key.substring(1);
             var localMapName:String = Localization.makeString("#arenas:" + systemMapName + "/name", {});
             _localizedMapnameList[localMapName.toUpperCase()] = _systemMapnameList[key].size;
         }
-        //Logger.add(com.xvm.Utils.elapsedMSec(start, new Date()).toString());
+        //Logger.add(((new Date()).getTime() - start).toString());
     }
 }
