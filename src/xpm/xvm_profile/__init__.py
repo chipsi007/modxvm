@@ -3,10 +3,10 @@
 #####################################################################
 # MOD INFO (mandatory)
 
-XFW_MOD_VERSION    = "3.0.0"
-XFW_MOD_URL        = "http://www.modxvm.com/"
-XFW_MOD_UPDATE_URL = "http://www.modxvm.com/en/download-xvm/"
-XFW_GAME_VERSIONS  = ["0.9.7"]
+XFW_MOD_VERSION    = '3.0.0'
+XFW_MOD_URL        = 'http://www.modxvm.com/'
+XFW_MOD_UPDATE_URL = 'http://www.modxvm.com/en/download-xvm/'
+XFW_GAME_VERSIONS  = ['0.9.7','0.9.8']
 
 #####################################################################
 
@@ -70,8 +70,8 @@ def ProfileTechnique_receiveVehicleDossier(base, self, vehId, playerId):
             vDossier = dossier.getDossier((self._battlesType, playerId, vehId))
             self.flashObject.as_responseVehicleDossierXvm(vDossier)
 
-def DetailedStatisticsUtils_getStatistics(base, targetData):
-    res = base(targetData)
+def DetailedStatisticsUtils_getStatistics(base, targetData, isCurrentuser):
+    res = base(targetData, isCurrentuser)
     global _lastVehId
     if _lastVehId is not None and token.networkServicesSettings['statAwards']:
         try:
@@ -112,7 +112,7 @@ def DAAPIModule_registerFlashComponent(base, self, component, alias, *args):
         if ctx is not None and ctx.get('itemCD'):
             selectedAlias = VIEW_ALIAS.PROFILE_TECHNIQUE_PAGE
         else:
-            startPage = config.config['userInfo']['startPage']
+            startPage = config.get('userInfo/startPage')
             if startPage == 2:
                 selectedAlias = VIEW_ALIAS.PROFILE_AWARDS
             elif startPage == 3:
