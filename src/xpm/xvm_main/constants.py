@@ -1,6 +1,11 @@
 """ XVM (c) www.modxvm.com 2013-2015 """
 
 class XVM(object):
+    XVM_VERSION    = '6.1.1.1-dev'
+    WOT_VERSION    = '0.9.7'
+    CONFIG_VERSION = '5.1.0'
+    XVM_INTRO      = 'www.modxvm.com'
+
     API_VERSION = '3.0'
     SERVERS = ['https://stat.modxvm.com:443/{API}/{REQ}']
     FINGERPRINTS = [ # fingerprints for SSL certificates
@@ -17,10 +22,14 @@ class XVM(object):
     LOCALE_AUTO_DETECTION = 'auto'
     REGION_AUTO_DETECTION = 'auto'
 
+class XVM_EVENT(object):
+    CONFIG_LOADED = 'xvm.config_loaded'
+    RELOAD_CONFIG = 'xvm.reload_config'
 
 # DAAPI commands
 
 class XVM_COMMAND(object):
+    REQUEST_CONFIG = "xvm.request_config"
     GET_BATTLE_LEVEL = "xvm.get_battle_level"
     GET_BATTLE_TYPE = "xvm.get_battle_type"
     REQUEST_DOSSIER = "xvm.request_dossier"
@@ -32,12 +41,11 @@ class XVM_COMMAND(object):
     LOAD_STAT_USER = "xvm.load_stat_user"
     OPEN_URL = "xvm.open_url"
     SAVE_SETTINGS = "xvm.save_settings"
-    SET_CONFIG = "xvm.set_config"
     RUN_TEST = "xvm.run_test"
     AS_DOSSIER = "xvm.as.dossier"
     AS_L10N = "xvm.as.l10n"
-    AS_RELOAD_CONFIG = "xvm.as.reload_config"
     AS_SET_SVC_SETTINGS = "xvm.as.set_svc_settings"
+    AS_SET_CONFIG = "xvm.as.set_config"
     AS_STAT_BATTLE_DATA = "xvm.as.stat_battle_data"
     AS_STAT_BATTLE_RESULTS_DATA = "xvm.as.stat_battle_results_data"
     AS_STAT_USER_DATA = "xvm.as.stat_user_data"
