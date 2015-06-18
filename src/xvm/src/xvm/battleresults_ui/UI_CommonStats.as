@@ -132,23 +132,23 @@ package xvm.battleresults_ui
 
         private function initTextFields():void
         {
-            shotsTitle = this.createTextField(FIELD_POS_TITLE, 1);
+            shotsTitle = createTextField(FIELD_POS_TITLE, 1);
 
-            shotsCount = this.createTextField(FIELD_POS_NON_PREM, 1);
+            shotsCount = createTextField(FIELD_POS_NON_PREM, 1);
 
-            shotsPercent = this.createTextField(FIELD_POS_PREM, 1);
+            shotsPercent = createTextField(FIELD_POS_PREM, 1);
 
-            damageAssistedTitle = this.createTextField(FIELD_POS_TITLE, 2);
+            damageAssistedTitle = createTextField(FIELD_POS_TITLE, 2);
 
-            damageAssistedValue = this.createTextField(FIELD_POS_NON_PREM, 2);
+            damageAssistedValue = createTextField(FIELD_POS_NON_PREM, 2);
             damageAssistedValue.name = BATTLE_EFFICIENCY_TYPES.ASSIST;
-            damageAssistedValue.addEventListener(MouseEvent.ROLL_OVER, onOver);
-            damageAssistedValue.addEventListener(MouseEvent.ROLL_OUT, onOut);
+            damageAssistedValue.addEventListener(MouseEvent.ROLL_OVER, onRollHandler);
+            damageAssistedValue.addEventListener(MouseEvent.ROLL_OUT, onRollHandler);
 
-            damageValue = this.createTextField(FIELD_POS_PREM, 2);
+            damageValue = createTextField(FIELD_POS_PREM, 2);
             damageValue.name = BATTLE_EFFICIENCY_TYPES.DAMAGE;
-            damageValue.addEventListener(MouseEvent.ROLL_OVER, onOver);
-            damageValue.addEventListener(MouseEvent.ROLL_OUT, onOut);
+            damageValue.addEventListener(MouseEvent.ROLL_OVER, onRollHandler);
+            damageValue.addEventListener(MouseEvent.ROLL_OUT, onRollHandler);
         }
 
         private function updateData():void
@@ -168,9 +168,9 @@ package xvm.battleresults_ui
         {
             try
             {
-                var x:int = efficiencyTitle.x + 294;
+                var x:int = efficiencyTitle.x + 275;
                 var y:int = efficiencyTitle.y;
-                var w:Number = 32;
+                var w:Number = 33;
 
                 // spotted
                 addChild(createTotalItem( { x: x, y: y, kind: BATTLE_EFFICIENCY_TYPES.DETECTION,
@@ -180,29 +180,41 @@ package xvm.battleresults_ui
                 // damage assisted (radio/tracks)
                 addChild(createTotalItem( { x: x + w * 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.ASSIST,
                     value: xdata.damageAssistedCount,
-                    tooltip: (_data.personal.details == null || _data.personal.details.length == 0) ? null : {
-                        value: xdata.damageAssisted,
-                        values: xdata.damageAssistedRadio + "<br/>" + xdata.damageAssistedTrack,
-                        discript: xdata.damageAssistedNames
+                    tooltip: {
+                        totalAssistedDamage: xdata.damageAssisted,
+                        values: App.utils.locale.integer(xdata.damageAssistedRadio) + "<br/>" +
+                            App.utils.locale.integer(xdata.damageAssistedTrack) + "<br/>" +
+                            App.utils.locale.integer(xdata.damageAssisted),
+                        discript: xdata.damageAssistedNames,
+                        totalItemsCount: 2
+                    } } ));
+
+                addChild(createTotalItem( { x: x + w * 2, y: y, kind: BATTLE_EFFICIENCY_TYPES.ARMOR,
+                    value: xdata.armorCount,
+                    tooltip: {
+                        values: xdata.ricochetsCount + "<br/>" + xdata.nonPenetrationsCount + "<br/>" + App.utils.locale.integer(xdata.damageBlockedByArmor),
+                        discript: xdata.armorNames,
+                        totalItemsCount: 3
                     } } ));
 
                 // crits
-                addChild(createTotalItem( { x: x + w * 2, y: y, kind: BATTLE_EFFICIENCY_TYPES.CRITS,
+                addChild(createTotalItem( { x: x + w * 3, y: y, kind: BATTLE_EFFICIENCY_TYPES.CRITS,
                     value: xdata.critsCount,
-                    tooltip: { value: xdata.critsCount } } ));
+                    tooltip: { } } ));
 
                 // piercings
-                addChild(createTotalItem( { x: x + w * 3 - 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.DAMAGE,
+                addChild(createTotalItem( { x: x + w * 4 + 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.DAMAGE,
                     value: xdata.piercings,
-                    tooltip: (_data.personal.details == null || _data.personal.details.length == 0) ? null : {
-                        values: xdata.damageDealt + "<br/>" + xdata.piercings,
-                        discript: _data.personal.details[0].damageDealtNames
+                    tooltip: {
+                        values: App.utils.locale.integer(xdata.damageDealt) + "<br/>" + xdata.piercings,
+                        discript: xdata.damageDealtNames,
+                        totalItemsCount: 2
                     } } ));
 
                 // kills
-                addChild(createTotalItem( { x: x + w * 4 - 2, y: y, kind: BATTLE_EFFICIENCY_TYPES.DESTRUCTION,
+                addChild(createTotalItem( { x: x + w * 5 + 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.DESTRUCTION,
                     value: xdata.kills,
-                    tooltip: { value: -1 } } ));
+                    tooltip: { } } ));
             }
             catch (ex:Error)
             {
@@ -282,8 +294,8 @@ package xvm.battleresults_ui
 
             var icon:EfficiencyIconRenderer = App.utils.classFactory.getComponent("EfficiencyIconRendererGUI", EfficiencyIconRenderer, params);
             icon.enabled = params.value > 0;
-            icon.addEventListener(MouseEvent.ROLL_OVER, onOver);
-            icon.addEventListener(MouseEvent.ROLL_OUT, onOut);
+            icon.addEventListener(MouseEvent.ROLL_OVER, onRollHandler);
+            icon.addEventListener(MouseEvent.ROLL_OUT, onRollHandler);
 
             return icon;
         }
@@ -293,23 +305,27 @@ package xvm.battleresults_ui
             return "<p class='" + CSS_FIELD_CLASS + "' align='" + align + "'><font color='" + color + "'>" + text + "</font></p>";
         }
 
-        private function onOver(e:MouseEvent):void
+        private function onRollHandler(e:MouseEvent):void
         {
-            var icon:EfficiencyIconRenderer = e.currentTarget as EfficiencyIconRenderer;
-            var kind:String = icon != null ? icon.kind : e.currentTarget.name;
-            var tooltip:* = tooltips[kind];
-            if (tooltip == null)
-                return;
-            var data:Object = merge(tooltip, {
-                "type":kind,
-                "disabled":icon == null ? false : icon.value <= 0
-            });
-            App.toolTipMgr.showSpecial(Tooltips.EFFICIENCY_PARAM, null, kind, data);
-        }
-
-        private function onOut(m:MouseEvent):void
-        {
-            App.toolTipMgr.hide();
+            //Logger.add("onRollHandler: " + e.type);
+            if (e.type == MouseEvent.ROLL_OVER)
+            {
+                var icon:EfficiencyIconRenderer = e.currentTarget as EfficiencyIconRenderer;
+                var kind:String = icon != null ? icon.kind : e.currentTarget.name;
+                var tooltip:* = tooltips[kind];
+                if (tooltip == null)
+                    return;
+                var data:Object = merge(tooltip, {
+                    isGarage: _data.common.isGarage,
+                    type:kind,
+                    disabled:icon == null ? false : icon.value <= 0
+                });
+                App.toolTipMgr.showSpecial(Tooltips.EFFICIENCY_PARAM, null, kind, data);
+            }
+            else
+            {
+                App.toolTipMgr.hide();
+            }
         }
 
         private function merge(obj1:Object, obj2:Object):Object
