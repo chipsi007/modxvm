@@ -15,6 +15,7 @@ package xvm.battleresults_ui
     import net.wg.data.constants.generated.*;
     import net.wg.gui.lobby.battleResults.EfficiencyIconRenderer;
     import net.wg.gui.lobby.battleResults.data.*;
+    import scaleform.clik.events.*;
 
     public dynamic class UI_CommonStats extends CommonStats
     {
@@ -25,7 +26,8 @@ package xvm.battleresults_ui
         private const XP_IMG_TXT:String = " <IMG SRC='img://gui/maps/icons/library/XpIcon-1.png' width='16' height='16' vspace='-2'/>";
 
         private var _data:BattleResultsVO = null;
-        private var xdata:XvmCommonStatsDataVO = null;
+        private var xdataList:XvmCommonStatsDataListVO = null;
+        private var currentTankIndex:int = 0;
 
         private var shotsTitle:TextField;
         private var shotsCount:TextField;
@@ -33,6 +35,13 @@ package xvm.battleresults_ui
         private var damageAssistedTitle:TextField;
         private var damageAssistedValue:TextField;
         private var damageValue:TextField;
+
+        private var spottedTotalField:EfficiencyIconRenderer;
+        private var damageAssistedTotalField:EfficiencyIconRenderer;
+        private var armorTotalField:EfficiencyIconRenderer;
+        private var critsTotalField:EfficiencyIconRenderer;
+        private var damageTotalField:EfficiencyIconRenderer;
+        private var killsTotalField:EfficiencyIconRenderer;
 
         private var tooltips:Object;
 
@@ -46,18 +55,22 @@ package xvm.battleresults_ui
         {
             super.configUI();
             tooltips = { };
+            tankSlot.addEventListener(ListEvent.INDEX_CHANGE, onDropDownIndexChangeHandler);
         }
 
         override protected function onDispose():void
         {
             super.onDispose();
 
+            tankSlot.removeEventListener(ListEvent.INDEX_CHANGE, onDropDownIndexChangeHandler);
+
             _data = null;
-            xdata = null;
+            xdataList = null;
         }
 
         override public function update(data:Object):void
         {
+            //Logger.add("update");
             try
             {
                 if (data != null)
@@ -66,7 +79,9 @@ package xvm.battleresults_ui
                     // Cannot add to data object because DAAPIDataClass is not dynamic.
                     var vehicles:Array = data.vehicles;
                     if (vehicles.length > 0 && vehicles[0]['__xvm'])
-                        this.xdata = new XvmCommonStatsDataVO(vehicles.shift());
+                    {
+                        xdataList = new XvmCommonStatsDataListVO(vehicles.shift());
+                    }
                 }
 
                 super.update(data);
@@ -85,20 +100,12 @@ package xvm.battleresults_ui
                         hideDetailBtn();
                         hideQuestLabel();
                         initTextFields();
-                        updateData();
                     }
 
                     if (Config.config.battleResults.showTotals)
-                        setTotals();
+                        initTotals();
 
-                    if (Config.config.battleResults.showTotalExperience)
-                        showTotalExperience();
-
-                    if (Config.config.battleResults.showCrewExperience)
-                        showCrewExperience();
-
-                    if (Config.config.battleResults.showNetIncome)
-                        showNetIncome();
+                    updateValues();
                 }
             }
             catch (ex:Error)
@@ -107,7 +114,18 @@ package xvm.battleresults_ui
             }
         }
 
+        private function onDropDownIndexChangeHandler(e:ListEvent) : void
+        {
+            this.currentTankIndex = e.index;
+            updateValues();
+        }
+
         // PRIVATE
+
+        private function get xdata():XvmCommonStatsDataVO
+        {
+            return xdataList.data[this.currentTankIndex];
+        }
 
         private function compactQuests():void
         {
@@ -151,7 +169,57 @@ package xvm.battleresults_ui
             damageValue.addEventListener(MouseEvent.ROLL_OUT, onRollHandler);
         }
 
-        private function updateData():void
+        private function initTotals():void
+        {
+            try
+            {
+                var x:int = efficiencyTitle.x + 275;
+                var y:int = efficiencyTitle.y;
+                var w:Number = 33;
+
+                // spotted
+                spottedTotalField = addChild(createTotalItem( { x: x, y: y, kind: BATTLE_EFFICIENCY_TYPES.DETECTION })) as EfficiencyIconRenderer;
+
+                // damage assisted (radio/tracks)
+                damageAssistedTotalField = addChild(createTotalItem( { x: x + w * 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.ASSIST })) as EfficiencyIconRenderer;
+
+                // armor
+                armorTotalField = addChild(createTotalItem( { x: x + w * 2, y: y, kind: BATTLE_EFFICIENCY_TYPES.ARMOR })) as EfficiencyIconRenderer;
+
+                // crits
+                critsTotalField = addChild(createTotalItem( { x: x + w * 3, y: y, kind: BATTLE_EFFICIENCY_TYPES.CRITS })) as EfficiencyIconRenderer;
+
+                // piercings
+                damageTotalField = addChild(createTotalItem( { x: x + w * 4 + 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.DAMAGE })) as EfficiencyIconRenderer;
+
+                // kills
+                killsTotalField = addChild(createTotalItem( { x: x + w * 5 + 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.DESTRUCTION })) as EfficiencyIconRenderer;
+            }
+            catch (ex:Error)
+            {
+                Logger.err(ex);
+            }
+        }
+
+        private function updateValues():void
+        {
+            if (Config.config.battleResults.showExtendedInfo)
+                showExtendedInfo();
+
+            if (Config.config.battleResults.showTotals)
+                showTotals();
+
+            if (Config.config.battleResults.showTotalExperience)
+                showTotalExperience();
+
+            if (Config.config.battleResults.showCrewExperience)
+                showCrewExperience();
+
+            if (Config.config.battleResults.showNetIncome)
+                showNetIncome();
+        }
+
+        private function showExtendedInfo():void
         {
             shotsTitle.htmlText = formatText(Locale.get("Hit percent"), "#C9C9B6");
             shotsCount.htmlText = formatText(xdata.hits + "/" + xdata.shots, "#C9C9B6", TextFormatAlign.RIGHT);
@@ -164,62 +232,52 @@ package xvm.battleresults_ui
             damageValue.htmlText = formatText(App.utils.locale.integer(xdata.damageDealt), "#FFC133", TextFormatAlign.RIGHT);
         }
 
-        private function setTotals():void
+        private function showTotals():void
         {
-            try
-            {
-                var x:int = efficiencyTitle.x + 275;
-                var y:int = efficiencyTitle.y;
-                var w:Number = 33;
+            // spotted
+            spottedTotalField.value = xdata.spotted;
+            spottedTotalField.enabled = xdata.spotted > 0;
+            tooltips[BATTLE_EFFICIENCY_TYPES.DETECTION] = { };
 
-                // spotted
-                addChild(createTotalItem( { x: x, y: y, kind: BATTLE_EFFICIENCY_TYPES.DETECTION,
-                    value: xdata.spotted,
-                    tooltip: { } } ));
+            // damage assisted (radio/tracks)
+            damageAssistedTotalField.value = xdata.damageAssistedCount;
+            damageAssistedTotalField.enabled = xdata.damageAssistedCount > 0;
+            tooltips[BATTLE_EFFICIENCY_TYPES.ASSIST] = {
+                totalAssistedDamage: xdata.damageAssisted,
+                values: App.utils.locale.integer(xdata.damageAssistedRadio) + "<br/>" +
+                    App.utils.locale.integer(xdata.damageAssistedTrack) + "<br/>" +
+                    App.utils.locale.integer(xdata.damageAssisted),
+                discript: xdataList.damageAssistedNames,
+                totalItemsCount: 2
+            };
 
-                // damage assisted (radio/tracks)
-                addChild(createTotalItem( { x: x + w * 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.ASSIST,
-                    value: xdata.damageAssistedCount,
-                    tooltip: {
-                        totalAssistedDamage: xdata.damageAssisted,
-                        values: App.utils.locale.integer(xdata.damageAssistedRadio) + "<br/>" +
-                            App.utils.locale.integer(xdata.damageAssistedTrack) + "<br/>" +
-                            App.utils.locale.integer(xdata.damageAssisted),
-                        discript: xdata.damageAssistedNames,
-                        totalItemsCount: 2
-                    } } ));
+            // armor
+            armorTotalField.value = xdata.armorCount;
+            armorTotalField.enabled = xdata.armorCount > 0;
+            tooltips[BATTLE_EFFICIENCY_TYPES.ARMOR] = {
+                values: xdata.ricochetsCount + "<br/>" + xdata.nonPenetrationsCount + "<br/>" + App.utils.locale.integer(xdata.damageBlockedByArmor),
+                discript: xdataList.armorNames,
+                totalItemsCount: 3
+            };
 
-                addChild(createTotalItem( { x: x + w * 2, y: y, kind: BATTLE_EFFICIENCY_TYPES.ARMOR,
-                    value: xdata.armorCount,
-                    tooltip: {
-                        values: xdata.ricochetsCount + "<br/>" + xdata.nonPenetrationsCount + "<br/>" + App.utils.locale.integer(xdata.damageBlockedByArmor),
-                        discript: xdata.armorNames,
-                        totalItemsCount: 3
-                    } } ));
+            // crits
+            critsTotalField.value = xdata.critsCount;
+            critsTotalField.enabled = xdata.critsCount > 0;
+            tooltips[BATTLE_EFFICIENCY_TYPES.CRITS] = { };
 
-                // crits
-                addChild(createTotalItem( { x: x + w * 3, y: y, kind: BATTLE_EFFICIENCY_TYPES.CRITS,
-                    value: xdata.critsCount,
-                    tooltip: { } } ));
+            // piercings
+            damageTotalField.value = xdata.piercings;
+            damageTotalField.enabled = xdata.piercings > 0;
+            tooltips[BATTLE_EFFICIENCY_TYPES.DAMAGE] = {
+                values: App.utils.locale.integer(xdata.damageDealt) + "<br/>" + xdata.piercings,
+                discript: xdataList.damageDealtNames,
+                totalItemsCount: 2
+            };
 
-                // piercings
-                addChild(createTotalItem( { x: x + w * 4 + 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.DAMAGE,
-                    value: xdata.piercings,
-                    tooltip: {
-                        values: App.utils.locale.integer(xdata.damageDealt) + "<br/>" + xdata.piercings,
-                        discript: xdata.damageDealtNames,
-                        totalItemsCount: 2
-                    } } ));
-
-                // kills
-                addChild(createTotalItem( { x: x + w * 5 + 1, y: y, kind: BATTLE_EFFICIENCY_TYPES.DESTRUCTION,
-                    value: xdata.kills,
-                    tooltip: { } } ));
-            }
-            catch (ex:Error)
-            {
-                Logger.err(ex);
-            }
+            // kills
+            killsTotalField.value = xdata.kills;
+            killsTotalField.enabled = xdata.kills > 0;
+            tooltips[BATTLE_EFFICIENCY_TYPES.DESTRUCTION] = { };
         }
 
         private function showTotalExperience():void
@@ -283,20 +341,9 @@ package xvm.battleresults_ui
 
         private function createTotalItem(params:Object = null):EfficiencyIconRenderer
         {
-            if (params != null)
-            {
-                if (params.hasOwnProperty("tooltip"))
-                {
-                    tooltips[params.kind] = params.tooltip;
-                    delete params.tooltip;
-                }
-            }
-
             var icon:EfficiencyIconRenderer = App.utils.classFactory.getComponent("EfficiencyIconRendererGUI", EfficiencyIconRenderer, params);
-            icon.enabled = params.value > 0;
             icon.addEventListener(MouseEvent.ROLL_OVER, onRollHandler);
             icon.addEventListener(MouseEvent.ROLL_OUT, onRollHandler);
-
             return icon;
         }
 
