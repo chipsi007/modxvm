@@ -1,0 +1,26 @@
+syntax: glob
+
+*.*~
+*~
+
+.idea
+
+addons/clanicons/archives/*.*
+addons/clanicons/icons/
+addons/stat-utils/db/players-test.qvw
+addons/stat-utils/db/top.qvw
+addons/xvm-stat-log/*.xml
+addons/xvm-stat-log/work/
+
+~output/
+
+src/xpm/*/__version__.py
+
+src/xvm-as2/include/
+src/xvm-as2/swf/*.swf
+
+src/xvm/obj/
+
+utils/replays/*.wotreplay
+src/xvm-as2/obj
+output/
