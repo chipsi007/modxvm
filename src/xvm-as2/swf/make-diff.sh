@@ -5,6 +5,7 @@
 
 patch_swfs="
     battle.swf
+    BattleMessenger.swf
     Minimap.swf
     PlayersPanel.swf
     StatisticForm.swf

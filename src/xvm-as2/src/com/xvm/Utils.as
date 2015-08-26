@@ -395,4 +395,43 @@ class com.xvm.Utils
         return "[" + ex.at + "] " + Strings.trim(ex.name) + ": " + Strings.trim(ex.message) + "\n  " +
             head + ">>>" + ex.text.charAt(ex.at) + "<<<" + tail;
     }
+	
+	/**
+     * Helper that replaces all "find" with "replace" in the given input string
+     * http://danikgames.com/blog/?p=550
+     * @param   input
+     * @param   find
+     * @param   replace
+     * @return
+     */
+    public static function strReplace(input:String, find:String, replace:String):String {
+        while (input.indexOf(find) != -1)
+            input = input.split(find).join(replace);
+        return input.split(find).join(replace);
+    }
+	
+	/**
+     * Helper that get access to object dot-separated property
+     * http://stackoverflow.com/questions/17383300/
+     * @param   object
+     * @param   string
+     * @return
+     */
+    public static function getObjectProperty(object:Object, property:String):Object
+    {
+        var parts:Array = property.split(".");
+        var returnProp:Object = null;
+
+        for (var i = 0; i < parts.length; i++) 
+        {
+             if(object[parts[i]]) 
+             {             
+                 returnProp = object[parts[i]];
+                 object = returnProp;
+             } 
+             else
+                 return null;
+        }
+        return returnProp;
+    }
 }

@@ -5,6 +5,7 @@
 
 PATCHES="
 battle
+BattleMessenger
 Minimap
 PlayersPanel
 StatisticForm
