@@ -1,0 +1,33 @@
+--- orig/StatisticForm.xml	2015-08-21 01:04:56.786860000 +0300
++++ StatisticForm.xml	2015-08-21 01:04:57.047697900 +0300
+@@ -15,4 +15,7 @@
+         </color>
+       </SetBackgroundColor>
++      <ImportAssets2 url="xvm.swf" reserved1="1" reserved2="0">
++        <symbols/>
++      </ImportAssets2>
+       <ImportAssets2 url="ComponentsLib.swf" reserved1="1" reserved2="0">
+         <symbols>
+@@ -101386,6 +101389,6 @@
+               <String value=" "/>
+               <String value="\"/>
+-              <String value=""/>
+-              <String value=""/>
++              <String value=" "/>
++              <String value=" "/>
+               <String value="&#10;"/>
+               <String value="&#13;"/>
+@@ -117544,5 +117547,5 @@
+           <PushData>
+             <items>
+-              <StackString value="net.wargaming.BattleStatItemRenderer"/>
++              <StackString value="wot.wrapper.StatisticForm.BattleStatItemRenderer"/>
+             </items>
+           </PushData>
+@@ -117570,5 +117573,5 @@
+           <PushData>
+             <items>
+-              <StackString value="net.wargaming.BattleStatItemRenderer"/>
++              <StackString value="wot.wrapper.StatisticForm.BattleStatItemRenderer"/>
+             </items>
+           </PushData>
