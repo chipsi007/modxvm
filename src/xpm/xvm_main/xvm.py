@@ -23,16 +23,18 @@ from logger import *
 import config
 import configwatchdog
 import stats
+import svcmsg
 import vehinfo
 import vehstate
 import token
 import utils
 import userprefs
 import dossier
-from websock import g_websock
 import minimap_circles
 import test
+import topclans
 import wgutils
+import xvmapi
 
 
 _LOG_COMMANDS = (
@@ -118,40 +120,52 @@ class Xvm(object):
         trace('onStateLogin')
         if self.currentPlayerId is not None:
             self.currentPlayerId = None
-            g_websock.send('id')
-            token.clearToken()
+            token.clear()
 
 
     # LOBBY
 
     def onStateLobby(self):
         trace('onStateLobby')
-        playerId = getCurrentPlayerId()
-        if playerId is not None and self.currentPlayerId != playerId:
-            self.currentPlayerId = playerId
-            token.checkVersion()
-            token.initializeXvmToken()
-            g_websock.send('id/%d' % playerId)
-        lobby = getLobbyApp()
-        if lobby is not None:
-            lobby.loaderManager.onViewLoaded += self.onViewLoaded
+        try:
+            playerId = getCurrentPlayerId()
+            if playerId is not None and self.currentPlayerId != playerId:
+                self.currentPlayerId = playerId
+                token.restore()
+                token.updateTokenFromApi()
 
-        # TODO
-        """
-            var message:String = Locale.get("XVM config loaded");
-            var type:String = "Information";
-            if (Config.__stateInfo.warning != null)
-            {
-                message = Locale.get("Config file xvm.xc was not found, using the built-in config");
-                type = "Warning";
-            }
-            else if (Config.__stateInfo.error != null)
-            {
-                message = Locale.get("Error loading XVM config") + ":\n" + XfwUtils.encodeHtmlEntities(Config.__stateInfo.error);
-                type = "Error";
-            }
-            Xfw.cmd(XfwConst.XFW_COMMAND_SYSMESSAGE, message, type);
-        """
+                if config.networkServicesSettings.servicesActive:
+                    data = xvmapi.getVersion()
+                    topclans.clear()
+                else:
+                    data = xvmapi.getVersionWithLimit()
+                    topclans.update(data)
+                config.verinfo = config.XvmVersionInfo(data)
+                
+                svcmsg.tokenUpdated()
+
+            lobby = getLobbyApp()
+            if lobby is not None:
+                lobby.loaderManager.onViewLoaded += self.onViewLoaded
+
+            # TODO
+            """
+                var message:String = Locale.get("XVM config loaded");
+                var type:String = "Information";
+                if (Config.__stateInfo.warning != null)
+                {
+                    message = Locale.get("Config file xvm.xc was not found, using the built-in config");
+                    type = "Warning";
+                }
+                else if (Config.__stateInfo.error != null)
+                {
+                    message = Locale.get("Error loading XVM config") + ":\n" + XfwUtils.encodeHtmlEntities(Config.__stateInfo.error);
+                    type = "Error";
+                }
+                Xfw.cmd(XfwConst.XFW_COMMAND_SYSMESSAGE, message, type);
+            """
+        except Exception, ex:
+            err(traceback.format_exc())
 
 
     def deleteLobbySwf(self):
@@ -169,7 +183,7 @@ class Xvm(object):
         g_currentVehicle.onChanged += self.updateTankParams
         BigWorld.callback(0, self.updateTankParams)
 
-        as_xfw_cmd(XVM_COMMAND.AS_SET_SVC_SETTINGS, token.networkServicesSettings)
+        as_xfw_cmd(XVM_COMMAND.AS_SET_SVC_SETTINGS, config.networkServicesSettings.__dict__)
 
         if IS_DEVELOPMENT:
             test.onHangarInit()
@@ -195,6 +209,8 @@ class Xvm(object):
 
     def onStateBattleLoading(self):
         trace('onStateBattleLoading')
+        if isReplay():
+            token.restore()
         pass
 
 
@@ -297,7 +313,7 @@ class Xvm(object):
                     'fallout' if arena_info.isEventBattle() else 'normal',
                     arenaVehicle['vehicleType'].type.compactDescr,
                     vehinfo.getVehicleInfoDataStr(),
-                    simplejson.dumps(token.networkServicesSettings),
+                    simplejson.dumps(config.networkServicesSettings.__dict__),
                     simplejson.dumps(minimap_circles.getMinimapCirclesData()),
                     IS_DEVELOPMENT,
                 ]))
@@ -506,7 +522,7 @@ class Xvm(object):
 
             if cmd == XVM_COMMAND.GET_SVC_SETTINGS:
                 token.getToken()
-                return (token.networkServicesSettings, True)
+                return (config.networkServicesSettings.__dict__, True)
 
             if cmd == XVM_COMMAND.LOAD_SETTINGS:
                 default = None if len(args) < 2 else args[1]
@@ -600,7 +616,6 @@ class Xvm(object):
             isRepeated = event.isRepeatedEvent()
             if not isRepeated:
                 # debug("key=" + str(key) + ' ' + ('down' if isDown else 'up'))
-                # g_websock.send("%s/%i" % ('down' if isDown else 'up', key))
                 battle = getBattleApp()
                 if battle:
                     if self.checkKeyEventBattle(key, isDown):
@@ -627,28 +642,6 @@ class Xvm(object):
             return True
 
         return False
-
-
-    def on_websock_message(self, message):
-        try:
-            pass
-            # type = SystemMessages.SM_TYPE.Information
-            # msg += message
-            # msg += '</textformat>'
-            # SystemMessages.pushMessage(msg, type)
-        except Exception:
-            debug(traceback.format_exc())
-
-
-    def on_websock_error(self, error):
-        try:
-            type = SystemMessages.SM_TYPE.Error
-            msg = token.getXvmMessageHeader()
-            msg += 'WebSocket error: %s' % str(error)
-            msg += '</textformat>'
-            SystemMessages.pushMessage(msg, type)
-        except Exception:
-            pass
 
 
     def onViewLoaded(self, e=None):

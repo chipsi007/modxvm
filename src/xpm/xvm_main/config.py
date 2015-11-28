@@ -19,6 +19,7 @@ from logger import *
 from default_xvm_xc import DEFAULT_XVM_XC
 import default_config
 import configwatchdog
+import userprefs
 import utils
 
 _config = None
@@ -207,3 +208,118 @@ def _constsSection():
         'VM_COEFF_MM_BASE': 0.8,    # minimap (base)
         'VM_COEFF_FC': 0.93         # frag correlation
     }
+
+
+# config.networkServicesSettings
+
+class NetworkServicesSettings(object):
+
+    def __init__(self, data={}, active=False):
+        self.servicesActive = active
+        self.statBattle = data.get('statBattle', True) if active else False
+        self.statAwards = data.get('statAwards', True) if active else False
+        self.statCompany = data.get('statCompany', True) if active else False
+        self.comments = data.get('comments', True) if active else False
+        self.chance = data.get('chance', False) if active else False
+        self.chanceLive = data.get('chanceLive', False) if active else False
+        self.chanceResults = data.get('chanceResults', False) if active else False
+        self.scale = data.get('scale', 'xvm')
+        self.rating = data.get('rating', 'wgr')
+        self.topClansCount = data.get('topClansCount', 50)
+        self.flag = data.get('flag', None)
+
+networkServicesSettings = NetworkServicesSettings()
+
+
+# config.token
+
+class XvmServicesToken(object):
+
+    def __init__(self, data={}):
+        trace('config.token.__init__')
+        log(data)
+        self._apply(data)
+        self.errStr = None
+
+
+    def _apply(self, data):
+        trace('config.token._apply')
+        if data is None:
+            data = {}
+        self.playerId = data.get('playerId', None)
+        if self.playerId is None:
+            self.playerId = data.get('_id', None)
+        self.expires_at = data.get('expires_at', None)
+        self.verChkCnt = data.get('verChkCnt', None)
+        self.cnt = data.get('cnt', None)
+        self.status = data.get('status', 'inactive')
+        self.issued = data.get('issued', None)
+        self.start_at = data.get('start_at', None)
+        self.services = data.get('services', {});
+        self.token = data.get('token', '').encode('ascii')
+        if self.token == '':
+            self.token = None
+
+        active = self.token is not None
+        global networkServicesSettings
+        networkServicesSettings = NetworkServicesSettings(self.services, active)
+
+
+    @staticmethod
+    def restore():
+        trace('config.token.restore')
+        try:
+            playerId = getCurrentPlayerId() if not isReplay() else userprefs.get('tokens.lastPlayerId')
+            if playerId is None:
+                return XvmServicesToken()
+            return XvmServicesToken(userprefs.get('tokens.{0}'.format(playerId)))
+        except Exception:
+            err(traceback.format_exc())
+
+
+    def save(self):
+        trace('config.token.save')
+        if self.playerId:
+            userprefs.set('tokens.{0}'.format(self.playerId), self.__dict__)
+            userprefs.set('tokens.lastPlayerId', self.playerId)
+
+
+    def update(self, data={}, errStr=None):
+        trace('config.token._update')
+        log(data)
+        if data is None:
+            return
+        status = data.get('status', None)
+        if not status:
+            self.status = None
+            self.errStr = errStr
+            return
+        if status == 'active':
+            if 'token' not in data:
+                data['token'] = self.token
+            self._apply(data)
+        else:
+            self.token = None
+            self.status = status
+            self.services = {}
+            global networkServicesSettings
+            networkServicesSettings = NetworkServicesSettings()
+
+        self.save()
+
+token = XvmServicesToken()
+
+
+# config.verinfo
+
+class XvmVersionInfo(object):
+    def __init__(self, data={}):
+        trace('config.verinfo.__init__')
+        if data is None:
+            data = {}
+        info = data.get('info', {})
+        self.message = info.get('message', None)
+        self.wot = info.get('wot', None)
+        self.ver = info.get('ver', None)
+
+verinfo = XvmVersionInfo()
