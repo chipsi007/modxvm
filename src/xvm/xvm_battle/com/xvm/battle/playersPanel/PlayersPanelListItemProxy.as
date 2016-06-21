@@ -6,13 +6,18 @@ package com.xvm.battle.playersPanel
 {
     import com.xfw.*;
     import com.xvm.*;
+    import com.xvm.battle.*;
+//    import com.xvm.types.*;
     import com.xvm.types.cfg.*;
     import flash.events.*;
     import net.wg.data.constants.generated.*;
     import net.wg.gui.battle.random.views.stats.components.playersPanel.list.*;
+    import net.wg.infrastructure.interfaces.*;
 
     public class PlayersPanelListItemProxy
     {
+        public var xvm_enabled:Boolean;
+
         private var DEFAULT_BG_ALPHA:Number;
         private var DEFAULT_SELFBG_ALPHA:Number;
         private var DEFAULT_DEADBG_ALPHA:Number;
@@ -20,12 +25,20 @@ package com.xvm.battle.playersPanel
         private var DEFAULT_VEHICLELEVEL_ALPHA:Number;
 
         private var pcfg:CPlayersPanel;
-        private var xvm_enabled:Boolean;
+        private var mcfg:CPlayersPanelMode;
+        private var ncfg:CPlayersPanelNoneMode;
         private var ui:PlayersPanelListItem;
+        private var isLeftPanel:Boolean;
 
-        public function PlayersPanelListItemProxy(ui:PlayersPanelListItem)
+        private var _isSelected:Boolean = false;
+        private var _userProps:IUserProps = null;
+
+        private var opt_removeSelectedBackground:Boolean;
+
+        public function PlayersPanelListItemProxy(ui:PlayersPanelListItem, isLeftPanel:Boolean)
         {
             this.ui = ui;
+            this.isLeftPanel = isLeftPanel;
             Xvm.addEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
 
             DEFAULT_BG_ALPHA = ui.bg.alpha;
@@ -54,21 +67,61 @@ package com.xvm.battle.playersPanel
             // empty
         }
 
+        public function setIsSelected(isSelected:Boolean):void
+        {
+            _isSelected = isSelected;
+        }
+
+        public function onDrawSelected():void
+        {
+            ui.selfBg.visible = _isSelected && !opt_removeSelectedBackground;
+        }
+
+        public function setPlayerNameProps(userProps:IUserProps):void
+        {
+            _userProps = userProps;
+            updatePlayerName();
+        }
+
+        public function updatePlayerName():void
+        {
+            if (mcfg != null && _userProps != null)
+            {
+                var txt:String = Macros.Format(_userProps..userName, isLeftPanel ? mcfg.nickFormatLeft : mcfg.nickFormatRight, BattleState.getByPlayerName(_userProps.userName));
+                Logger.add("updatePlayerName: " + txt);
+                ui.playerNameCutTF.htmlText = txt;
+                ui.playerNameFullTF.htmlText = txt;
+            }
+        }
+
+        public function updateVehicleName():void
+        {
+            if (mcfg != null && _userProps != null)
+            {
+                var txt:String = Macros.Format(_userProps.userName, isLeftPanel ? mcfg.vehicleFormatLeft : mcfg.vehicleFormatRight, BattleState.getByPlayerName(_userProps.userName));
+                ui.vehicleTF.htmlText = txt;
+            }
+        }
+
+        public function updateFrags():void
+        {
+            if (mcfg != null && _userProps != null)
+            {
+                var txt:String = Macros.Format(_userProps.userName, isLeftPanel ? mcfg.fragsFormatLeft : mcfg.fragsFormatRight, BattleState.getByPlayerName(_userProps.userName));
+                ui.fragsTF.htmlText = txt;
+            }
+        }
+
         public function applyState():void
         {
             switch (ui.xfw_state)
             {
                 case PLAYERS_PANEL_STATE.FULL:
-                    applyStateDefault(pcfg.large);
-                    break;
                 case PLAYERS_PANEL_STATE.LONG:
-                    applyStateDefault(pcfg.medium2);
-                    break;
                 case PLAYERS_PANEL_STATE.MEDIUM:
-                    applyStateDefault(pcfg.medium);
-                    break;
                 case PLAYERS_PANEL_STATE.SHORT:
-                    applyStateDefault(pcfg.short);
+                    mcfg = pcfg[UI_PlayersPanel.PLAYERS_PANEL_STATE_NAMES[ui.xfw_state]];
+                    applyStateDefault();
                     break;
                 case PLAYERS_PANEL_STATE.HIDEN:
                     applyStateNone(pcfg.none);
@@ -84,18 +137,20 @@ package com.xvm.battle.playersPanel
             {
                 //Logger.add("PlayersPanelListItemProxy.onConfigLoaded()");
                 pcfg = Config.config.playersPanel;
+                mcfg = pcfg[UI_PlayersPanel.PLAYERS_PANEL_STATE_NAMES[ui.xfw_state]];
+                ncfg = pcfg.none;
                 xvm_enabled = Macros.GlobalBoolean(pcfg.enabled, true);
 
                 if (xvm_enabled)
                 {
-                    var alpha:Number = Macros.GlobalNumber(pcfg.alpha, 60) / 100.0;
+                    var alpha:Number = Macros.GlobalNumber(pcfg.alpha, 80) / 100.0;
                     ui.bg.alpha = alpha;
                     ui.selfBg.alpha = alpha;
                     ui.deadBg.alpha = alpha;
 
                     ui.vehicleIcon.alpha = Macros.GlobalNumber(pcfg.iconAlpha, 100) / 100.0;
 
-                    applyState();
+                    opt_removeSelectedBackground = Macros.GlobalBoolean(pcfg.removeSelectedBackground, false);
                 }
                 else
                 {
@@ -106,6 +161,8 @@ package com.xvm.battle.playersPanel
                     ui.vehicleIcon.alpha = DEFAULT_VEHICLEICON_ALPHA;
                     ui.vehicleLevel.alpha = DEFAULT_VEHICLELEVEL_ALPHA;
                 }
+
+                ui.invalidate();
             }
             catch (ex:Error)
             {
@@ -114,12 +171,15 @@ package com.xvm.battle.playersPanel
             return null;
         }
 
-        public function applyStateDefault(cfg:CPlayersPanelMode):void
+        private function applyStateDefault():void
         {
-            ui.vehicleLevel.alpha = Macros.GlobalNumber(cfg.vehicleLevelAlpha, 100) / 100.0;
+            ui.vehicleLevel.alpha = Macros.GlobalNumber(mcfg.vehicleLevelAlpha, 100) / 100.0;
+            updatePlayerName();
+            updateVehicleName();
+            updateFrags();
         }
 
-        public function applyStateNone(cfg:CPlayersPanelNoneMode):void
+        private function applyStateNone(cfg:CPlayersPanelNoneMode):void
         {
 
         }
