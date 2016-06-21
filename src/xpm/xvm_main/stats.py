@@ -3,12 +3,11 @@
 #############################
 # Command
 
-def getBattleStat(args, proxy=None):
+def getBattleStat(args):
     _stat.enqueue({
         'func': _stat.getBattleStat,
         'cmd': XVM_COMMAND.AS_STAT_BATTLE_DATA,
-        'args': args,
-        'proxy': proxy})
+        'args': args})
     _stat.processQueue()
 
 def getBattleResultsStat(args):
@@ -131,10 +130,7 @@ class _Stat(object):
     def _respond(self):
         debug("respond: " + self.req['cmd'])
         self.resp = unicode_to_ascii(self.resp)
-        if not 'proxy' in self.req or self.req['proxy'] is None:
-            as_xfw_cmd(self.req['cmd'], self.resp)
-        elif self.req['proxy'].component and self.req['proxy'].movie:
-            self.req['proxy'].movie.as_xvm_onUpdateStat(self.resp)
+        as_xfw_cmd(self.req['cmd'], self.resp)
 
 
     # Threaded
@@ -286,22 +282,19 @@ class _Stat(object):
 
 
     def _get_user(self):
-        (value, isId) = self.req['args']
+        (value,) = self.req['args']
         orig_value = value
-        reg = GAME_REGION
-        if isId:
-            value = str(int(value))
-        else:
-            if reg == "CT":
-                suf = value[-3:]
-                if suf in ('_RU', '_EU', '_NA', '_US', '_SG'):
-                    reg = value[-2:]
-                    value = value[:-3]
-                    if reg == 'US':
-                        reg = 'NA'
-                else:
-                    reg = "RU"
-        cacheKey = "%s/%s" % ("ID" if isId else reg, value)
+        region = GAME_REGION
+        if region == "CT":
+            suf = value[-3:]
+            if suf in ('_RU', '_EU', '_NA', '_US', '_SG'):
+                region = value[-2:]
+                value = value[:-3]
+                if region == 'US':
+                    region = 'NA'
+            else:
+                region = "RU"
+        cacheKey = "%s/%s" % (region, value)
         data = None
         if cacheKey not in self.cacheUser:
             try:
@@ -309,16 +302,11 @@ class _Stat(object):
                 if token is None:
                     err('No valid token for XVM network services (key=%s)' % cacheKey)
                 else:
-                    if isId:
-                        data = xvmapi.getStatsById(value)
-                    else:
-                        data = xvmapi.getStatsByNick(reg, value)
-
+                    data = xvmapi.getStatsByNick(region, value)
                     if data is not None:
-                        self._fix_user(data, None if isId else orig_value)
+                        self._fix_user(data, orig_value)
                         if 'nm' in data and '_id' in data:
-                            self.cacheUser[reg + "/" + data['nm']] = data
-                            self.cacheUser["ID/" + str(data['_id'])] = data
+                            self.cacheUser[region + "/" + data['nm']] = data
                     else:
                         self.cacheUser[cacheKey] = {}
             except Exception:

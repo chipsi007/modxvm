@@ -6,8 +6,9 @@ package com.xvm.battle
 {
     import com.xfw.*;
     import com.xvm.*;
+    import com.xfw.events.*;
     import com.xvm.infrastructure.*;
-    import com.xvm.battle.BattleXvmView;
+    import com.xvm.battle.*;
     import com.xvm.battle.fragCorrelationBar.FragCorrelationBarXvmView;
     import com.xvm.battle.fullStats.FullStatsXvmView;
     import com.xvm.battle.playersPanel.PlayersPanelXvmView;
@@ -22,7 +23,6 @@ package com.xvm.battle
 
         private static const _views:Object =
         {
-
             "classicBattlePage": [
                 FragCorrelationBarXvmView,      // FragCorrelationBarXvmView should be loaded first (implements battle state update methods)
                 FullStatsXvmView,
@@ -37,6 +37,8 @@ package com.xvm.battle
             super.entryPoint();
             Macros.RegisterGlobalMacrosData();
             Macros.RegisterBattleGlobalMacrosData(BattleMacros.RegisterGlobalMacrosData);
+            Stat.clearBattleStat();
+            Stat.loadBattleStat();
         }
 
         public override function get views():Object
