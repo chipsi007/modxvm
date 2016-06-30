@@ -13,14 +13,10 @@ package com.xvm.lobby.company
     import net.wg.infrastructure.events.*;
     import net.wg.gui.events.*;
     import net.wg.gui.prebattle.company.*;
-    import org.idmedia.as3commons.util.StringUtils;
 
     public class CompanyXvmView extends XvmViewBase
     {
-        private static const _name:String = "xvm_lobby";
-        private static const _ui_name:String = "xvm_company_ui.swf";
-
-        private var _initialized:Boolean = false;
+        private static const _swf_name:String = "xvm_lobbycompany_ui.swf";
 
         public function CompanyXvmView(view:IView)
         {
@@ -36,32 +32,28 @@ package com.xvm.lobby.company
         {
             //Logger.add("onAfterPopulate: " + view.as_alias);
 
-            _initialized = false;
-
             if (!Config.networkServicesSettings.statCompany)
                 return;
 
-            _initialized = true;
-
             App.instance.loaderMgr.addEventListener(LibraryLoaderEvent.LOADED, onLibLoaded);
 
-            if (XfwView.try_load_ui_swf(_name, _ui_name) != XfwConst.SWF_START_LOADING)
+            if (XfwView.try_load_ui_swf("xvm_lobby", _swf_name) != XfwConst.SWF_START_LOADING)
+            {
                 init();
+            }
         }
 
         override public function onBeforeDispose(e:LifeCycleEvent):void
         {
-            if (!_initialized)
-                return;
-
             App.instance.loaderMgr.removeEventListener(LibraryLoaderEvent.LOADED, onLibLoaded);
+            page.stack.removeEventListener(ViewStackEvent.VIEW_CHANGED, onViewChanged);
         }
 
         // PRIVATE
 
-        private function onLibLoaded(e:LibraryLoaderEvent):void
+         private function onLibLoaded(e:LibraryLoaderEvent):void
         {
-            if (StringUtils.endsWith(e.url.toLowerCase(), _ui_name))
+            //if (StringUtils.endsWith(e.url.toLowerCase(), _ui_name))
             {
                 init();
                 setView(page.stack.currentView as IViewStackContent);
