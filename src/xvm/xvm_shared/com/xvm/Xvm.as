@@ -4,20 +4,48 @@
  */
 package com.xvm
 {
-    XvmLinks;
-
     import com.xfw.*;
+    import com.xvm.battle.*;
+    import com.xvm.battle.events.*;
+    import com.xvm.battle.vo.*;
     import com.xvm.types.*;
     import com.xvm.types.cfg.*;
     import flash.display.*;
     import flash.events.*;
-    import net.wg.infrastructure.managers.IImageManager;
+    import net.wg.infrastructure.managers.*;
+
+    /**
+     *  Link additional classes into xfw.swc
+     */
+    Chance;
+    Config;
+    Dossier;
+    Locale;
+    Stat;
+    VehicleInfo;
+    XvmCommands;
+    Utils;
+
+    // Battle
+    BattleCommands;
+    BattleEvents;
+    BattleGlobalData;
+    BattleMacros;
+    BattleState;
+    PlayerStateEvent;
+    VOArenaInfo;
+    VOCaptureBarData;
+    VODamageInfo;
+    VOMinimapCirclesData;
+    VOPlayersData;
+    VOPlayerState;
+    VOXmqpData;
 
     public class Xvm extends Sprite
     {
         public static function addEventListener(type:String, listener:Function):void
         {
-            _instance.addEventListener(type, listener);
+            _instance.addEventListener(type, listener, false, 0, true);
         }
 
         public static function removeEventListener(type:String, listener:Function):void

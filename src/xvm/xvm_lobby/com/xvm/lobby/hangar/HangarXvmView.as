@@ -35,6 +35,11 @@ package com.xvm.lobby.hangar
             initServerInfo();
         }
 
+        override public function onBeforeDispose(e:LifeCycleEvent):void
+        {
+            Xfw.removeCommandListener(XvmCommands.AS_UPDATE_CURRENT_VEHICLE, onUpdateCurrentVehicle);
+        }
+
         // PRIVATE
 
         private function initVehicleParams():void

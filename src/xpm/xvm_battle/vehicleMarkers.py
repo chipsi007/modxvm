@@ -53,7 +53,7 @@ def _MarkersManager_beforeDelete(base, self):
 @overrideMethod(MarkersManager, 'createMarker')
 def _MarkersManager_createMarker(base, self, mProv, symbol, active = True):
     if _g_markers.active:
-        symbol = 'xvm.vehiclemarkers_ui::XvmVehicleMarker'
+        symbol = 'com.xvm.vehiclemarkers.ui::XvmVehicleMarker'
     #debug('createMarker: ' + str(symbol))
     handle = base(self, mProv, symbol, active)
     return handle
@@ -94,7 +94,9 @@ class VehicleMarkers(object):
             elif cmd == XVM_VM_COMMAND.INITIALIZED:
                 self.initialized = True
                 log('[VM] initialized')
+            elif cmd == XVM_COMMAND.REQUEST_CONFIG:
                 self.respondConfig()
+                return (None, True)
             else:
                 warn('Unknown command: {}'.format(cmd))
         except Exception, ex:
