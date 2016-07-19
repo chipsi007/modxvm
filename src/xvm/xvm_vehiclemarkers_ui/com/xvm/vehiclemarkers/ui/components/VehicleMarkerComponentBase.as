@@ -21,19 +21,24 @@ package com.xvm.vehiclemarkers.ui.components
             marker.addEventListener(XvmVehicleMarkerEvent.UPDATE, update);
         }
 
-        public function dispose():void
+        public final function dispose():void
         {
-            //
+            onDispose();
+        }
+
+        protected function onDispose():void
+        {
+            // virtual
         }
 
         protected function init(e:XvmVehicleMarkerEvent):void
         {
-            update(e);
+            // virtual
         }
 
         protected function update(e:XvmVehicleMarkerEvent):void
         {
-
+            // virtual
         }
     }
 }

@@ -20,12 +20,16 @@ package com.xvm.extraFields
 
     public class ExtraFields extends UIComponent
     {
+        public static const LAYOUT_HORIZONTAL:String = "horizontal";
+        public static const LAYOUT_VERTICAL:String = "vertical";
+        public static const LAYOUT_ROOT:String = "root";
+
         private var _bounds:Rectangle;
         private var _layout:String;
         private var _isLeftPanel:Boolean;
 
         public function ExtraFields(formats:Array, isLeftPanel:Boolean = true, getSchemeNameForText:Function = null, getSchemeNameForImage:Function = null,
-            bounds:Rectangle = null, layout:String = null, defaultAlign:String = null):void
+            bounds:Rectangle = null, layout:String = null, defaultAlign:String = null, defaultTextFormatConfig:CTextFormat = null):void
         {
             mouseEnabled = false;
             mouseChildren = false;
@@ -69,7 +73,7 @@ package com.xvm.extraFields
                 {
                     addChild(format.src != null
                         ? new (App.utils.classFactory.getClass("com.xvm.extraFields::ImageExtraField"))(format, isLeftPanel, getSchemeNameForImage) // TODO: make ImageExtraField shared
-                        : new TextExtraField(format, isLeftPanel, getSchemeNameForText, _bounds, defaultAlign));
+                        : new TextExtraField(format, isLeftPanel, getSchemeNameForText, _bounds, defaultAlign, defaultTextFormatConfig));
                 }
             }
         }
@@ -81,7 +85,8 @@ package com.xvm.extraFields
 
         public function update(options:IVOMacrosOptions, bindToIconOffset:Number = 0, offsetX:Number = 0, offsetY:Number = 0):void
         {
-            for (var i:int = 0; i < this.numChildren; ++i)
+            var len:int = this.numChildren;
+            for (var i:int = 0; i < len; ++i)
             {
                 var child:IExtraField = this.getChildAt(i) as IExtraField;
                 if (child)
@@ -89,20 +94,33 @@ package com.xvm.extraFields
                     child.update(options, bindToIconOffset, offsetX, offsetY);
                     if (_bounds && _layout)
                     {
-                        if (_layout == "horizontal")
+                        var position:Number = options.position;
+                        switch (_layout)
                         {
-                            var vx:Number = _bounds.x + (options.position - 1) * _bounds.width;
-                            x = _isLeftPanel ? vx : App.appWidth - vx;
-                            y = _bounds.y;
-                        }
-                        else
-                        {
-                            x = _isLeftPanel ? _bounds.x : App.appWidth - _bounds.x;
-                            y = _bounds.y + (options.position - 1) * _bounds.height;
+                            case LAYOUT_HORIZONTAL:
+                                var vx:Number = _bounds.x + (position - 1) * _bounds.width;
+                                x = _isLeftPanel ? vx : App.appWidth - vx;
+                                y = _bounds.y;
+                                break;
+                            case LAYOUT_VERTICAL:
+                                x = _isLeftPanel ? _bounds.x : App.appWidth - _bounds.x;
+                                y = _bounds.y + (position - 1) * _bounds.height;
+                                break;
+                            case LAYOUT_ROOT:
+                                var align:String = Macros.FormatStringGlobal(child.cfg.screenHAlign, TextFormatAlign.LEFT);
+                                child.x = child.xValue + Utils.HAlign(align, child.widthValue, _bounds.width);
+                                var valign:String = Macros.FormatStringGlobal(child.cfg.screenVAlign, TextFieldEx.VALIGN_TOP);
+                                child.y = child.yValue + Utils.VAlign(valign, child.heightValue, _bounds.height);
+                                break;
                         }
                     }
                 }
             }
+        }
+
+        public function updateBounds(bounds:Rectangle):void
+        {
+            _bounds = bounds;
         }
     }
 }

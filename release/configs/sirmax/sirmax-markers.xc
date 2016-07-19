@@ -24,16 +24,16 @@
     "alive": {
       "normal": {
         "vehicleIcon": {
-          "maxScale": 100,
+          //"maxScale": 50,
           "color": ${"def.markers.vehicleIconColor"}
         },
         "contourIcon": {
-          "enabled": false,
+          //"enabled": true,
           "x": 0,
-          "y": -65,
+          "y": -85,
           "alpha": 100,
           "color": null,
-          "amount": 30
+          "amount": 0
         },
         "healthBar": {
           "enabled": true,
@@ -78,16 +78,16 @@
       },
       "extended": {
         "vehicleIcon": {
-          "maxScale": 100,
+          //"maxScale": 75,
           "color": ${"def.markers.vehicleIconColor"}
         },
         "contourIcon": {
-          "enabled": false,
+          //"enabled": true,
           "x": 0,
-          "y": -65,
-          "alpha": 100,
+          "y": -85,
+          "alpha": 75,
           "color": null,
-          "amount": 50
+          "amount": 30
         },
         "healthBar": {
           "enabled": true,
@@ -121,7 +121,8 @@
           {
             "enabled": true,
             "name": "HP",
-            "x": 0, "y": -38, "color": "0xD9FFB3",
+            "x": 0, "y": -38,
+            "textFormat": { "color": "0xD9FFB3" },
             "shadow": { "alpha": 100, "color": "0x000000", "angle": 0, "strength": 1.5, "distance": 0, "size": 3 },
             "format": "<font face='$FieldFont' size='11'><b>{{hp}} / {{hp-max}}</b></font>"
           },
@@ -190,7 +191,7 @@
     "alive": {
       "normal": {
         "vehicleIcon": {
-          "maxScale": 100,
+          //"maxScale": 50,
           "color": ${"def.markers.vehicleIconColor"}
         },
         "contourIcon": {
@@ -245,7 +246,7 @@
       },
       "extended": {
         "vehicleIcon": {
-          "maxScale": 100,
+          //"maxScale": 75,
           "color": ${"def.markers.vehicleIconColor"}
         },
         "contourIcon": {

@@ -5,10 +5,13 @@
 
 import traceback
 import weakref
+import time
 
 import BigWorld
+import constants
 import game
-from gui.shared import g_eventBus
+from gui.shared import g_eventBus, events
+from gui.app_loader.settings import GUI_GLOBAL_SPACE_ID
 from gui.battle_control import g_sessionProvider
 from gui.Scaleform.daapi.view.battle.shared.markers2d.manager import MarkersManager
 
@@ -23,6 +26,7 @@ import xvm_main.python.vehinfo as vehinfo
 
 from commands import *
 from battle import g_battle
+import shared
 
 #####################################################################
 # initialization/finalization
@@ -85,11 +89,12 @@ class VehicleMarkers(object):
 
     enabled = True
     initialized = False
+    guiType = 0
     managerRef = None
 
     @property
     def active(self):
-        return self.enabled and self.initialized
+        return self.enabled and self.initialized and (self.guiType != constants.ARENA_GUI_TYPE.TUTORIAL)
 
     @property
     def manager(self):
@@ -104,6 +109,7 @@ class VehicleMarkers(object):
         manager.addExternalCallback('xvm.cmd', self.onVMCommand)
 
     def destroy(self):
+        self.initialized = False
         self.managerRef = None
 
     #####################################################################
@@ -116,29 +122,23 @@ class VehicleMarkers(object):
                 log(*args)
             elif cmd == XVM_VM_COMMAND.INITIALIZED:
                 self.initialized = True
+                self.guiType = BigWorld.player().arena.guiType
                 log('[VM]    initialized')
             elif cmd == XVM_COMMAND.REQUEST_CONFIG:
                 self.respondConfig()
+            elif cmd == XVM_BATTLE_COMMAND.REQUEST_BATTLE_GLOBAL_DATA:
+                self.respondGlobalBattleData()
             elif cmd == XVM_COMMAND.PYTHON_MACRO:
                 return python_macro.process_python_macro(args[0])
             #elif cmd == XVM_COMMAND.GET_PLAYER_NAME:
             #    return (BigWorld.player().name, True)
-            #elif cmd == XVM_COMMAND.GET_SVC_SETTINGS:
-            #    return (config.networkServicesSettings.__dict__, True)
-            elif cmd == XVM_COMMAND.GET_BATTLE_LEVEL:
-                arena = getattr(BigWorld.player(), 'arena', None)
-                return arena.extraData.get('battleLevel', 0) if arena else None
-            elif cmd == XVM_COMMAND.GET_BATTLE_TYPE:
-                arena = getattr(BigWorld.player(), 'arena', None)
-                return arena.bonusType if arena else None
-            elif cmd == XVM_COMMAND.GET_MAP_SIZE:
-                return utils.getMapSize()
             elif cmd == XVM_COMMAND.GET_CLAN_ICON:
                 return stats.getClanIcon(args[0])
-            elif cmd == XVM_COMMAND.GET_MY_VEHCD:
-                return getVehCD(BigWorld.player().playerVehicleID)
             elif cmd == XVM_COMMAND.LOAD_STAT_BATTLE:
-                stats.getBattleStat(args, self.call)
+                stats.getBattleStat(args, self.call, GUI_GLOBAL_SPACE_ID.BATTLE)
+            # profiler
+            elif cmd in (XVM_PROFILER_COMMAND.BEGIN, XVM_PROFILER_COMMAND.END):
+                g_eventBus.handleEvent(events.HasCtxEvent(cmd, args[0]))
             else:
                 warn('Unknown command: {}'.format(cmd))
         except Exception, ex:
@@ -153,9 +153,11 @@ class VehicleMarkers(object):
             err(traceback.format_exc())
 
     def respondConfig(self):
+        #debug('vm:respondConfig')
+        #s = time.clock()
         try:
             if self.initialized:
-                if self.enabled:
+                if self.active:
                     self.call(
                         XVM_COMMAND.AS_SET_CONFIG,
                         config.config_data,
@@ -174,8 +176,19 @@ class VehicleMarkers(object):
                 self.recreateMarkers()
         except Exception, ex:
             err(traceback.format_exc())
+        #debug('vm:respondConfig: {:>8.3f} s'.format(time.clock() - s))
+
+    def respondGlobalBattleData(self):
+        #s = time.clock()
+        try:
+            if self.active:
+                self.call(XVM_BATTLE_COMMAND.AS_RESPONSE_BATTLE_GLOBAL_DATA, *shared.getGlobalBattleData())
+        except Exception, ex:
+            err(traceback.format_exc())
+        #debug('vm:respondGlobalBattleData: {:>8.3f} s'.format(time.clock() - s))
 
     def recreateMarkers(self):
+        #s = time.clock()
         try:
             if self.plugins:
                 plugin = self.plugins.getPlugin('vehicles')
@@ -186,6 +199,7 @@ class VehicleMarkers(object):
                         plugin.addVehicleInfo(vInfo, arenaDP)
         except Exception, ex:
             err(traceback.format_exc())
+        #debug('vm:recreateMarkers: {:>8.3f} s'.format(time.clock() - s))
 
 g_markers = VehicleMarkers()
 

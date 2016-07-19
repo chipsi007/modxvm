@@ -60,6 +60,20 @@ package com.xvm
             _instance.dispatchEvent(e);
         }
 
+        // SWF Profiler
+
+        public static function swfProfilerBegin(name:String):void
+        {
+            if (Config.IS_DEVELOPMENT)
+                Xfw.cmd(XvmCommandsInternal.XVM_PROFILER_COMMAND_BEGIN, Logger.counterPrefix + ":" + name);
+        }
+
+        public static function swfProfilerEnd(name:String):void
+        {
+            if (Config.IS_DEVELOPMENT)
+                Xfw.cmd(XvmCommandsInternal.XVM_PROFILER_COMMAND_END, Logger.counterPrefix + ":" + name);
+        }
+
         // initialization
 
         private static var _instance:Xvm;
@@ -81,26 +95,24 @@ package com.xvm
         }
 
         private function onSetConfig(config_data:Object, lang_data:Object, vehInfo_data:Array,
-            networkServicesSettings:Object, IS_DEVELOPMENT:Boolean):Object
+            networkServicesSettings:Object, IS_DEVELOPMENT:Boolean):void
         {
             //Logger.add("onSetConfig");
             //Logger.addObject(config_data, 5);
             //Logger.addObject(lang_data, 3);
             //Logger.addObject(vehInfo_data, 3);
+            Config.IS_DEVELOPMENT = IS_DEVELOPMENT;
             Config.config = ObjectConverter.convertData(config_data, CConfig);
             Locale.setupLanguage(lang_data);
             VehicleInfo.setVehicleInfoData(vehInfo_data);
             Config.networkServicesSettings = new NetworkServicesSettings(networkServicesSettings);
-            Config.IS_DEVELOPMENT = IS_DEVELOPMENT;
             Xvm.dispatchEvent(new Event(Defines.XVM_EVENT_CONFIG_LOADED));
-            return null;
         }
 
-        private function onUpdateReserve(vehInfo_data:Array):Object
+        private function onUpdateReserve(vehInfo_data:Array):void
         {
             Logger.add("onUpdateReserve");
             VehicleInfo.setVehicleInfoData(vehInfo_data);
-            return null;
         }
     }
 }

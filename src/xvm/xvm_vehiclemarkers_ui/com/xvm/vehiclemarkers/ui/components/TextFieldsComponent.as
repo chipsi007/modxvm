@@ -18,6 +18,7 @@ package com.xvm.vehiclemarkers.ui.components
     {
         private var extraFieldsHolders:Object;
         private var isAlly:Boolean;
+        private var lastState:String;
         private var currentPlayerState:VOPlayerState;
 
         public function TextFieldsComponent(marker:XvmVehicleMarker)
@@ -29,18 +30,12 @@ package com.xvm.vehiclemarkers.ui.components
         {
             var playerState:VOPlayerState = e.playerState;
             isAlly = playerState.isAlly;
+            lastState = null;
             extraFieldsHolders = { };
-            for each (var state:String in XvmVehicleMarkerState.getAllStates(isAlly))
-            {
-                var cfg:CMarkers4 = XvmVehicleMarkerState.getConfig(state);
-                var extraFields:ExtraFields = new ExtraFields(cfg.textFields, true, getColorSchemeName, null, new Rectangle(0, 0, 140, 100), null, TextFormatAlign.CENTER);
-                extraFieldsHolders[state] = extraFields;
-                marker.addChild(extraFields);
-            }
             super.init(e);
         }
 
-        override public function dispose():void
+        override protected function onDispose():void
         {
             if (extraFieldsHolders != null)
             {
@@ -50,7 +45,7 @@ package com.xvm.vehiclemarkers.ui.components
                 }
                 extraFieldsHolders = null;
             }
-            super.dispose();
+            super.onDispose();
         }
 
         override protected function update(e:XvmVehicleMarkerEvent):void
@@ -62,23 +57,38 @@ package com.xvm.vehiclemarkers.ui.components
                 var playerState:VOPlayerState = e.playerState;
                 currentPlayerState = playerState;
                 var currentState:String = XvmVehicleMarkerState.getCurrentState(playerState, e.exInfo);
-                for each (var state:String in XvmVehicleMarkerState.getAllStates(isAlly))
+                var extraFields:ExtraFields = extraFieldsHolders[lastState];
+                if (lastState != currentState)
                 {
-                    var extraFields:ExtraFields = extraFieldsHolders[state];
-                    if (state != currentState)
+                    if (extraFields != null)
                     {
                         extraFields.visible = false;
                     }
-                    else
+                    extraFields = extraFieldsHolders[currentState];
+                    if (extraFields == null)
                     {
-                        extraFields.visible = true;
-                        extraFields.update(playerState, 0, 0, -15.5); // -15.5 is used for configs compatibility
+                        extraFields = initState(currentState, playerState);
+                        var exState:String = XvmVehicleMarkerState.getCurrentState(playerState, !e.exInfo);
+                        initState(exState, playerState);
                     }
+                    extraFields.visible = true;
+                    lastState = currentState;
                 }
+                extraFields.update(playerState, 0, 0, -15.5); // -15.5 is used for configs compatibility
             }
         }
 
         // PRIVATE
+
+        private function initState(state:String, playerState:VOPlayerState):ExtraFields
+        {
+            var cfg:CMarkers4 = XvmVehicleMarkerState.getConfig(state);
+            var extraFields:ExtraFields = new ExtraFields(cfg.textFields, true, getColorSchemeName, null, new Rectangle(0, 0, 140, 100), null,
+                TextFormatAlign.CENTER, CTextFormat.GetDefaultConfigForMarkers());
+            extraFieldsHolders[state] = extraFields;
+            marker.addChild(extraFields);
+            return extraFields;
+        }
 
         // from net.wg.gui.battle.views.stats.constants::PlayerStatusSchemeName
         public static const NORMAL:String = "normal";
@@ -102,6 +112,7 @@ package com.xvm.vehiclemarkers.ui.components
             {
                 schemeName += OFFLINE_POSTFIX;
             }
+            //Logger.add("getColorSchemeName: " + schemeName);
             return schemeName;
         }
     }

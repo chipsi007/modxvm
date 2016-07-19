@@ -5,9 +5,11 @@
 package com.xvm.battle
 {
     import com.xfw.*;
+    import com.xfw.events.*;
     import com.xvm.*;
-    import com.xvm.battle.events.HitLogEvent;
+    import com.xvm.battle.events.*;
     import com.xvm.battle.vo.*;
+    import com.xvm.types.cfg.*;
 
     public class BattleState // implements IBattleComponentDataController
     {
@@ -107,7 +109,8 @@ package com.xvm.battle
         function BattleState()
         {
             Xfw.addCommandListener(BattleCommands.AS_UPDATE_PLAYER_STATE, onUpdatePlayerState);
-            Xfw.addCommandListener(BattleCommands.AS_UPDATE_HITLOG_DATA, onUpdateHitLogDataHandler);
+            Xfw.addCommandListener(BattleCommands.AS_UPDATE_DEVICE_STATE, onUpdateDeviceState);
+            Xfw.addCommandListener(BattleCommands.AS_UPDATE_HITLOG_DATA, onUpdateHitlogData);
         }
 
         // IBattleComponentDataController implementation
@@ -137,6 +140,7 @@ package com.xvm.battle
 
         public function setArenaInfo(data:Object):void
         {
+            Xvm.swfProfilerBegin("BattleState.setArenaInfo()");
             try
             {
                 _arenaInfoVO = new VOArenaInfo(data);
@@ -144,6 +148,10 @@ package com.xvm.battle
             catch (ex:Error)
             {
                 Logger.err(ex);
+            }
+            finally
+            {
+                Xvm.swfProfilerEnd("BattleState.setArenaInfo()");
             }
         }
 
@@ -177,15 +185,24 @@ package com.xvm.battle
 
         public function setVehiclesData(data:Object):void
         {
-            //Logger.addObject(data, 1, "setVehiclesData");
+            Xvm.swfProfilerBegin("BattleState.setVehiclesData()");
             try
             {
-                _playersDataVO = new VOPlayersData(data);
-                Macros.RegisterPlayersData(BattleMacros.RegisterPlayersData);
+                if (_playersDataVO == null)
+                {
+                    _playersDataVO = new VOPlayersData();
+                }
+                _playersDataVO.setVehiclesData(data);
+                _playersDataVO.dispatchEvents();
+                BattleMacros.RegisterPlayersData();
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
+            }
+            finally
+            {
+                Xvm.swfProfilerEnd("BattleState.setVehiclesData()");
             }
         }
 
@@ -229,14 +246,20 @@ package com.xvm.battle
 
         public function updatePlayerStatus(data:Object):void
         {
+            Xvm.swfProfilerBegin("BattleState.updatePlayerStatus()");
             //Logger.addObject(data, 1, "updatePlayerStatus");
             try
             {
                 _playersDataVO.updatePlayerState(data.vehicleID, { playerStatus: data.status });
+                _playersDataVO.dispatchEvents();
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
+            }
+            finally
+            {
+                Xvm.swfProfilerEnd("BattleState.updatePlayerStatus()");
             }
         }
 
@@ -254,6 +277,7 @@ package com.xvm.battle
 
         public function updateVehiclesInfo(data:Object):void
         {
+            Xvm.swfProfilerBegin("BattleState.updateVehiclesInfo()");
             //Logger.addObject(data, 1, "updateVehiclesInfo");
             try
             {
@@ -269,15 +293,21 @@ package com.xvm.battle
                     _playersDataVO.updateVehicleInfos(data.leftVehicleInfos);
                 if (data.rightVehicleInfos)
                     _playersDataVO.updateVehicleInfos(data.rightVehicleInfos);
+                _playersDataVO.dispatchEvents();
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
             }
+            finally
+            {
+                Xvm.swfProfilerEnd("BattleState.updateVehiclesInfo()");
+            }
         }
 
         public function updateVehiclesStats(data:Object):void
         {
+            Xvm.swfProfilerBegin("BattleState.updateVehiclesStats()");
             //Logger.addObject(data, 1, "updateVehiclesStats");
             try
             {
@@ -293,15 +323,21 @@ package com.xvm.battle
                 {
                     _playersDataVO.updateTotalStats(data.totalStats);
                 }
+                _playersDataVO.dispatchEvents();
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
             }
+            finally
+            {
+                Xvm.swfProfilerEnd("BattleState.updateVehiclesStats()");
+            }
         }
 
         public function updateVehicleStatus(data:Object):void
         {
+            Xvm.swfProfilerBegin("BattleState.updateVehicleStatus()");
             //Logger.addObject(data, 1, "updateVehicleStatus");
             try
             {
@@ -316,17 +352,23 @@ package com.xvm.battle
                     _playersDataVO.leftVehiclesIDs = Vector.<Number>(data.leftVehiclesIDs || data.leftItemsIDs);
                 if (data.totalStats)
                     _playersDataVO.updateTotalStats(data.totalStats);
+                _playersDataVO.dispatchEvents();
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
             }
+            finally
+            {
+                Xvm.swfProfilerEnd("BattleState.updateVehicleStatus()");
+            }
         }
 
-        // XVM calls
+        // XVM events
 
-        private function onUpdatePlayerState(vehicleID:Number, data:Object):Object
+        private function onUpdatePlayerState(vehicleID:Number, data:Object):void
         {
+            Xvm.swfProfilerBegin("BattleState.onUpdatePlayerState()");
             try
             {
                 var playerState:VOPlayerState = get(vehicleID);
@@ -339,10 +381,36 @@ package com.xvm.battle
             {
                 Logger.err(ex);
             }
-            return null;
+            finally
+            {
+                Xvm.swfProfilerEnd("BattleState.onUpdatePlayerState()");
+            }
         }
 
-        private function onUpdateHitLogDataHandler(vehicleID:Number, attackReasonID:Number, newHealth:Number):Object
+        private function onUpdateDeviceState(moduleName:String, state:String, state2:String):void
+        {
+            try
+            {
+                switch (state)
+                {
+                    case "critical":
+                        Xvm.dispatchEvent(new StringEvent(PlayerStateEvent.MODULE_CRITICAL, moduleName));
+                        break;
+                    case "destroyed":
+                        Xvm.dispatchEvent(new StringEvent(PlayerStateEvent.MODULE_DESTROYED, moduleName));
+                        break;
+                    case "repaired":
+                        Xvm.dispatchEvent(new StringEvent(PlayerStateEvent.MODULE_REPAIRED, moduleName));
+                        break;
+                }
+            }
+            catch (ex:Error)
+            {
+                Logger.err(ex);
+            }
+        }
+
+        private function onUpdateHitlogData(vehicleID:Number, attackReasonID:Number, newHealth:Number):void
         {
             var targetPlayerState:VOPlayerState = get(vehicleID);
             if(targetPlayerState) {

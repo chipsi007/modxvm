@@ -32,8 +32,8 @@ class XVM_PATH(object):
     XVM_IMG_CFG_ROOT = "../configs/xvm/"
 
 class XVM_EVENT(object):
-    CONFIG_LOADED = 'xvm.config_loaded'
     RELOAD_CONFIG = 'xvm.reload_config'
+    CONFIG_LOADED = 'xvm.config_loaded'
     SYSTEM_MESSAGE = 'xvm.system_message'
     XMQP_CONNECTED = 'xvm.xmqp_connected'
     XMQP_MESSAGE = 'xvm.xmqp_message'
@@ -43,11 +43,7 @@ class XVM_EVENT(object):
 class XVM_COMMAND(object):
     REQUEST_CONFIG = "xvm.request_config"
     GET_PLAYER_NAME = "xvm.get_player_name"
-    GET_BATTLE_LEVEL = "xvm.get_battle_level"
-    GET_BATTLE_TYPE = "xvm.get_battle_type"
-    GET_MAP_SIZE = "xvm.get_map_size"
     GET_CLAN_ICON = "xvm.get_clan_icon"
-    GET_MY_VEHCD = "xvm.get_my_vehcd"
     GET_XTDB_DATA = "xvm.get_xtdb_data"
     REQUEST_DOSSIER = "xvm.request_dossier"
     GET_SVC_SETTINGS = "xvm.get_svc_settings"
@@ -59,6 +55,7 @@ class XVM_COMMAND(object):
     SAVE_SETTINGS = "xvm.save_settings"
     MINIMAP_CLICK = "xvm.minimap_click"
     AS_ON_KEY_EVENT = "xvm.as.on_key_event"
+    AS_ON_UPDATE_STAGE = "xvm.as.on_update_stage"
     AS_DOSSIER = "xvm.as.dossier"
     AS_L10N = "xvm.as.l10n"
     AS_SET_CONFIG = "xvm.as.set_config"
@@ -69,6 +66,9 @@ class XVM_COMMAND(object):
     AS_UPDATE_CURRENT_VEHICLE = "xvm.as.update_current_vehicle"
     AS_ON_CLAN_ICON_LOADED = "xvm.as.on_clan_icon_loaded"
 
+class XVM_PROFILER_COMMAND(object):
+    BEGIN = "xvm.profiler.begin"
+    END = "xvm.profiler.end"
 
 # Teams
 

@@ -29,6 +29,14 @@ package com.xvm.types.cfg
         public var shadow:CShadow;
         public var highlight:*;
 
+        // for BattleLabels
+        public var updateEvent:String;
+        public var hotKeyCode:*;
+        public var onHold:*;
+        public var visibleOnHotKey:*;
+        public var screenHAlign:String;
+        public var screenVAlign:String;
+
         // legacy configs
         public function set w(value:*):void
         {
@@ -62,6 +70,12 @@ package com.xvm.types.cfg
             cloned.textFormat = textFormat ? textFormat.clone() : null;
             cloned.shadow = shadow ? shadow.clone() : null;
             cloned.highlight = highlight;
+            cloned.updateEvent = updateEvent;
+            cloned.hotKeyCode = hotKeyCode;
+            cloned.onHold = onHold;
+            cloned.visibleOnHotKey = visibleOnHotKey;
+            cloned.screenHAlign = screenHAlign;
+            cloned.screenVAlign = screenVAlign;
             return cloned;
         }
     }
