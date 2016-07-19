@@ -5,6 +5,7 @@
 package com.xvm.types.cfg
 {
     import com.xfw.*;
+    import flash.text.*;
 
     public dynamic class CTextFormat extends Object implements ICloneable
     {
@@ -39,6 +40,36 @@ package com.xvm.types.cfg
             cloned.leading = leading;
             cloned.tabStops = tabStops ? tabStops.concat() : null;
             return cloned;
+        }
+
+        private static var _defaultConfigForMarkers:CTextFormat = null;
+        public static function GetDefaultConfigForMarkers():CTextFormat
+        {
+            if (_defaultConfigForMarkers == null)
+            {
+                _defaultConfigForMarkers = new CTextFormat();
+                _defaultConfigForMarkers.enabled = true;
+                _defaultConfigForMarkers.font = "$FieldFont";
+                _defaultConfigForMarkers.size = 13;
+                _defaultConfigForMarkers.color = "{{c:system}}";
+                _defaultConfigForMarkers.align = TextFormatAlign.CENTER;
+            }
+            return _defaultConfigForMarkers;
+        }
+
+        private static var _defaultConfigForBattleLabels:CTextFormat = null;
+        public static function GetDefaultConfigForBattleLabels():CTextFormat
+        {
+            if (_defaultConfigForBattleLabels == null)
+            {
+                _defaultConfigForBattleLabels = new CTextFormat();
+                _defaultConfigForBattleLabels.enabled = true;
+                _defaultConfigForBattleLabels.font = "$FieldFont";
+                _defaultConfigForBattleLabels.size = 13;
+                _defaultConfigForBattleLabels.color = 0xFFFFFF;
+                _defaultConfigForBattleLabels.align = TextFormatAlign.LEFT;
+            }
+            return _defaultConfigForBattleLabels;
         }
     }
 }

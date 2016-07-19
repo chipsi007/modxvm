@@ -68,20 +68,22 @@ package com.xvm.battle.vo
         // private
         private var playerNameToVehicleIDMap:Dictionary;
 
-        public function VOPlayersData(data:Object)
+        public function VOPlayersData()
         {
             playerStates = new Dictionary();
             playerNameToVehicleIDMap = new Dictionary();
+        }
+
+        public function setVehiclesData(data:Object):void
+        {
             var value:Object;
             for each (value in data.leftVehicleInfos || data.leftItems)
             {
-                playerStates[value.vehicleID] = new VOPlayerState(value);
-                playerNameToVehicleIDMap[value.playerName] = value.vehicleID;
+                addOrUpdatePlayerState(value);
             }
             for each (value in data.rightVehicleInfos || data.rightItems)
             {
-                playerStates[value.vehicleID] = new VOPlayerState(value);
-                playerNameToVehicleIDMap[value.playerName] = value.vehicleID;
+                addOrUpdatePlayerState(value);
             }
             leftCorrelationIDs = Vector.<Number>(data.leftCorrelationIDs);
             rightCorrelationIDs = Vector.<Number>(data.rightCorrelationIDs);
@@ -104,7 +106,7 @@ package com.xvm.battle.vo
             var playerState:VOPlayerState = get(vehicleID);
             if (playerState)
             {
-                playerState.update(data);
+                playerState.updateNoEvent(data);
             }
         }
 
@@ -112,15 +114,7 @@ package com.xvm.battle.vo
         {
             for each (var value:Object in data)
             {
-                if (!playerStates.hasOwnProperty(value.vehicleID))
-                {
-                    playerStates[value.vehicleID] = new VOPlayerState(value);
-                    playerNameToVehicleIDMap[value.playerName] = value.vehicleID;
-                }
-                else
-                {
-                    (playerStates[value.vehicleID] as VOPlayerState).update(value);
-                }
+                addOrUpdatePlayerState(value);
             }
         }
 
@@ -131,7 +125,9 @@ package com.xvm.battle.vo
                 var playerState:VOPlayerState = get(vehicleStats.vehicleID);
                 if (playerState)
                 {
-                    playerState.frags = vehicleStats.frags;
+                    playerState.updateNoEvent({
+                       frags: vehicleStats.frags
+                    });
                 }
             }
         }
@@ -142,7 +138,29 @@ package com.xvm.battle.vo
             rightScope = data.rightScope;
         }
 
+        public function dispatchEvents():void
+        {
+            for each (var playerState:VOPlayerState in playerStates)
+            {
+                playerState.dispatchEvents();
+            }
+        }
+
         // PRIVATE
+
+        private function addOrUpdatePlayerState(value:Object):void
+        {
+            if (!playerStates.hasOwnProperty(value.vehicleID))
+            {
+                var playerState:VOPlayerState = new VOPlayerState(value);
+                playerStates[value.vehicleID] = playerState;
+                playerNameToVehicleIDMap[value.playerName] = value.vehicleID;
+            }
+            else
+            {
+                (playerStates[value.vehicleID] as VOPlayerState).updateNoEvent(value);
+            }
+        }
 
         private function updateVehiclesPositionsAndTeam(ids:Vector.<Number>, isAlly:Boolean):void
         {
@@ -153,8 +171,10 @@ package com.xvm.battle.vo
                 playerState = get(ids[i]);
                 if (playerState)
                 {
-                    playerState.isAlly = isAlly;
-                    playerState.position = i + 1;
+                    playerState.updateNoEvent({
+                        isAlly: isAlly,
+                        position: i + 1
+                    });
                 }
             }
         }

@@ -22,6 +22,7 @@ package com.xvm.battle.teamBasesPanel
             //Logger.add("UI_teamBasesPanel()");
             super();
             Xvm.addEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
+            Xfw.addCommandListener(XvmCommands.AS_ON_UPDATE_STAGE, onUpdateStage);
         }
 
         override protected function configUI():void
@@ -38,10 +39,28 @@ package com.xvm.battle.teamBasesPanel
             }
         }
 
+        override protected function onDispose():void
+        {
+            Xvm.removeEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
+            Xfw.removeCommandListener(XvmCommands.AS_ON_UPDATE_STAGE, onUpdateStage);
+            super.onDispose();
+        }
+
         // PRIVATE
 
-        private function onConfigLoaded(e:Event):Object
+        private function onConfigLoaded(e:Event):void
         {
+            update();
+        }
+
+        private function onUpdateStage():void
+        {
+            update();
+        }
+
+        private function update():void
+        {
+            //Xvm.swfProfilerBegin("UI_teamBasesPanel.onConfigLoaded()");
             try
             {
                 if (Macros.FormatBooleanGlobal(Config.config.captureBar.enabled, true))
@@ -63,7 +82,7 @@ package com.xvm.battle.teamBasesPanel
             {
                 Logger.err(ex);
             }
-            return null;
+            //Xvm.swfProfilerEnd("UI_teamBasesPanel.onConfigLoaded()");
         }
     }
 }

@@ -23,6 +23,7 @@ package com.xvm.battle
     public class BattleXvmView extends XvmViewBase
     {
         private static var _battlePageRef:WeakReference;
+        private var hotkeys_cfg:CHotkeys;
 
         public static function get battlePage():BattlePage
         {
@@ -49,13 +50,12 @@ package com.xvm.battle
         public override function onAfterPopulate(e:LifeCycleEvent):void
         {
             //Logger.add("onAfterPopulate: " + view.as_alias);
+            //Xvm.swfProfilerBegin("BattleXvmView.onAfterPopulate()");
             super.onAfterPopulate(e);
             try
             {
                 Xvm.addEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
                 Xfw.addCommandListener(XvmCommands.AS_ON_KEY_EVENT, onKeyEvent);
-
-                Stat.instance.addEventListener(Stat.COMPLETE_BATTLE, onStatLoaded);
 
                 onConfigLoaded(null);
 
@@ -82,10 +82,12 @@ package com.xvm.battle
             {
                 Logger.err(ex);
             }
+            //Xvm.swfProfilerEnd("BattleXvmView.onAfterPopulate()");
         }
 
         override public function onBeforeDispose(e:LifeCycleEvent):void
         {
+            //Xvm.swfProfilerBegin("BattleXvmView.onBeforeDispose()");
             try
             {
                 Xvm.removeEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
@@ -116,19 +118,17 @@ package com.xvm.battle
                 Logger.err(ex);
             }
             super.onBeforeDispose(e);
-        }
-
-        private function onStatLoaded(e:ObjectEvent):void
-        {
-            //Logger.add("onStatLoaded");
-            onConfigLoaded(null);
+            //Xvm.swfProfilerEnd("BattleXvmView.onBeforeDispose()");
         }
 
         public override function onConfigLoaded(e:Event):void
         {
             //Logger.add("BattleXvmView.onConfigLoaded()");
+            Xvm.swfProfilerBegin("BattleXvmView.onConfigLoaded()");
             try
             {
+                super.onConfigLoaded(e);
+                hotkeys_cfg = Config.config.hotkeys;
                 Xfw.cmd(BattleCommands.BATTLE_CTRL_SET_VEHICLE_DATA);
                 page.updateStage(App.appWidth, App.appHeight);
             }
@@ -136,20 +136,19 @@ package com.xvm.battle
             {
                 Logger.err(ex);
             }
+            Xvm.swfProfilerEnd("BattleXvmView.onConfigLoaded()");
         }
 
         // PRIVATE
 
-        private function onKeyEvent(key:Number, isDown:Boolean):Object
+        private function onKeyEvent(key:Number, isDown:Boolean):void
         {
-            var cfg:CHotkeys = Config.config.hotkeys;
-            if (cfg.minimapZoom.enabled && cfg.minimapZoom.keyCode == key)
+            if (hotkeys_cfg.minimapZoom.enabled && hotkeys_cfg.minimapZoom.keyCode == key)
                 Xvm.dispatchEvent(new ObjectEvent(BattleEvents.MINIMAP_ZOOM, { isDown: isDown }));
-            if (cfg.minimapAltMode.enabled && cfg.minimapAltMode.keyCode == key)
+            if (hotkeys_cfg.minimapAltMode.enabled && hotkeys_cfg.minimapAltMode.keyCode == key)
                 Xvm.dispatchEvent(new ObjectEvent(BattleEvents.MINIMAP_ALT_MODE, { isDown: isDown } ));
-            if (cfg.playersPanelAltMode.enabled && cfg.playersPanelAltMode.keyCode == key)
+            if (hotkeys_cfg.playersPanelAltMode.enabled && hotkeys_cfg.playersPanelAltMode.keyCode == key)
                 Xvm.dispatchEvent(new ObjectEvent(BattleEvents.PLAYERS_PANEL_ALT_MODE, { isDown: isDown } ));
-            return null;
         }
     }
 }

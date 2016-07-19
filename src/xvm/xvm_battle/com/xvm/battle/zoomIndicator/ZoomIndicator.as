@@ -7,7 +7,7 @@ package com.xvm.battle.zoomIndicator
     import com.xfw.*;
     import com.xvm.*;
     import com.xvm.battle.*;
-    import com.xvm.extraFields.TextExtraField;
+    import com.xvm.extraFields.*;
     import com.xvm.types.cfg.*;
     import flash.events.*;
     import flash.text.*;
@@ -32,7 +32,8 @@ package com.xvm.battle.zoomIndicator
             Xfw.addCommandListener(BattleCommands.AS_SNIPER_CAMERA, onSniperCamera);
             Xfw.addCommandListener(BattleCommands.AS_AIM_OFFSET_UPDATE, onAimOffsetUpdate);
             Xvm.addEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
-            onConfigLoaded(null);
+            Xfw.addCommandListener(XvmCommands.AS_ON_UPDATE_STAGE, onUpdateStage);
+            setup();
         }
 
         override protected function onDispose():void
@@ -40,6 +41,7 @@ package com.xvm.battle.zoomIndicator
             Xvm.removeEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
             Xfw.removeCommandListener(BattleCommands.AS_SNIPER_CAMERA, onSniperCamera);
             Xfw.removeCommandListener(BattleCommands.AS_AIM_OFFSET_UPDATE, onAimOffsetUpdate);
+            Xfw.removeCommandListener(XvmCommands.AS_ON_UPDATE_STAGE, onUpdateStage);
             cfg = null;
             indicator = null;
             super.onDispose();
@@ -49,6 +51,18 @@ package com.xvm.battle.zoomIndicator
 
         private function onConfigLoaded(e:Event):void
         {
+            setup();
+        }
+
+        private function onUpdateStage():void
+        {
+            if (cfg && cfg.enabled)
+                invalidate(InvalidationType.POSITION);
+        }
+
+        private function setup():void
+        {
+            //Xvm.swfProfilerBegin("ZoomIndicator.setup()");
             try
             {
                 visible = false;
@@ -67,6 +81,7 @@ package com.xvm.battle.zoomIndicator
             {
                 Logger.err(ex);
             }
+            //Xvm.swfProfilerEnd("ZoomIndicator.setup()");
         }
 
         private function onSniperCamera(enable:Boolean, zoom:int):void

@@ -39,7 +39,7 @@ package com.xvm.lobby
         private static const _views:Object =
         {
             "login": [ LoginLayoutXvmView, OnlineLoginXvmView, PingLoginXvmView/*, WidgetsXvmView*/ ],
-            "lobby": [ ClockXvmView, LimitsXvmView, OnlineLobbyXvmView, PingLobbyXvmView/*, WidgetsXvmView*/ ],
+            "lobby": [ LobbyXvmView, ClockXvmView, LimitsXvmView, OnlineLobbyXvmView, PingLobbyXvmView/*, WidgetsXvmView*/ ],
             "hangar": [ CrewXvmView, HangarXvmView ],
             "battleLoading": [ BattleLoadingXvmView ],
             "battleResults": [ BattleResultsXvmView ],
@@ -70,9 +70,8 @@ package com.xvm.lobby
             // init pinger as earlier as possible
             PingServers.initFeature(Config.config.login.pingServers.enabled || Config.config.hangar.pingServers.enabled);
 
-            Macros.RegisterXvmServicesMacrosData();
-            Macros.RegisterVehiclesMacros(LobbyMacros.RegisterVehiclesMacros);
-            Macros.RegisterClockMacros(LobbyMacros.RegisterClockMacros);
+            LobbyMacros.RegisterVehiclesMacros();
+            LobbyMacros.RegisterClockMacros();
         }
 
         public override function get views():Object

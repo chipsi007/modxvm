@@ -5,6 +5,8 @@
 {
   "def": {
     /**
+      TODO: update format description to ExtraFields format.
+
       Set of formats fields available for configuring (default value applyed, when parameter is not defined):
       Набор форматов полей доступных для настройки (значение по-умолчанию применяется, если параметр не указан):
      ┌────────────────────────────┬──────────────────────────────────────────────────────────────────────────
@@ -13,18 +15,23 @@
      │ "enabled"                  │ enable/disable field creation: true or false (default: false)
      │                            │ включить/отключить создание полей: true or false (по-умолчанию: false)
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
-     │ "updateEvent"              │ event on which field updates, use with dynamic macros; to disable define null value or delete parameter;
-     │                            │ allowed events: "ON_BATTLE_STATE_CHANGED", "ON_PLAYERS_HP_CHANGED", "ON_VEHICLE_DESTROYED", "ON_CURRENT_VEHICLE_DESTROYED", "ON_MODULE_DESTROYED", "ON_MODULE_REPAIRED"
-     │                            │ событие по которому обновляется поле, используйте динамические макросы; для отключения используйте значение null или удалите параметр;
-     │                            │ доступные события: "ON_BATTLE_STATE_CHANGED", "ON_PLAYERS_HP_CHANGED", "ON_VEHICLE_DESTROYED", "ON_CURRENT_VEHICLE_DESTROYED", "ON_MODULE_DESTROYED", "ON_MODULE_REPAIRED"
+     │ "updateEvent"              │ events on which field updates, use with dynamic macros; to disable define null value or delete parameter;
+     │                            │ allowed events: "ON_BATTLE_STATE_CHANGED", "ON_PLAYERS_HP_CHANGED", "ON_VEHICLE_DESTROYED", "ON_CURRENT_VEHICLE_DESTROYED", "ON_MODULE_CRITICAL", "ON_MODULE_DESTROYED", "ON_MODULE_REPAIRED"
+     │                            │ multiple events separated by comma
+     │                            │ события по которому обновляется поле, используйте динамические макросы; для отключения используйте значение null или удалите параметр;
+     │                            │ доступные события: "ON_BATTLE_STATE_CHANGED", "ON_PLAYERS_HP_CHANGED", "ON_VEHICLE_DESTROYED", "ON_CURRENT_VEHICLE_DESTROYED", "ON_MODULE_CRITICAL", "ON_MODULE_DESTROYED", "ON_MODULE_REPAIRED"
+     │                            │ несколько событий разделяются запятой
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
      │ "hotKeyCode"               │ keyboard key code (see list in hotkeys.xc), when pressed - switches text field to show and apply configured html in "format", or hide;
      │                            │ when defined, text field will not be shown until key is pressed, to disable define null value or delete parameter
      │                            │ горячие клавиши клавиатуры (список в hotkeys.xc), при нажатии - выводится текстовое поле и применяются параметры html в "format", или скрывается поле;
      │                            │ текстовое поле не будет отображаться, пока не будет нажата клавиша, для отключения используйте значение null или удалите параметр;
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
-     │ "onHold"                   │ take action by key click; true - while key is remains pressed (default: false)
+     │ "onHold"                   │ false - take action by key click; true - while key is remains pressed (default: false)
      │                            │ false - производит действие по разовому нажатию клавиши; true - по удержанию (по-умолчанию: false)
+     ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
+     │ "visibleOnHotKey"          │ true - field visible on hot key pressed; false - vice versa (default: true)
+     │                            │ true - поле отображается при нажатии горячей клавиши; false - наоборот (по-умолчанию: true)
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
      │ "x"                        │ x position (macros allowed) (default: 0)
      │                            │ положение по оси x (доступно использование макросов) (по-умолчанию: 0)
@@ -50,23 +57,26 @@
      │ "scaleY"                   │ scaling axis Y (%, use negative values for mirroring) (default: 100)
      │                            │ масштабирование по оси y (%, используйте отрицательные значения для зеркального отображения) (по-умолчанию: 100)
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
-     │ "autoSize"                 │ controls automatic sizing and alignment of text fields ("none", "left" [default], "right", "center")
-     │                            │ управление автоматической настройкой размеров и выравниванием текстовых полей ("none", "left" [по-умолчанию], "right", "center")
-     ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
      │ "align"                    │ horizontal alignment ("left" [default], "center", "right")
      │                            │ горизонтальное выравнивание ("left" [по-умолчанию], "center", "right")
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
      │ "valign"                   │ vertical alignment ("top" [default], "center", "bottom")
      │                            │ вертикальное выравнивание ("top" [по-умолчанию], "center", "bottom")
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
-     │ "antiAliasType"            │ sets anti-aliasing to advanced anti-aliasing ("advanced" [default] or "normal")
-     │                            │ задает использование расширенных возможностей сглаживания ("advanced" [по-умолчанию] or "normal")
+TODO:     │ "screenHAlign"             │ horizontal alignment ("left" [default], "center", "right")
+     │                            │ горизонтальное выравнивание ("left" [по-умолчанию], "center", "right")
+     ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
+TODO:     │ "screenVAlign"             │ vertical alignment ("top" [default], "center", "bottom")
+     │                            │ вертикальное выравнивание ("top" [по-умолчанию], "center", "bottom")
+     ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
+     │ "borderColor"              │ if set, draw border with specified color (macros allowed) (default: null)
+     │                            │ окрашивает границу в заданный цвет, если установлен (доступно использование макросов) (по-умолчанию: null)
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
      │ "bgColor"                  │ if set, draw background with specified color (macros allowed) (default: null)
      │                            │ окрашивает фон в заданный цвет, если установлен (доступно использование макросов) (по-умолчанию: null)
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
-     │ "borderColor"              │ if set, draw border with specified color (macros allowed) (default: null)
-     │                            │ окрашивает границу в заданный цвет, если установлен (доступно использование макросов) (по-умолчанию: null)
+     │ "antiAliasType"            │ sets anti-aliasing to advanced anti-aliasing ("advanced" [default] or "normal")
+     │                            │ задает использование расширенных возможностей сглаживания ("advanced" [по-умолчанию] or "normal")
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
      │ "shadow"                   │ shadow settings, defaults:
      │                            │ настройки тени, значение по умолчанию:
@@ -92,12 +102,12 @@
      │                            │ интенсивность тени (0.0 .. 255.0) (по-умолчанию: 1)
 quality, inner, knockout, hideObject
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
-     │ "currentFieldDefaultStyle" │ it applies global style to HTML in "format"; note, that defined font attributes in "format" override those in "currentFieldDefaultStyle"
-     │                            │ применяет глобальный стиль HTML в "format"; обратите внимание, что определенные атрибуты шрифта в "format" переопределяют "currentFieldDefaultStyle"
+     │ "textFormat"               │ it applies global style to HTML in "format"; note, that defined font attributes in "format" override those in "textFormat"
+     │                            │ применяет глобальный стиль HTML в "format"; обратите внимание, что определенные атрибуты шрифта в "format" переопределяют "textFormat"
      │                            │ field default styles, defaults:
      │                            │ стандартный стиль поля, значение по умолчанию:
      │                            │
-     │                            │ "currentFieldDefaultStyle": { "name": "$FieldFont", "color": "0xFFFFFF", "size": 12, "align": "left", "bold": false, "italic": false, "underline": false, "display": "block", "leading": 0, "marginLeft": 0, "marginRight": 0 },
+     │                            │ "textFormat": { "name": "$FieldFont", "color": "0xFFFFFF", "size": 12, "align": "left", "bold": false, "italic": false, "underline": false, "display": "block", "leading": 0, "marginLeft": 0, "marginRight": 0 },
      │----------------------------│--------------------------------------------------------------------------
      │ "name"                     │ font name (default: "$FieldFont")
      │                            │ наименование шрифта (по-умолчанию: "$FieldFont")
@@ -132,6 +142,9 @@ quality, inner, knockout, hideObject
      │ "marginRight"              │ indent left, similarly (<textformat rightMargin='XX'>...</textformat>) (default: 0)
      │                            │ отступ справа, аналогично (<textformat rightMargin='XX'>...</textformat>) (по-умолчанию: 0)
      ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
+     │ "src"                      │ display image
+     │                            │ отображение изображения
+     ├────────────────────────────┼──────────────────────────────────────────────────────────────────────────
      │ "format"                   │ displayed text field data (HTML allowed, macros allowed) (default: "")
      │                            │ отображаемые данные в текстовых полях (доступно использование HTML и макросов) (по-умолчанию: "")
      └────────────────────────────┴──────────────────────────────────────────────────────────────────────────
@@ -143,10 +156,9 @@ quality, inner, knockout, hideObject
       "y": 2,
       "width": 50,
       "height": 20,
-      "autoSize": "left",
       "shadow": { "distance": 1, "angle": 90, "alpha": 80, "blur": 5, "strength": 1.5 },
-      "currentFieldDefaultStyle": { "color": "0xF4EFE8", "size": 15 },
-      "format": "{{xvm-stat?{{l10n:Chance to win}}: {{chancesStatic}}{{chancesStatic?&nbsp;/&nbsp;|}}{{chancesLive}}}}"
+      "textFormat": { "color": "0xF4EFE8", "size": 15 },
+      "format": "{{xvm-stat?{{l10n:Chance to win}}: {{chancesStatic}}{{chancesStatic? / |}}{{chancesLive}}}}"
     },
     "totalHP": {
       "enabled": false,
@@ -155,23 +167,21 @@ quality, inner, knockout, hideObject
       "y": 30,
       "width": 200,
       "height": 40,
-      "autoSize": "center",
-      "align": "center",
+      "screenHAlign": "right",
       "shadow": { "distance": 1, "angle": 90, "alpha": 80, "blur": 5, "strength": 1.5 },
-      "currentFieldDefaultStyle": { "color": "0xF4EFE8", "size": 18 },
+      "textFormat": { "color": "0xF4EFE8", "size": 18, "align": "right" },
       "format": "{{py:xvm.total_hp.text()}}"
     },
     "test": {
       "enabled": true,
       "y": -170,
       "width": 200,
-      "height": 50,
+      "height": 70,
       "alpha": 70,
-      "autoSize": "center",
-      "align": "center",
-      "valign": "bottom",
-      "shadow": { "distance": 1, "angle": 90, "alpha": 80, "strength": 25},
-      "currentFieldDefaultStyle": { "color": "{{battleType=1?0x00FFFF|0xFFFF00}}", "size": 25, "align": "center", "bold": true, "leading": -1, "marginLeft": 2, "marginRight": 2 },
+      "screenHAlign": "center",
+      "screenVAlign": "bottom",
+      "shadow": { "distance": 1, "angle": 90, "alpha": 80, "strength": 5},
+      "textFormat": { "color": "{{battleType=1?0x00FFFF|0xFFFF00}}", "size": 25, "align": "center", "bold": true, "leading": -1, "marginLeft": 2, "marginRight": 2 },
       "format": "This is a demo of XVM text fields on battle interface. You may disable it in battle.xc<br/> Press '<font color='#60FF00'>J</font>' hot-key to show info field"
     },
     "test2": {
@@ -181,14 +191,13 @@ quality, inner, knockout, hideObject
       "width": 310,
       "height": 50,
       "alpha": 70,
-      "autoSize": "none",
-      "align": "center",
-      "valign": "bottom",
+      "screenHAlign": "center",
+      "screenVAlign": "bottom",
       "bgColor": "0x000000",
       "borderColor": "0x101009",
       "shadow": { "distance": 1, "angle": 90, "alpha": 80, "strength": 8},
-      "currentFieldDefaultStyle": { "color": "0x60FF00", "size": 15, "leading": -20, "marginLeft": 2, "marginRight": 2},
-      "format": "<font color='#FFFFFF'><p align='center'><b>Info text field (WN8:&nbsp;<font color='{{c:wn8}}'>{{wn8}}</font>)</b></p></font><br/>Battle tier:<font color='#ff1aff'>&nbsp;{{battletier}}</font><p align='right'>My vehicle:&nbsp;<font color='#ff1aff'>{{my-vehicle}}</font>&nbsp;(<font color='{{c:t-winrate}}'>{{t-winrate%2d}}%</font>)</p>"
+      "textFormat": { "color": "0x60FF00", "size": 15, "align": "center", "marginLeft": 2, "marginRight": 2},
+      "format": "<font color='#FFFFFF'><b>Info text field (WN8: <font color='{{c:wn8}}'>{{wn8}}</font>)</b></font><br/>Battle tier:<font color='#ff1aff'> {{battletier}}</font> <p align='right'>My vehicle: <font color='#ff1aff'>{{my-vehicle}}</font> (<font color='{{c:t-winrate}}'>{{t-winrate%2d}}%</font>)</p>"
     }
   }
 }

@@ -8,12 +8,16 @@ package com.xvm.battle.battleLabels
     import com.xfw.*;
     import com.xfw.events.*;
     import com.xvm.*;
+    import com.xvm.battle.*;
     import com.xvm.battle.events.HitLogEvent;
-
-import com.xvm.extraFields.*;
+    import com.xvm.extraFields.*;
     import com.xvm.types.cfg.*;
     import flash.events.*;
+    import flash.text.*;
+    import flash.geom.*;
+    import net.wg.data.constants.*;
     import scaleform.clik.core.*;
+    import scaleform.gfx.*;
 
     public class BattleLabels extends UIComponent
     {
@@ -24,9 +28,10 @@ import com.xvm.extraFields.*;
         {
             Xvm.addEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
             Xfw.addCommandListener(XvmCommands.AS_ON_KEY_EVENT, onKeyEvent);
-            Stat.instance.addEventListener(Stat.COMPLETE_BATTLE, onStatLoaded);
+            Xfw.addCommandListener(XvmCommands.AS_ON_UPDATE_STAGE, onUpdateStage);
+            Stat.instance.addEventListener(Stat.COMPLETE_BATTLE, onStatLoaded, false, 0, true);
             Xvm.addEventListener(HitLogEvent.DAMAGE_CAUSED, onDamageCausedHandler);
-            onConfigLoaded(null);
+            createExtraFields();
         }
 
         private function onDamageCausedHandler(event:HitLogEvent):void {
@@ -37,11 +42,20 @@ import com.xvm.extraFields.*;
         {
             Xvm.removeEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
             Xfw.removeCommandListener(XvmCommands.AS_ON_KEY_EVENT, onKeyEvent);
+            Xfw.removeCommandListener(XvmCommands.AS_ON_UPDATE_STAGE, onUpdateStage);
             Xvm.removeEventListener(HitLogEvent.DAMAGE_CAUSED, onDamageCausedHandler);
-            if (_extraFields)
+            Stat.instance.removeEventListener(Stat.COMPLETE_BATTLE, onStatLoaded);
+            removeExtraFields();
+            super.onDispose();
+        }
+
+        // UIComponent
+
+        override protected function draw():void
+        {
+            if (isInvalid(InvalidationType.STATE, InvalidationType.POSITION))
             {
-                _extraFields.dispose();
-                _extraFields = null;
+                update();
             }
             if (_hitLogExtraFields)
             {
@@ -50,22 +64,44 @@ import com.xvm.extraFields.*;
                 _hitLogExtraFields = null;
             }
 
-            super.onDispose();
         }
 
         // PRIVATE
 
+        private function onConfigLoaded(e:Event):void
+        {
+            removeExtraFields();
+            createExtraFields();
+        }
+
         private function onStatLoaded(e:ObjectEvent):void
         {
-            onConfigLoaded(null);
+            invalidate(InvalidationType.STATE);
         }
 
-        public function onConfigLoaded(e:Event):void
+        private function onUpdateStage():void
+        {
+            _extraFields.updateBounds(new Rectangle(0, 0, App.appWidth, App.appHeight));
+            invalidate(InvalidationType.POSITION);
+        }
+
+        private function createExtraFields():void
         {
             try
             {
-                // TODO
-                //_extraFields = new ExtraFields(...);
+                removeExtraFields();
+                var cfg:CBattleLabels = Config.config.battleLabels;
+                _extraFields = new ExtraFields(
+                    cfg.formats,
+                    true,
+                    null,
+                    null,
+                    new Rectangle(0, 0, App.appWidth, App.appHeight),
+                    ExtraFields.LAYOUT_ROOT,
+                    TextFormatAlign.LEFT,
+                    CTextFormat.GetDefaultConfigForBattleLabels());
+                addChild(_extraFields);
+                invalidate(InvalidationType.ALL);
             }
             catch (ex:Error)
             {
@@ -73,21 +109,33 @@ import com.xvm.extraFields.*;
             }
         }
 
-        private function onKeyEvent(key:Number, isDown:Boolean):Object
+        private function removeExtraFields():void
+        {
+            if (_extraFields)
+            {
+                _extraFields.dispose();
+                _extraFields = null;
+            }
+        }
+
+        private function onKeyEvent(key:Number, isDown:Boolean):void
         {
             try
             {
-                var cfg:CHotkeys = Config.config.hotkeys;
-                if (!cfg.battleLabelsHotKeys)
-                    return null;
-
                 // TODO
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
             }
-            return null;
+        }
+
+        private function update():void
+        {
+            if (_extraFields)
+            {
+                _extraFields.update(BattleState.get(BattleGlobalData.playerVehicleID)); // TODO: BigWorld.target()
+            }
         }
     }
 }

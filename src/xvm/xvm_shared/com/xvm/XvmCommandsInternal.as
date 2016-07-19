@@ -8,16 +8,14 @@ package com.xvm
     {
         internal static const REQUEST_CONFIG:String = "xvm.request_config";
         internal static const GET_ARENA_GUI_TYPE:String = "xvm.get_arena_gui_type";
-        internal static const GET_BATTLE_LEVEL:String = "xvm.get_battle_level";
-        internal static const GET_BATTLE_TYPE:String = "xvm.get_battle_type";
-        internal static const GET_MAP_SIZE:String = "xvm.get_map_size";
         internal static const GET_CLAN_ICON:String = "xvm.get_clan_icon";
-        internal static const GET_MY_VEHCD:String = "xvm.get_my_vehcd";
         internal static const REQUEST_DOSSIER:String = "xvm.request_dossier";
         internal static const LOAD_STAT_BATTLE:String = "xvm.load_stat_battle";
         internal static const LOAD_STAT_BATTLE_RESULTS:String = "xvm.load_stat_battle_results";
         internal static const LOAD_STAT_USER:String = "xvm.load_stat_user";
         internal static const PYTHON_MACRO:String = "xvm.python_macro";
+        internal static const XVM_PROFILER_COMMAND_BEGIN:String = "xvm.profiler.begin";
+        internal static const XVM_PROFILER_COMMAND_END:String = "xvm.profiler.end";
 
         internal static const AS_DOSSIER:String = "xvm.as.dossier";
         internal static const AS_L10N:String = "xvm.as.l10n";

@@ -9,6 +9,7 @@ from messenger import MessengerEntry
 from gui import SystemMessages
 from gui.app_loader import g_appLoader
 from gui.app_loader.settings import APP_NAME_SPACE, GUI_GLOBAL_SPACE_ID
+from gui.shared import g_eventBus, events
 from gui.Scaleform.daapi.settings.views import VIEW_ALIAS
 
 from xfw import *
@@ -95,8 +96,9 @@ class Xvm(object):
         if isReplay():
             self.initializeXvmServices()
 
-        self.respondConfig()
-        wgutils.reloadHangar()
+        if not e or not e.ctx.get('fromInitStage', False):
+            self.respondConfig()
+            wgutils.reloadHangar()
 
 
     def respondConfig(self):
@@ -265,26 +267,8 @@ class Xvm(object):
 
             # battleloading, battle
 
-            if cmd == XVM_COMMAND.GET_BATTLE_LEVEL:
-                arena = getattr(BigWorld.player(), 'arena', None)
-                if arena is not None:
-                    return (arena.extraData.get('battleLevel', 0), True)
-                return (None, True)
-
-            if cmd == XVM_COMMAND.GET_BATTLE_TYPE:
-                arena = getattr(BigWorld.player(), 'arena', None)
-                if arena is not None:
-                    return (arena.bonusType, True)
-                return (None, True)
-
-            if cmd == XVM_COMMAND.GET_MAP_SIZE:
-                return (utils.getMapSize(), True)
-
             if cmd == XVM_COMMAND.GET_CLAN_ICON:
                 return (stats.getClanIcon(args[0]), True)
-
-            if cmd == XVM_COMMAND.GET_MY_VEHCD:
-                return (getVehCD(BigWorld.player().playerVehicleID), True)
 
             # lobby
 
@@ -295,7 +279,7 @@ class Xvm(object):
             # stat
 
             if cmd == XVM_COMMAND.LOAD_STAT_BATTLE:
-                stats.getBattleStat(args, as_xfw_cmd)
+                stats.getBattleStat(args, as_xfw_cmd, g_appLoader.getSpaceID())
                 return (None, True)
 
             if cmd == XVM_COMMAND.LOAD_STAT_BATTLE_RESULTS:
@@ -304,6 +288,12 @@ class Xvm(object):
 
             if cmd == XVM_COMMAND.LOAD_STAT_USER:
                 stats.getUserData(args)
+                return (None, True)
+
+            # profiler
+
+            if cmd in (XVM_PROFILER_COMMAND.BEGIN, XVM_PROFILER_COMMAND.END):
+                g_eventBus.handleEvent(events.HasCtxEvent(cmd, args[0]))
                 return (None, True)
 
         except Exception, ex:
@@ -351,23 +341,31 @@ class Xvm(object):
             err('onKeyEvent(): ' + traceback.format_exc())
         return True
 
+    def onUpdateStage(self):
+        try:
+            as_xfw_cmd(XVM_COMMAND.AS_ON_UPDATE_STAGE)
+        except Exception, ex:
+            err('onUpdateStage(): ' + traceback.format_exc())
+
     def checkKeyEventBattle(self, key, isDown):
         # do not handle keys when chat is active
         if MessengerEntry.g_instance.gui.isFocused():
             return False
 
-        c = config.get('hotkeys')
+        #c = config.get('hotkeys')
+        #
+        #if c['minimapZoom']['enabled'] is True and c['minimapZoom']['keyCode'] == key:
+        #    return True
+        #if c['minimapAltMode']['enabled'] is True and c['minimapAltMode']['keyCode'] == key:
+        #    return True
+        #if c['playersPanelAltMode']['enabled'] is True and c['playersPanelAltMode']['keyCode'] == key:
+        #    return True
+        #if c['battleLabelsHotKeys'] is True:
+        #    return True
+        #
+        #return False
 
-        if c['minimapZoom']['enabled'] is True and c['minimapZoom']['keyCode'] == key:
-            return True
-        if c['minimapAltMode']['enabled'] is True and c['minimapAltMode']['keyCode'] == key:
-            return True
-        if c['playersPanelAltMode']['enabled'] is True and c['playersPanelAltMode']['keyCode'] == key:
-            return True
-        if c['battleLabelsHotKeys'] is True:
-            return True
-
-        return False
+        return True
 
     def onViewLoaded(self, view=None):
         trace('onViewLoaded: {}'.format('(None)' if not view else view.uniqueName))

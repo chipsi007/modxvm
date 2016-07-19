@@ -41,7 +41,7 @@ from gui.shared.utils.requesters.ItemsRequester import ItemsRequester
 from gui.Scaleform.genConsts.TOOLTIPS_CONSTANTS import TOOLTIPS_CONSTANTS
 from gui.Scaleform.locale.TOOLTIPS import TOOLTIPS
 from gui.Scaleform.framework.ToolTip import ToolTip
-from gui.Scaleform.daapi.view.battle.legacy.ConsumablesPanel import ConsumablesPanel
+from gui.Scaleform.daapi.view.battle.shared.consumables_panel import ConsumablesPanel
 from gui.Scaleform.daapi.view.meta.ModuleInfoMeta import ModuleInfoMeta
 from xfw import *
 
@@ -66,14 +66,14 @@ p_replacement = None # will be something like <font size... color...>
 # initialization/finalization
 
 def start():
-    g_eventBus.addListener(XVM_EVENT.RELOAD_CONFIG, tooltips_clear_cache)
+    g_eventBus.addListener(XVM_EVENT.CONFIG_LOADED, tooltips_clear_cache)
 
 BigWorld.callback(0, start)
 
 
 @registerEvent(game, 'fini')
 def fini():
-    g_eventBus.removeListener(XVM_EVENT.RELOAD_CONFIG, tooltips_clear_cache)
+    g_eventBus.removeListener(XVM_EVENT.CONFIG_LOADED, tooltips_clear_cache)
 
 
 #####################################################################

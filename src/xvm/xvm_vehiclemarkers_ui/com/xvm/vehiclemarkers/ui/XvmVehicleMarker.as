@@ -23,67 +23,85 @@ package com.xvm.vehiclemarkers.ui
     {
         public var vehicleID:Number = NaN;
         private var playerName:String = null;
+        private var curHealth:Number = NaN;
         private var maxHealth:int = 0;
 
-        private var actionMarkerComponent:ActionMarkerComponent;
-        private var contourIconComponent:ContourIconComponent;
-        private var damageTextComponent:DamageTextComponent;
-        private var healthBarComponent:HealthBarComponent;
-        private var levelIconComponent:LevelIconComponent;
-        private var textFieldsComponent:TextFieldsComponent;
-        private var vehicleIconComponent:VehicleIconComponent;
+        private var actionMarkerComponent:ActionMarkerComponent = null;
+        private var contourIconComponent:ContourIconComponent = null;
+        private var damageTextComponent:DamageTextComponent = null;
+        private var healthBarComponent:HealthBarComponent = null;
+        private var levelIconComponent:LevelIconComponent = null;
+        private var textFieldsComponent:TextFieldsComponent = null;
+        private var vehicleTypeIconComponent:VehicleTypeIconComponent = null;
 
         public function XvmVehicleMarker()
         {
+            Xvm.swfProfilerBegin("XvmVehicleMarker.ctor()");
             //Logger.add(getQualifiedClassName(this));
             super();
             super.markerSettings = XvmVehicleMarkerConstants.DISABLED_MARKER_SETTINGS;
-            Xvm.addEventListener(PlayerStateEvent.PLAYER_STATE_CHANGED, onPlayerStateChanged);
+            Xvm.addEventListener(PlayerStateEvent.CHANGED, onPlayerStateChanged);
             createComponents();
+            Xvm.swfProfilerEnd("XvmVehicleMarker.ctor()");
         }
 
         override protected function configUI():void
         {
+            Xvm.swfProfilerBegin("XvmVehicleMarker.configUI()");
             super.configUI();
-            VehicleMarkersManager.getInstance().addEventListener(VehicleMarkersManagerEvent.SHOW_EX_INFO, onShowExInfoHandler);
+            VehicleMarkersManager.getInstance().addEventListener(VehicleMarkersManagerEvent.SHOW_EX_INFO, onShowExInfoHandler, false, 0, true);
             // TODO: removeStandardFields();
+            Xvm.swfProfilerEnd("XvmVehicleMarker.configUI()");
         }
 
         override protected function onDispose():void
         {
+            Xvm.swfProfilerBegin("XvmVehicleMarker.onDispose()");
             super.onDispose();
-            Xvm.removeEventListener(PlayerStateEvent.PLAYER_STATE_CHANGED, onPlayerStateChanged);
+            Xvm.removeEventListener(PlayerStateEvent.CHANGED, onPlayerStateChanged);
             VehicleMarkersManager.getInstance().removeEventListener(VehicleMarkersManagerEvent.SHOW_EX_INFO, onShowExInfoHandler);
             deleteComponents();
+            Xvm.swfProfilerEnd("XvmVehicleMarker.onDispose()");
         }
 
         override public function setVehicleInfo(vClass:String, vIconSource:String, vType:String, vLevel:int,
             pFullName:String, pName:String, pClan:String, pRegion:String,
             maxHealth:int, entityName:String, hunt:Boolean, squadIndex:int):void
         {
+            // WORKAROUND: possible bug - marker instance not deletes on MarkersManager.destroyMarker() call.
+            if (!parent) { dispose(); return; }
+            ///
+
+            Xvm.swfProfilerBegin("XvmVehicleMarker.setVehicleInfo()");
             super.setVehicleInfo.apply(this, arguments);
             try
             {
                 this.playerName = pName;
+                this.maxHealth = maxHealth;
                 var playerState:VOPlayerState = BattleState.getByPlayerName(playerName);
                 if (playerState != null)
                 {
-                    vehicleID = playerState.vehicleID;
-                    this.maxHealth = maxHealth;
-                    playerState.maxHealth = maxHealth;
-                    Macros.RegisterVehicleMarkerData(this.RegisterVehicleMarkerData);
-                    dispatchEvent(new XvmVehicleMarkerEvent(XvmVehicleMarkerEvent.INIT, playerState, exInfo));
+                    init(playerState.vehicleID);
+                    //invalidate(InvalidationType.DATA);
                 }
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
             }
+            Xvm.swfProfilerEnd("XvmVehicleMarker.setVehicleInfo()");
         }
 
         override protected function draw():void
         {
+            // WORKAROUND: possible bug - marker instance not deletes on MarkersManager.destroyMarker() call.
+            if (!parent) { dispose(); return; }
+            ///
+
+            Xvm.swfProfilerBegin("XvmVehicleMarker.super.draw()");
             super.draw();
+            Xvm.swfProfilerEnd("XvmVehicleMarker.super.draw()");
+            Xvm.swfProfilerBegin("XvmVehicleMarker.draw()");
             try
             {
                 if (isInvalid(InvalidationType.DATA))
@@ -99,12 +117,19 @@ package com.xvm.vehiclemarkers.ui
             {
                 Logger.err(ex);
             }
+            Xvm.swfProfilerEnd("XvmVehicleMarker.draw()");
         }
 
         override public function updateHealth(newHealth:int, damageFlag:int, damageType:String):void
         {
+            // WORKAROUND: possible bug - marker instance not deletes on MarkersManager.destroyMarker() call.
+            if (!parent) { dispose(); return; }
+            ///
+
+            Xvm.swfProfilerBegin("XvmVehicleMarker.updateHealth()");
             try
             {
+                this.curHealth = newHealth;
                 var playerState:VOPlayerState = BattleState.get(vehicleID);
                 if (playerState != null)
                 {
@@ -116,19 +141,27 @@ package com.xvm.vehiclemarkers.ui
                         }),
                         curHealth: newHealth
                     });
-                    dispatchEvent(new XvmVehicleMarkerEvent(XvmVehicleMarkerEvent.UPDATEHEALTH, playerState, exInfo));
+                    dispatchEvent(new XvmVehicleMarkerEvent(XvmVehicleMarkerEvent.UPDATE_HEALTH, playerState, exInfo));
                 }
             }
             catch (ex:Error)
             {
                 Logger.err(ex);
             }
+            Xvm.swfProfilerEnd("XvmVehicleMarker.updateHealth()");
         }
 
         override public function setHealth(curHealth:int):void
         {
+            // WORKAROUND: possible bug - marker instance not deletes on MarkersManager.destroyMarker() call.
+            if (!parent) { dispose(); return; }
+            ///
+
+            Xvm.swfProfilerBegin("XvmVehicleMarker.setHealth()");
             try
             {
+                //Logger.add("curHealth=" + curHealth);
+                this.curHealth = curHealth;
                 var playerState:VOPlayerState = BattleState.get(vehicleID);
                 if (playerState != null)
                 {
@@ -140,6 +173,30 @@ package com.xvm.vehiclemarkers.ui
             {
                 Logger.err(ex);
             }
+            Xvm.swfProfilerEnd("XvmVehicleMarker.setHealth()");
+        }
+
+        override public function setSpeaking(value:Boolean):void
+        {
+            // WORKAROUND: possible bug - marker instance not deletes on MarkersManager.destroyMarker() call.
+            if (!parent) { dispose(); return; }
+            ///
+
+            Xvm.swfProfilerBegin("XvmVehicleMarker.setSpeaking()");
+            super.setSpeaking(value);
+            try
+            {
+                var playerState:VOPlayerState = BattleState.get(vehicleID);
+                if (playerState != null)
+                {
+                    dispatchEvent(new XvmVehicleMarkerEvent(XvmVehicleMarkerEvent.SET_SPEAKING, playerState, exInfo));
+                }
+            }
+            catch (ex:Error)
+            {
+                Logger.err(ex);
+            }
+            Xvm.swfProfilerEnd("XvmVehicleMarker.setSpeaking()");
         }
 
         override public function set markerSettings(value:Object):void
@@ -152,8 +209,13 @@ package com.xvm.vehiclemarkers.ui
             // stub
         }
 
-        private function onShowExInfoHandler(param1:VehicleMarkersManagerEvent):void
+        private function onShowExInfoHandler(e:VehicleMarkersManagerEvent):void
         {
+            // WORKAROUND: possible bug - marker instance not deletes on MarkersManager.destroyMarker() call.
+            if (!parent) { dispose(); return; }
+            ///
+
+            Xvm.swfProfilerBegin("XvmVehicleMarker.onShowExInfoHandler()");
             try
             {
                 var playerState:VOPlayerState = BattleState.get(vehicleID);
@@ -166,6 +228,7 @@ package com.xvm.vehiclemarkers.ui
             {
                 Logger.err(ex);
             }
+            Xvm.swfProfilerEnd("XvmVehicleMarker.onShowExInfoHandler()");
         }
 
         // PRIVATE
@@ -174,7 +237,7 @@ package com.xvm.vehiclemarkers.ui
         {
             try
             {
-                vehicleIconComponent = new VehicleIconComponent(this);
+                vehicleTypeIconComponent = new VehicleTypeIconComponent(this);
                 contourIconComponent = new ContourIconComponent(this);
                 levelIconComponent = new LevelIconComponent(this);
                 actionMarkerComponent = new ActionMarkerComponent(this);
@@ -192,20 +255,41 @@ package com.xvm.vehiclemarkers.ui
         {
             try
             {
-                vehicleIconComponent.dispose();
-                vehicleIconComponent = null;
-                contourIconComponent.dispose();
-                contourIconComponent = null;
-                levelIconComponent.dispose();
-                levelIconComponent = null;
-                actionMarkerComponent.dispose();
-                actionMarkerComponent = null;
-                healthBarComponent.dispose();
-                healthBarComponent = null;
-                textFieldsComponent.dispose();
-                textFieldsComponent = null;
-                damageTextComponent.dispose();
-                damageTextComponent = null;
+                if (vehicleTypeIconComponent != null)
+                {
+                    vehicleTypeIconComponent.dispose();
+                    vehicleTypeIconComponent = null;
+                }
+                if (contourIconComponent != null)
+                {
+                    contourIconComponent.dispose();
+                    contourIconComponent = null;
+                }
+                if (levelIconComponent != null)
+                {
+                    levelIconComponent.dispose();
+                    levelIconComponent = null;
+                }
+                if (actionMarkerComponent != null)
+                {
+                    actionMarkerComponent.dispose();
+                    actionMarkerComponent = null;
+                }
+                if (healthBarComponent != null)
+                {
+                    healthBarComponent.dispose();
+                    healthBarComponent = null;
+                }
+                if (textFieldsComponent != null)
+                {
+                    textFieldsComponent.dispose();
+                    textFieldsComponent = null;
+                }
+                if (damageTextComponent != null)
+                {
+                    damageTextComponent.dispose();
+                    damageTextComponent = null;
+                }
             }
             catch (ex:Error)
             {
@@ -213,19 +297,41 @@ package com.xvm.vehiclemarkers.ui
             }
         }
 
+        private function init(vehicleID:Number):void
+        {
+            this.vehicleID = vehicleID;
+            var playerState:VOPlayerState = BattleState.get(vehicleID);
+            if (!isNaN(this.curHealth))
+            {
+                playerState.updateNoEvent({
+                    curHealth: this.curHealth
+                });
+            }
+            playerState.updateNoEvent({
+                maxHealth: this.maxHealth
+            });
+            RegisterVehicleMarkerData();
+            dispatchEvent(new XvmVehicleMarkerEvent(XvmVehicleMarkerEvent.INIT, playerState, exInfo));
+        }
+
         private function onPlayerStateChanged(e:PlayerStateEvent):void
         {
             if (e.playerName == playerName)
             {
+                if (isNaN(vehicleID))
+                {
+                    init(e.vehicleID);
+                }
                 invalidate(InvalidationType.DATA);
             }
         }
 
-        private function RegisterVehicleMarkerData(m_dict:Object):void
+        private function RegisterVehicleMarkerData():void
         {
-            if (!m_dict.hasOwnProperty(playerName))
-                m_dict[playerName] = {};
-            var pdata:Object = m_dict[playerName];
+            var dict:Object = Macros.Players;
+            if (!dict.hasOwnProperty(playerName))
+                dict[playerName] = {};
+            var pdata:Object = dict[playerName];
 
             // {{turret}}
             pdata["turret"] = getTurretData();

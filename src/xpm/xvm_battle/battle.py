@@ -20,16 +20,14 @@ from gui.battle_control.battle_constants import FEEDBACK_EVENT_ID
 from gui.battle_control.battle_arena_ctrl import BattleArenaController
 from gui.Scaleform.genConsts.BATTLE_VIEW_ALIASES import BATTLE_VIEW_ALIASES
 from gui.Scaleform.daapi.settings.views import VIEW_ALIAS
+from gui.Scaleform.daapi.view.battle.shared.damage_panel import DamagePanel
 
 from xfw import *
 from xvm_main.python.logger import *
-import xvm_main.python.minimap_circles as minimap_circles
-import xvm_main.python.utils as utils
-import xvm_main.python.vehinfo_xtdb as vehinfo_xtdb
 import xvm_main.python.xmqp_events as xmqp_events
 
 from commands import *
-
+import shared
 
 #####################################################################
 # constants
@@ -173,6 +171,12 @@ def _BattleArenaController_updateVehiclesInfo(self, updated, arenaDP):
     except Exception, ex:
         err(traceback.format_exc())
 
+@registerEvent(DamagePanel, '_updateDeviceState')
+def _DamagePanel_updateDeviceState(self, value):
+    try:
+        as_xfw_cmd(XVM_BATTLE_COMMAND.AS_UPDATE_DEVICE_STATE, *value)
+    except:
+        err(traceback.format_exc())
 
 #####################################################################
 # Battle
@@ -282,21 +286,7 @@ class Battle(object):
     def onXfwCommand(self, cmd, *args):
         try:
             if cmd == XVM_BATTLE_COMMAND.REQUEST_BATTLE_GLOBAL_DATA:
-                player = BigWorld.player()
-                vehicleID = player.playerVehicleID
-                arena = player.arena
-                arenaVehicle = arena.vehicles.get(vehicleID)
-                vehCD = getVehCD(vehicleID)
-                as_xfw_cmd(XVM_BATTLE_COMMAND.AS_RESPONSE_BATTLE_GLOBAL_DATA,
-                    vehicleID,                                  # playerVehicleID
-                    arenaVehicle['name'],                       # playerName
-                    vehCD,                                      # playerVehCD
-                    arena.extraData.get('battleLevel', 0),      # battleLevel
-                    arena.bonusType,                            # battleType
-                    arena.guiType,                              # arenaGuiType
-                    utils.getMapSize(),                         # mapSize
-                    minimap_circles.getMinimapCirclesData(),    # minimapCirclesData
-                    vehinfo_xtdb.vehArrayXTDB(vehCD))           # xtdb_data
+                as_xfw_cmd(XVM_BATTLE_COMMAND.AS_RESPONSE_BATTLE_GLOBAL_DATA, *shared.getGlobalBattleData())
                 return (None, True)
 
             elif cmd == XVM_BATTLE_COMMAND.BATTLE_CTRL_SET_VEHICLE_DATA:

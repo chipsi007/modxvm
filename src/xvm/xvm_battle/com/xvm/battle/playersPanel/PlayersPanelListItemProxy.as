@@ -94,7 +94,7 @@ package com.xvm.battle.playersPanel
             mouseChildren = false;
             this.isLeftPanel = isLeftPanel;
             Xvm.addEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
-            Xvm.addEventListener(PlayerStateEvent.PLAYER_STATE_CHANGED, onPlayerStateChanged);
+            Xvm.addEventListener(PlayerStateEvent.CHANGED, onPlayerStateChanged);
             Xvm.addEventListener(MAX_PLAYER_NAME_TEXT_WIDTH_CHANGED, onMaxPlayerNameTextWidthChanged);
             Xfw.addCommandListener(XvmCommands.AS_ON_CLAN_ICON_LOADED, onClanIconLoaded);
             onConfigLoaded(null);
@@ -112,7 +112,7 @@ package com.xvm.battle.playersPanel
         override protected function onDispose():void
         {
             Xvm.removeEventListener(Defines.XVM_EVENT_CONFIG_LOADED, onConfigLoaded);
-            Xvm.removeEventListener(PlayerStateEvent.PLAYER_STATE_CHANGED, onPlayerStateChanged);
+            Xvm.removeEventListener(PlayerStateEvent.CHANGED, onPlayerStateChanged);
             Xvm.removeEventListener(MAX_PLAYER_NAME_TEXT_WIDTH_CHANGED, onMaxPlayerNameTextWidthChanged);
             Xfw.removeCommandListener(XvmCommands.AS_ON_CLAN_ICON_LOADED, onClanIconLoaded);
             disposeExtraFields();
@@ -604,12 +604,18 @@ package com.xvm.battle.playersPanel
         private function createExtraFields():void
         {
             var cfg:CPlayersPanelNoneModeExtraField = isLeftPanel ? ncfg.extraFields.leftPanel : ncfg.extraFields.rightPanel;
-            var size:Rectangle = new Rectangle(
+            var bounds:Rectangle = new Rectangle(
                 Macros.FormatNumberGlobal(cfg.x, 0),
                 Macros.FormatNumberGlobal(cfg.y, 65),
                 Macros.FormatNumberGlobal(cfg.width, 380),
                 Macros.FormatNumberGlobal(cfg.height, 28));
-            extraFieldsHidden = new ExtraFields(cfg.formats, isLeftPanel, getSchemeNameForPlayer, getSchemeNameForVehicle, size, Macros.FormatStringGlobal(ncfg.layout, "vertical").toLowerCase());
+            extraFieldsHidden = new ExtraFields(
+                cfg.formats,
+                isLeftPanel,
+                getSchemeNameForPlayer,
+                getSchemeNameForVehicle,
+                bounds,
+                Macros.FormatStringGlobal(ncfg.layout, ExtraFields.LAYOUT_VERTICAL).toLowerCase());
             BattleXvmView.battlePage.addChildAt(extraFieldsHidden, BattleXvmView.battlePage.getChildIndex(BattleXvmView.battlePage.playersPanel));
             //_internal_createMenuForNoneState(mc);
             //createMouseHandler(_root["extraPanels"]);
