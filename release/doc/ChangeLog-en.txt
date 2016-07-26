@@ -1,4 +1,4 @@
-﻿XVM-6.4.0-dev:
+XVM-6.4.0-dev:
   * adaptation to WoT 0.9.15.1
   * complete refactoring of battle mods (AS2->AS3 migration)
   * markers and hitlog: shadow parameter "size" renamed to "blur"
@@ -67,6 +67,10 @@
   * changed anchor for "bindToIcon" option in the extra fields
   * changed hitlog macros - added "hitlog." prefix (see macros.txt)
   * removed "hpLeft" section - use {{hp*}} macros
+
+XVM-6.3.2.1:
+  * fix for 6th sense sound
+  * fix for tank carousel filters
 
 XVM-6.3.2:
   * update for WoT 0.9.15.0.1 micropatch
