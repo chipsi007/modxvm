@@ -1,14 +1,14 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 #####################################################################
 # MOD INFO
 
 XFW_MOD_INFO = {
     # mandatory
-    'VERSION':       '0.9.14.1',
+    'VERSION':       '0.9.16',
     'URL':           'http://www.modxvm.com/',
     'UPDATE_URL':    'http://www.modxvm.com/en/download-xvm/',
-    'GAME_VERSIONS': ['0.9.14.1'],
+    'GAME_VERSIONS': ['0.9.16'],
     # optional
 }
 
@@ -35,7 +35,7 @@ import BigWorld
 from gui.Scaleform.framework import g_entitiesFactories, ViewSettings, ViewTypes, ScopeTemplates
 from gui.Scaleform.framework.entities.View import View
 from gui.shared.tooltips.common import ContactTooltipData
-from messenger.gui.Scaleform.view.ContactsListPopover import ContactsListPopover
+from messenger.gui.Scaleform.view.lobby.ContactsListPopover import ContactsListPopover
 from messenger.gui.Scaleform.data.contacts_vo_converter import ContactConverter
 from messenger.gui.Scaleform.data.contacts_cm_handlers import PlayerContactsCMHandler
 

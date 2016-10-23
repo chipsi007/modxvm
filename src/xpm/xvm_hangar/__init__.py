@@ -1,14 +1,14 @@
-﻿""" XVM (c) www.modxvm.com 2013-2015 """
+﻿""" XVM (c) www.modxvm.com 2013-2016 """
 
 #####################################################################
 # MOD INFO
 
 XFW_MOD_INFO = {
     # mandatory
-    'VERSION':       '0.9.14.1',
+    'VERSION':       '0.9.16',
     'URL':           'http://www.modxvm.com/',
     'UPDATE_URL':    'http://www.modxvm.com/en/download-xvm/',
-    'GAME_VERSIONS': ['0.9.14.1'],
+    'GAME_VERSIONS': ['0.9.16'],
     # optional
 }
 
@@ -31,7 +31,7 @@ from gui.prb_control.dispatcher import _PrebattleDispatcher
 from xfw import *
 
 import xvm_main.python.config as config
-from xvm_main.python.constants import *
+from xvm_main.python.consts import *
 from xvm_main.python.logger import *
 from xvm_main.python.xvm import l10n
 
@@ -69,13 +69,13 @@ def Vehicle_isAmmoFull(base, self):
 
 #barracks: add nation flag and skills for tanksman
 @overrideMethod(BarracksMeta, 'as_setTankmenS')
-def BarracksMeta_as_setTankmenS(base, self, tankmenCount, tankmenInSlots, placesCount, tankmenInBarracks, tankmanArr):
+def BarracksMeta_as_setTankmenS(base, self, data):
     try:
         show_flags = config.get('hangar/barracksShowFlags', True)
         show_skills = config.get('hangar/barracksShowSkills', True)
         if show_flags or show_skills:
             imgPath = 'img://../mods/shared_resources/xvm/res/icons/barracks'
-            for tankman in tankmanArr:
+            for tankman in data['tankmenData']:
                 if 'role' not in tankman:
                     continue
                 tankman['rank'] = tankman['role']
@@ -89,14 +89,14 @@ def BarracksMeta_as_setTankmenS(base, self, tankmenCount, tankmenInSlots, places
                         tankman_role_arr[-1] += "<img src='%s/skills/%s' vspace='-3'>" % (imgPath, skill.icon)
                     if len(tankman_full_info.skills):
                         tankman_role_arr[-1] += "%s%%" % tankman_full_info.descriptor.lastSkillLevel
-                    if tankman_full_info.hasNewSkill:
+                    if tankman_full_info.hasNewSkill and tankman_full_info.newSkillCount[0] > 0:
                         tankman_role_arr[-1] += "<img src='%s/skills/new_skill.png' vspace='-3'>x%s" % (imgPath, tankman_full_info.newSkillCount[0])
                     if not tankman_role_arr[-1]:
                         tankman_role_arr[-1] = l10n('noSkills')
                 tankman['role'] = ' '.join(tankman_role_arr)
     except Exception as ex:
         err(traceback.format_exc())
-    return base(self, tankmenCount, tankmenInSlots, placesCount, tankmenInBarracks, tankmanArr)
+    return base(self, data)
 
 
 # low ammo => vehicle not ready

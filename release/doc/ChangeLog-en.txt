@@ -1,19 +1,328 @@
-﻿XVM-6.3.0-dev:
+XVM-6.4.8-dev:
+
+XVM-6.4.7.1:
+  * fixed "crewMaxPerksCount" option
+
+XVM-6.4.7:
+  [DAMAGE LOG]
+  * added "damageLog" implementation using py_macro
+      Forum thread: http://www.koreanrandom.com/forum/topic/35169-damagelog/
+  * added new section "damageLog"
+  * added new elements in sections "battleLabels" and "battleLabelsTemplates":
+      "damageLog" - received damage log
+      "timerReload" - cooldown timer for the last damager
+      "lastHit" - pop up with the received damage
+
+  [PY_MACRO]
+  * braces for functions without arguments can be omitted
+  * macros formatting implemented
+  * added mouse events in the battle labels which can be
+    handled in py_macro using the function as_callback(event_name):
+      "mouseEvents":
+        "click" - event is sent when the mouse button clicked inside the field
+        "mouseDown" - event is sent when the mouse button pressed inside the field
+        "mouseUp" - event is sent when the mouse button released inside the field
+        "mouseOver" - event is sent when the mouse pointer enters the field
+        "mouseOut" - event is sent when the mouse pointer leaves the field
+        "mouseMove" - event is sent when mouse pointer moves inside the field
+        "mouseWheel" - event is sent when mouse wheel rolled inside the field
+
+  [HANGAR]
+  * in sections "clock", "pingServers", "onlineServers" option "topmost" replaced with "layer"
+  * added new options in the "hangar" section:
+      "showBuyPremiumButton" - show "Buy premium" button
+      "showPremiumShopButton" - show "Premium shop" button
+      "crewMaxPerksCount" - number of perks to show without grouping
+  * fixed {{v.elite}} macro in the carousel
+  * added new options in the "carousel"/"normal"/"fields" and "carousel"/"small"/"fields" sections:
+      "flag" - nation flag
+      "tankIcon" - vehicle icon
+
+  [MISC]
+  * fixed "minimapDeadSwitch" option
+  * added global macros:
+      {{my-clan}} - my clan
+  
+XVM-6.4.6.2:
+  * fixed initial minimap size restoring
+
+XVM-6.4.6.1:
+  * fixed development version notification
+
+XVM-6.4.6:
+  * adaptation to WoT 0.9.16
+  * fixed WorldOfTanks mods compatibility with Microsoft Windows NT 5.x (XP, XP 64-bit, Server 2003)
+  * added default value for "carousel"/"rows" option: 0 - use client settings
+  * added new options in the "carousel" section:
+      "cellType" - type of cells - "default" (depends from window size), "normal" or "small"
+  * added new sections in the "carousel" section:
+      "normal" - normal cells settings
+      "small" - small cells settings
+  * sections "padding", "fields" and "extraFields" moved from "carousel" to
+    "carousel"/"normal" and "carousel"/"small" sections to allow separate settings
+  * added new options in the "carousel"/"normal" and "carousel"/"small" sections:
+      "width" - cell width
+      "height" - cell height
+  * option "carousel"/"zoom" removed ("width" and "height" allow to do the same)
+  * section "padding" replaced with option "gap"
+  * created separate files for carousel cell types: "carouselNormal.xc", "carouselSmall.xc"
+  * battleLabels: added events:
+      PY(event_name)  - event from python, sent by as_event(event_name)
+
+  [KNOWN ISSUES]
+  * The module disabled by default: Extra sounds settings. (will be reprocessed in future releases)
+
+XVM-6.4.5.1:
+  * fix client crash when "minimap"/"circles"/"special" section is not empty
+
+XVM-6.4.5:
+  * circles on the minimap implemented
+  * renamed option in the "minimap" and "minimapAlt" sections (with inverted values):
+      "useStandardCircles" -> "circlesEnabled"
+      "useStandardLabels" -> "labelsEnabled"
+      "useStandardLines" -> "linesEnabled"
+  * added option "statisticForm"/"removePlayerStatusIcon" - disable player status icon
+
+XVM-6.4.4:
+  * lines on the minimap implemented (circles are not yet)
+
+XVM-6.4.3:
+  * adaptation to WoT 0.9.15.2
+  * labels on the minimap implemented (circles and lines are not yet)
+  * added new elements in sections "battleLabels" and "battleLabelsTemplates":
+      "avgDamage" - avg damage on current vehicle
+      "mainGun" - threshold necessary for achievements "High caliber"
+  * added options in the "minimap" and "minimapAlt" sections:
+      "selfIconScale" - self icon scale
+      "directionTriangleAlpha" - camera direction green triangle transparency
+      "directionLineAlpha" - standard camera direction line transparency
+      "zoom"/"index" - zoom index value for minimap zoom key
+  * removed options in the "minimap" and "minimapAlt" sections:
+      "hideCameraTriangle"
+      "cameraAlpha"
+      "zoom"/"pixelsBack"
+  * renamed options in the "minimap" and "minimapAlt" sections:
+      "showCameraLineAfterDeath" => "showDirectionLineAfterDeath"
+  * extra fields alignment options behavior changed:
+      "align"               - horizontal alignment of the text field relative to its position
+      "valign"              - vertical alignment of the text field relative to its position
+      "textFormat"/"align"  - horizontal alignment of the text inside the field
+      "textFormat"/"valign" - vertical alignment of the text inside the field
+  * added options in the "playersPanel" modes sections:
+      "squadIconAlpha" - transparency of the squad icon
+
+XVM-6.4.2.1:
+  * fix Alt mode in the standard markers
+
+XVM-6.4.2:
+  * added options in the "playersPanel" modes sections:
+      "fragsShadowLeft", "fragsShadowRight" - shadow for frags field
+      "nickShadowLeft", "nickShadowRight" - shadow for player name field
+      "vehicleShadowLeft", "vehicleShadowRight" - shadow for vehicle name field
+      "fixedPosition" - true - don't change players positions on dead (default false)
+  * added options in the "playersPanel"/"none" mode:
+      "inviteIndicatorAlpha" - opacity of dynamic squad invite indicator
+      "inviteIndicatorX" - X position offset of dynamic squad invite indicator
+      "inviteIndicatorY" - Y position offset of dynamic squad invite indicator
+  * ping: fixed a memory leak on old Windows versions if ping in hangar was enabled
+  * ping: no longer requires additional configuration to work under Wine
+  * battleLoading: extraFields added
+  * battleLabels: added events:
+      ON_DAMAGE_CAUSED_ALLY - damage to ally
+      ON_TARGET_IN  - aim at the vehicle
+      ON_TARGET_OUT - aim not at the vehicle
+      ON_PANEL_MODE_CHANGED
+      ON_EVERY_FRAME           * can reduce performance
+      ON_EVERY_SECOND          * can reduce performance
+  * added global macros:
+      {{pp.mode}}       - current players panel mode (0-none, 1-small, 2-medium, 3-medium2, 4-large)
+      {{pp.widthLeft}}  - current left players panel width
+      {{pp.widthRight}} - current right players panel width
+
+XVM-6.4.1.1:
+  * fix minimap (Only compatibility. Extended functionality not implemented yet.)
+
+XVM-6.4.1:
+  * adaptation to WoT 0.9.15.1.1
+  * some bugs fixed
+  * statisticForm: extraFields added
+  * carousel: restored multi rows
+  * carousel: added sorting on markOfMastery, xtdb, xte, damageRating and marksOnGun
+  * added option in "battleLoading" and "statisticForm" sections:
+      "vehicleIconAlpha" - opacity percentage of vehicle icon
+  * added macros:
+      {{allyStrengthStatic}} - ally team strength (static)
+      {{enemyStrengthStatic}} - enemy team strength (static)
+      {{allyStrengthLive}} - ally team strength (live)
+      {{enemyStrengthLive}} - enemy team strength (live)
+
+XVM-6.4.0:
+  * adaptation to WoT 0.9.15.1
+  * complete refactoring of battle mods (AS2->AS3 migration)
+  * markers and hitlog: shadow parameter "size" renamed to "blur"
+    now all shadow sections have standard parameters:
+      "enabled", "distance", "angle", "color", "alpha", "blur", "strength"
+  * renamed parameters:
+      "playersPanel"/"medium"/"formatLeft" => "playersPanel"/"medium"/"nickFormatLeft"
+      "playersPanel"/"medium"/"formatRight" => "playersPanel"/"medium"/"nickFormatRight"
+      "playersPanel"/"medium2"/"formatLeft" => "playersPanel"/"medium2"/"vehicleFormatLeft"
+      "playersPanel"/"medium2"/"formatRight" => "playersPanel"/"medium2"/"vehicleFormatRight"
+      "camera"/"arcade"/"dynamicCameraEnabled" => "camera"/"arcade"/"shotRecoilEffect"
+      "camera"/"postmortem"/"dynamicCameraEnabled" => "camera"/"postmortem"/"shotRecoilEffect"
+      "camera"/"strategic"/"dynamicCameraEnabled" => "camera"/"strategic"/"shotRecoilEffect"
+      "camera"/"sniper"/"dynamicCameraEnabled" => "camera"/"sniper"/"shotRecoilEffect"
+  * removed parameters (not required):
+      "battle"/"allowSpottedStatus"
+      "battle"/"allowHpInPanelsAndMinimap"
+      "battle"/"allowMarksOnGunInPanelsAndMinimap"
+      "carousel"/"alwaysShowFilters"
+  * renamed parameters in the "iconset" section and changed value from folder to atlas name:
+      "playersPanelAlly" => "playersPanelLeftAtlas"
+      "playersPanelEnemy" => "playersPanelRightAtlas"
+      "statisticFormAlly" => "fullStatsLeftAtlas"
+      "statisticFormEnemy" => "fullStatsRightAtlas"
+      "vehicleMarkerAlly" => "vehicleMarkerAllyAtlas"
+      "vehicleMarkerEnemy" => "vehicleMarkerEnemyAtlas"
+  * added macro {{clanicon}} with clan embled image path value
+  * removed "clanIcon" section in the "battleLoading", "battleLoadingTips", "statisticForm" and "playersPanel" sections
+    and in the markers
+  * added options in all modes in the "playersPanel" section:
+      "standardFields" - displayed standard fields in this mode and their order.
+                         available names: "frags", "vehicle", "nick".
+      "fragsWidth" - width of the frags column
+      "vehicleWidth" - width of the vehicle name column
+      "nickMinWidth" - minimum width of the player's name column
+      "nickMaxWidth" - maximum width of the player's name column
+      "expandAreaWidth" - width of area for switching to "large" mode on mouse over
+      "vehicleIconXOffsetLeft" - offset of X value for vehicle icon for left side
+      "vehicleIconXOffsetRight" - offset of X value for vehicle icon for right side
+      "vehicleLevelXOffsetLeft" - offset of X value for vehicle level for left side
+      "vehicleLevelXOffsetRight" - offset of X value for vehicle level for right side
+      "fragsXOffsetLeft" - offset of X value for frags column for left side
+      "fragsXOffsetRight" - offset of X value for frags column for right side
+      "nickXOffsetLeft" - offset of X value for player name column for left side
+      "nickXOffsetRight" - offset of X value for player name column for right side
+      "vehicleXOffsetLeft" - offset of X value for vehicle name column for left side
+      "vehicleXOffsetRight" - offset of X value for vehicle name column for right side
+  * removed options in the "playersPanel" section:
+     "short"/"width"
+     "medium"/"width"
+     "medium2"/"width"
+     "large"/"width"
+  * camera zoom indicator implemented as extra field with all its options
+  * clock is using php format (http://php.net/date)
+  * global macros, including {{py:f()}}, can be used in the "battle"/"elements" section
+  * changed "carousel"/"scrollingSpeed" value, now it is multiplier for default scrolling rate
+  * option "markers"/"useStandardMarkers" renamed to "markers"/"enabled"
+  * option "markers"/*/"vehicleIcon"/"scaleX" renamed to "offsetX"
+  * option "markers"/*/"vehicleIcon"/"scaleY" renamed to "offsetY"
+  * default value for "vehicleIcon"/"offsetY" changed fro 16 to 0
+  * config format of the text fields in markers and battleLabels are changed to
+    common extraFields config format
+  * option "visible" everywhere changed to "enabled" for unification
+  * removed option "hotkeys"/"battleLabelsHotKeys" - not required
+  * removed option "battle"/"allowLabelsOnBattleInterface" - not required
+  * changed anchor for "bindToIcon" option in the extra fields
+  * changed hitlog macros - added "hitlog." prefix (see macros.txt)
+  * removed "hpLeft" section - use {{hp*}} macros
+  * added {{comment}} macro to show comment for player from contacts
+  * added option "battle"/"sixthSenseDuration" - duration of the sixth sense indicator
+  * removed option "hitLog"/"direction" - not required
+
+  [KNOWN ISSUES]
+  * Minimap is not ready. Some functionality may work incorrectly or may not work at all. (will be fixed in future releases)
+  * Option "carousel"/"rows" does not implemented. (postponed because it may be implemented by WG)
+  * Some functionality may work incorrectly with "autoReloadConfig": true
+  * Service record: List of tanks may scroll to the middle in some configurations
+
+XVM-6.3.2.1:
+  * fix for 6th sense sound
+  * fix for tank carousel filters
+
+XVM-6.3.2:
+  * update for WoT 0.9.15.0.1 micropatch
+  * changed "shadow"/"alpha" parameter values range from 0..1 to 0..100 in the carousel
+    and players panel extra fields
+
+XVM-6.3.1.1:
+  * update for WoT 0.9.15 #30 micropatch
+  * added option "tooltips"/"hideSimplifiedVehParams" - hide simplified vehicle parameters
+  * tooltips:
+      added parameters:
+        "invisibilityStillFactor" - Concealment of Stationary Vehicle (%)
+        "invisibilityMovingFactor" - Concealment of Moving Vehicle (%)
+      removed parameter:
+        "camo_coeff"
+
+XVM-6.3.1:
+  * bug fixes
+  * total hp indicator implemented using battleLabels and py_macro
+  * py_macro: changed export definition:
+      was: @xvm.export('xvm', 'xvm2sup')
+      now: @xvm.export('xvm.xvm2sup')
+  * py_macro: add 'deterministic' argument to export definition to mark function as
+      deterministic or not (default: deterministic=True)
+  * carousel filters reworked
+
+  [FIXES]
+  * fixed "useStandardLabels" option
+
+  [CONFIG]
+  * removed options:
+      "minimap"/"circles"/"enabled" - duplicates "minimap"/"useStandardCircles"
+      "minimap"/"lines"/"enabled"   - duplicates "minimap"/"useStandardLabels"
+      "minimap"/"labels"/"enabled"  - duplicates "minimap"/"useStandardLines"
+  * moved color settings option for total hp indicator:
+      "battle"/"totalHP"/"colors" > "colors"/"totalHP"
+  * removed obsolete config section "battle"/"totalHP"
+
+XVM-6.3.0:
   * adaptation to WoT 0.9.15
-  * added option "battle"/"allowLabelsOnBattleInterface" - enable custom labels on battle interface window
-  * added option "hotkeys"/"battleLabelsHotKeys" - use hotkeys in custom labels on battle interface window
-  * added new sections "battleLabels", "battleLabelsTemplates" for custom labels on battle interface window
-  * added macros {{chancesStatic}} - win chances at battle (static)
-  * added macros {{chancesLive}} - win chances at battle (live)
+
+  [MAJOR UPDATES]
   * added new type of macro - dynamic macros calculated in the python:
-      {{py:full.path.to.static.func(arg,arg,...)}}
+    python functions are loaded from res_mods/configs/py_macro/*.py with decorator @xvm.export(a, b)
     E. g. get %SUP for xTE:
-      {{py:xvm_main.python.xvm_scale.XvmScaleToSup({{xte}})|==}}
-  * new xmqp feature for echanging data between players:
+      {{py:xvm.xvm2sup('{{xte}}')|==}}
+    res_mods/configs/py_macro/xvm.py:
+        xvm2sup = [...]
+        @xvm.export('xvm', 'xvm2sup')
+        def XvmScaleToSup(x=None):
+            if x is None or x == '':
+                return None
+            x = 100 if x == 'XX' else int(x)
+            return xvm2sup[max(0, min(100, x-1))]
+  * config section "captureBar" completely reworked, without backward compatibility
+  * capture bar macros names was changed, formatting possibilities added
+
+  [CONFIG]
+  * removed option "camera"/"noScroll" - implemented in client
+  * removed option "login"/"skipIntro" - implemented in client
+  * new options "sounds"/"xvm_battleEnd_*" - sound notifications informing about the imminent end of the battle
+  * new config file "xmqp.xc" for XMQP services settings
+
+  [XMQP]
+  * accurate minimap cell clicks
+
+XVM-6.2.2:
+  [MAJOR UPDATES]
+  * added new sections "battleLabels", "battleLabelsTemplates" for custom labels on battle interface window
+  * new xmqp feature for exchanging data between players (experimental):
     new macros:
       {{x-enabled}} - player have xmqp service enabled
-      {{x-spotted}} - "I'm spotted" feature
-    accurate minimap cell clicks
+      {{x-sense-on}} - player studied "sixth sense" perk
+      {{x-spotted}} - player vehicle is spotted
+      {{x-fire}} - fire in vehicle
+      {{x-overturned}} - player vehicle is overturned
+      {{x-drowning}} - player vehicle is drowning
+
+  [CONFIG]
+  * added option "battle"/"allowLabelsOnBattleInterface" - enable custom labels on battle interface window
+  * added option "hotkeys"/"battleLabelsHotKeys" - use hotkeys in custom labels on battle interface window
+
+  [MACROS]
+  * added macros {{chancesStatic}} - win chances at battle (static)
+  * added macros {{chancesLive}} - win chances at battle (live)
 
 XVM-6.2.1.2:
   * adaptation to WoT 0.9.14.1

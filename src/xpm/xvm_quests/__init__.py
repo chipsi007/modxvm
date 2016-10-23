@@ -1,14 +1,14 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 #####################################################################
 # MOD INFO
 
 XFW_MOD_INFO = {
     # mandatory
-    'VERSION':       '0.9.14.1',
+    'VERSION':       '0.9.16',
     'URL':           'http://www.modxvm.com/',
     'UPDATE_URL':    'http://www.modxvm.com/en/download-xvm/',
-    'GAME_VERSIONS': ['0.9.14.1'],
+    'GAME_VERSIONS': ['0.9.16'],
     # optional
 }
 
@@ -20,13 +20,6 @@ import traceback
 
 import BigWorld
 from gui.Scaleform.genConsts.QUEST_TASK_FILTERS_TYPES import QUEST_TASK_FILTERS_TYPES
-from gui.Scaleform.genConsts.QUESTS_ALIASES import QUESTS_ALIASES
-from gui.Scaleform.framework import ViewSettings
-from gui.Scaleform.framework import ViewTypes
-from gui.Scaleform.framework import ScopeTemplates
-from gui.Scaleform.framework import g_entitiesFactories
-from gui.Scaleform.daapi.view.lobby.server_events.EventsWindow import EventsWindow
-from gui.Scaleform.daapi.view.lobby.server_events.QuestsCurrentTab import QuestsCurrentTab
 from gui.Scaleform.daapi.view.lobby.server_events.QuestsTileChainsView import _QuestsTileChainsView, _QuestsFilter
 
 from xfw import *
@@ -86,7 +79,7 @@ def _QuestsTileChainsView__updateTileData(self, vehType, questState, selectItemI
 # PRIVATE
 
 def _PREFS_NAME():
-    return 'xvm_quests/%s/filters' % getCurrentPlayerId()
+    return 'xvm_quests/%s/filters' % getCurrentAccountDBID()
 
 
 def _GetSettings():

@@ -1,6 +1,6 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
-from constants import *
+from consts import *
 
 # PUBLIC
 
@@ -51,25 +51,31 @@ import config
 import utils
 
 def _exec(req, data=None, showLog=True, api=XVM.API_VERSION, params={}):
+    url = None
+    response = None
+    errStr = None
     try:
         url = XVM.SERVERS[randint(0, len(XVM.SERVERS) - 1)]
         url = url.format(API=api, REQ=req)
         for k, v in params.iteritems():
             url = url.replace('{'+k+'}', '' if v is None else str(v))
 
-        playerId = utils.getPlayerId()
-        if playerId is None:
-            playerId = 0
+        accountDBID = utils.getAccountDBID()
+        if accountDBID is None:
+            accountDBID = 0
 
         token = config.token.token
         if token is None:
             token = ''
 
-        url = url.format(id=playerId, token=token)
+        url = url.format(id=accountDBID, token=token)
 
         (response, duration, errStr) = loadUrl(url, None, data)
 
         return (None if response is None else unicode_to_ascii(simplejson.loads(response)), errStr)
     except Exception as ex:
         err(traceback.format_exc())
+        err('url = {}'.format(utils.hide_guid(url)))
+        err('response = {}'.format(utils.hide_guid(response)))
+        err('errStr = {}'.format(utils.hide_guid(errStr)))
         return (None, sys.exc_info()[0])

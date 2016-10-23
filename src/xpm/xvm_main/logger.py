@@ -1,4 +1,4 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 from xfw import *
 from xfw import swf
@@ -21,4 +21,4 @@ def debug(s):
 
 def trace(s):
     if IS_DEVELOPMENT:
-        log(s, '[TRACE] >>> ')
+        log(s, '[TRACE] >> ')

@@ -1,12 +1,12 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 # PUBLIC
 
-def getWN8ExpectedData(vehId):
+def getWN8ExpectedData(vehCD):
     global _wn8ExpectedData
     if _wn8ExpectedData is None:
         _wn8ExpectedData = _load()
-    return _wn8ExpectedData.get(str(vehId), None)
+    return _wn8ExpectedData.get(str(vehCD), None)
 
 
 # PRIVATE

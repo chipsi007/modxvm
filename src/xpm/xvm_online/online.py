@@ -1,4 +1,4 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 #############################
 # Command
@@ -21,8 +21,8 @@ from gui.shared.utils.HangarSpace import g_hangarSpace
 
 from xfw import *
 from xfw.constants import URLS
+from xvm_main.python.consts import XVM
 from xvm_main.python.logger import *
-from xvm_main.python.constants import XVM
 from xvm_main.python.xvm import l10n
 import xvm_main.python.config as config
 import xvm_main.python.xvmapi as xvmapi
@@ -33,6 +33,7 @@ import xvm_main.python.xvmapi as xvmapi
 class _Get_online(object):
 
     def __init__(self):
+        self.loginSection = None
         if GAME_REGION not in URLS.WG_API_SERVERS:
             warn('xvm_online: no API available for this server')
             return

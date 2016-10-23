@@ -1,19 +1,326 @@
-﻿XVM-6.3.0-dev:
+XVM-6.4.8-dev:
+
+XVM-6.4.7.1:
+  * исправлена опция "crewMaxPerksCount"
+
+XVM-6.4.7:
+  [DAMAGE LOG]
+  * добавлен "damageLog", реализованный на py_macro
+      Тема на форуме: http://www.koreanrandom.com/forum/topic/35169-damagelog/
+  * добавлена новая секция "damageLog"
+  * добавлены новые элементы в секции "battleLabels" и "battleLabelsTemplates":
+      "damageLog" - лог с полученными игроком попаданиями/уроном
+      "timerReload" - сообщение с таймером с момента последнего получения урона
+      "lastHit" - всплывающее сообщение с полученными игроком попаданиями/уроном
+
+  [PY_MACRO]
+  * скобки для функций без аргументов могут быть опущены
+  * реализовано форматирование макросов
+  * в battle labels добавлены события мыши, которые могут быть
+    обработаны в py_macro с помощью функции as_callback(event_name):
+      "mouseEvents":
+        "click" - событие отправляется при клике мышкой внутри поля
+        "mouseDown" - событие отправляется при нажатии кнопки мышки внутри поля
+        "mouseUp" - событие отправляется при отжатии кнопки мышки внутри поля
+        "mouseOver" - событие отправляется при перемещении курсора мыши на поле
+        "mouseOut" - событие отправляется при перемещении курсора мыши из поля
+        "mouseMove" - событие отправляется при перемещении курсора мыши внутри поля
+        "mouseWheel" - событие отправляется при прокручивании колеса мыши внутри поля
+  
+  [АНГАР]
+  * в секциях "clock", "pingServers", "onlineServers" опция "topmost" заменена на "layer"
+  * добавлены новые опции в секции "hangar":
+      "showBuyPremiumButton" - показать кнопку "Купить премиум"
+      "showPremiumShopButton" - показать кнопку "Премиум магазин"
+      "crewMaxPerksCount" - количество перков, которые отображаются без группировки
+  * исправлен макрос {{v.elite}} в карусели
+  * добавлены новые опции в секции "carousel"/"normal"/"fields" и "carousel"/"small"/"fields":
+      "flag" - флаг нации
+      "tankIcon" - иконка танка
+
+  [РАЗНОЕ]
+  * исправлена опция "minimapDeadSwitch"
+  * добавлены глобальные макросы:
+      {{my-clan}} - мой клан
+
+XVM-6.4.6.2:
+  * исправлено восстановление начального размера миникарты
+
+XVM-6.4.6.1:
+  * исправлено уведомление о тестовой версии
+
+XVM-6.4.6:
+  * адаптация к WoT 0.9.16
+  * исправлена совместимость модификаций для WorldOfTanks с Microsoft Windows NT 5.x (XP, XP 64-bit, Server 2003)
+  * добавлено значение по умолчанию для опции "carousel"/"rows": 0 - использовать настройки клиента
+  * добавлены новые опции в секции "carousel":
+      "cellType" - вид ячеек - "default" (в зависимости от размера окна), "normal" (обычные), "small" (маленькие)
+  * добавлены новые секции в секции "carousel":
+      "normal" - настройки ячеек карусели обычного размера
+      "small" - настройки ячеек маленького размера
+  * секции "padding", "fields" и "extraFields" перенесены из "carousel" в
+    "carousel"/"normal" и "carousel"/"small" чтобы позволить их настраивать отдельно
+  * добавлены новые опции в секции "carousel"/"normal" и "carousel"/"small":
+      "width" - ширина ячейки
+      "height" - высота ячейки
+  * опция "carousel"/"zoom" удалена ("width" и "height" позволяют делать то же самое)
+  * секция "padding" заменена на опцию "gap"
+  * созданы отдельные файлы для разных типов ячеек карусели: "carouselNormal.xc", "carouselSmall.xc"
+  * battleLabels: добавлены события:
+      PY(event_name)  - событие из питона, отправленное через as_event(event_name)
+
+  [ИЗВЕСТНЫЕ ПРОБЛЕМЫ]
+  * Отключен по умолчанию модуль: Настройки дополнительных звуков. (будет доработан в будущих релизах)
+
+XVM-6.4.5.1:
+  * исправлено падение клиента при не пустой секции "minimap"/"circles"/"special"
+
+XVM-6.4.5:
+  * реализованы круги на миникарте
+  * переименованы опции в секциях "minimap" и "minimapAlt" (с инвертированными значениями):
+      "useStandardCircles" -> "circlesEnabled"
+      "useStandardLabels" -> "labelsEnabled"
+      "useStandardLines" -> "linesEnabled"
+  * добавлена опция "statisticForm"/"removePlayerStatusIcon" - убрать отображение иконки статуса игрока
+
+XVM-6.4.4:
+  * реализованы линии на миникарте (круги пока еще нет)
+
+XVM-6.4.3:
+  * адаптация к WoT 0.9.15.2
+  * реализованы надписи на миникарте (круги и линии пока еще нет)
+  * добавлены новые элементы в секции "battleLabels" и "battleLabelsTemplates":
+      "avgDamage" - средний урон на текущей технике
+      "mainGun" - порог необходимый для получения достижения "Основной калибр"
+  * добавлены опции в секциях "minimap" и "minimapAlt":
+      "selfIconScale" - масштаб своей иконки
+      "directionTriangleAlpha" - прозрачность зеленого треугольника направления камеры
+      "directionLineAlpha" - прозрачность стандартного луча направления камеры
+      "zoom"/"index" - значение масштаба миникарты при нажатии клавиши масштаба
+  * удалены опции в секциях "minimap" и "minimapAlt":
+      "hideCameraTriangle"
+      "cameraAlpha"
+      "zoom"/"pixelsBack"
+  * переименованы опции в секциях "minimap" и "minimapAlt":
+      "showCameraLineAfterDeath" => "showDirectionLineAfterDeath"
+  * изменено поведение параметров выравнивания в экстра полях:
+      "align"               - горизонтальное выравнивание текстового поля относительно его позиции
+      "valign"              - вертикальное выравнивание текстового поля относительно его позиции
+      "textFormat"/"align"  - горизонтальное выравнивание текста текста внутри поля
+      "textFormat"/"valign" - вертикальное выравнивание текста внутри поля
+  * добавлены опции в секциях режимов "playersPanel":
+      "squadIconAlpha" - прозрачность иконки взвода
+
+XVM-6.4.2.1:
+  * исправлен Alt режим в стандартных маркерах
+
+XVM-6.4.2:
+  * добавлены опции в секциях режимов "playersPanel":
+      "fragsShadowLeft", "fragsShadowRight" - тень для поля фрагов
+      "nickShadowLeft", "nickShadowRight" - тень для поля имени игрока
+      "vehicleShadowLeft", "vehicleShadowRight" - тень для поля названия танка
+      "fixedPosition" - true - не изменять позиции игроков при уничтожении (по умолчанию false)
+  * добавлены опции в режиме "playersPanel"/"none":
+      "inviteIndicatorAlpha" - прозрачность индикатора приглашения в динамический взвод
+      "inviteIndicatorX" - позиция X индикатора приглашения в динамический взвод
+      "inviteIndicatorY" - позиция Y индикатора приглашения в динамический взвод
+  * ping: исправлена утечка памяти при включенном пинге в ангаре, которая могла возникнуть на устаревших версиях Windows
+  * ping: для работы под Wine больше не требуется дополнительная настройка
+  * battleLoading: добавлены extraFields
+  * battleLabels: добавлены события:
+      ON_TARGET_IN  - при наведении на танк
+      ON_TARGET_OUT - при наведении не на танк
+      ON_PANEL_MODE_CHANGED
+      ON_EVERY_FRAME           * может понизить производительность
+      ON_EVERY_SECOND          * может понизить производительность
+  * добавлены глобальные макросы:
+      {{pp.mode}}       - текущий режим ушей (0-none, 1-small, 2-medium, 3-medium2, 4-large)
+      {{pp.widthLeft}}  - текущая ширина левых ушей
+      {{pp.widthRight}} - текущая ширина правых ушей
+
+XVM-6.4.1.1:
+  * исправлена миникарта (Только совместимость. Расширенная функциональность ещё не реализована.)
+
+XVM-6.4.1:
+  * адаптация к WoT 0.9.15.1
+  * исправлены некоторые ошибки
+  * statisticForm: добавлены extraFields
+  * карусель: восстановлена многорядность
+  * карусель: добавлена сортировка по markOfMastery, xtdb, xte, damageRating и marksOnGun
+  * добавлена опция в секции "battleLoading" и "statisticForm":
+      "vehicleIconAlpha" - прозрачность в процентах иконки танка
+  * добавлены макросы:
+      {{allyStrengthStatic}} - сила команды союзников (статическая)
+      {{enemyStrengthStatic}} - сила команды противников (статическая)
+      {{allyStrengthLive}} - сила команды союзников (динамическая)
+      {{enemyStrengthLive}} - сила команды противников (динамическая)
+
+XVM-6.4.0:
+  * адаптация к WoT 0.9.15.1
+  * полная переделка боевых модов (миграция AS2->AS3)
+  * маркеры и хитлог: параметр тени "size" переименован в "blur"
+    теперь все настройки тени имеют стандарные параметры:
+      "enabled", "distance", "angle", "color", "alpha", "blur", "strength"
+  * переименованы параметры:
+      "playersPanel"/"medium"/"formatLeft" => "playersPanel"/"medium"/"nickFormatLeft"
+      "playersPanel"/"medium"/"formatRight" => "playersPanel"/"medium"/"nickFormatRight"
+      "playersPanel"/"medium2"/"formatLeft" => "playersPanel"/"medium2"/"vehicleFormatLeft"
+      "playersPanel"/"medium2"/"formatRight" => "playersPanel"/"medium2"/"vehicleFormatRight"
+      "camera"/"arcade"/"dynamicCameraEnabled" => "camera"/"arcade"/"shotRecoilEffect"
+      "camera"/"postmortem"/"dynamicCameraEnabled" => "camera"/"postmortem"/"shotRecoilEffect"
+      "camera"/"strategic"/"dynamicCameraEnabled" => "camera"/"strategic"/"shotRecoilEffect"
+      "camera"/"sniper"/"dynamicCameraEnabled" => "camera"/"sniper"/"shotRecoilEffect"
+  * удалены параметры (больше не требуются):
+      "battle"/"allowSpottedStatus"
+      "battle"/"allowHpInPanelsAndMinimap"
+      "battle"/"allowMarksOnGunInPanelsAndMinimap"
+      "carousel"/"alwaysShowFilters"
+  * переименованы параметры в секции "iconset" и изменено значение с каталога на название атласа:
+      "playersPanelAlly" => "playersPanelLeftAtlas"
+      "playersPanelEnemy" => "playersPanelRightAtlas"
+      "statisticFormAlly" => "fullStatsLeftAtlas"
+      "statisticFormEnemy" => "fullStatsRightAtlas"
+      "vehicleMarkerAlly" => "vehicleMarkerAllyAtlas"
+      "vehicleMarkerEnemy" => "vehicleMarkerEnemyAtlas"
+  * добавлен макрос {{clanicon}} со значением пути эмблемы клана
+  * удалена опция "clanIcon" в секциях "battleLoading", "battleLoadingTips", "statisticForm", "playersPanel" и в маркерах
+  * добавлены опции во все режимы в секции "playersPanel":
+      "standardFields" - отображаемые стандартные поля в данном режиме, и их порядок.
+                         допустимые названия: "frags", "vehicle", "nick".
+      "fragsWidth" - ширина поля фрагов
+      "vehicleWidth" - ширина поля названия танка
+      "nickMinWidth" - минимальная ширина поля имени игрока
+      "nickMaxWidth" - максимальная ширина поля имени игрока
+      "expandAreaWidth" - ширина области переключения в режим "large" при наведении мыши
+      "vehicleIconXOffsetLeft" - смещение координаты X для иконки танка для левой стороны
+      "vehicleIconXOffsetRight" - смещение координаты X для иконки танка для правой стороны
+      "vehicleLevelXOffsetLeft" - смещение координаты X для уровня танка для левой стороны
+      "vehicleLevelXOffsetRight" - смещение координаты X для уровня танка для правой стороны
+      "fragsXOffsetLeft" - смещение координаты X для поля фрагов для левой стороны
+      "fragsXOffsetRight" - смещение координаты X для поля фрагов для правой стороны
+      "nickXOffsetLeft" - смещение координаты X для поля имени игрока для левой стороны
+      "nickXOffsetRight" - смещение координаты X для поля имени игрока для правой стороны
+      "vehicleXOffsetLeft" - смещение координаты X для поля названия танка для левой стороны
+      "vehicleXOffsetRight" - смещение координаты X для поля названия танка для правой стороны
+  * удалены опции в секции "playersPanel":
+     "short"/"width"
+     "medium"/"width"
+     "medium2"/"width"
+     "large"/"width"
+  * индикатор зума камеры реализован как дополнительное поле со всеми его опциями
+  * в часах используется php форматирование (http://php.net/date)
+  * в секции "battle"/"elements" можно использовать глобальные макросы, включая {{py:f()}})
+  * изменено значение "carousel"/"scrollingSpeed", теперь это множительн значения по умолчанию
+  * опция "markers"/"useStandardMarkers" переименована в "markers"/"enabled"
+  * опция "markers"/*/"vehicleIcon"/"scaleX" переименована в "offsetX"
+  * опция "markers"/*/"vehicleIcon"/"scaleY" переименована в "offsetY"
+  * значение по умолчанию для "vehicleIcon"/"offsetY" изменено с 16 на 0
+  * формат конфига текстовых полей в маркерах и battleLabels изменен на
+    общий формат конфига для дополнительных полей
+  * опция "visible" везде изменена на "enabled" для однообразия
+  * удалена опция "hotkeys"/"battleLabelsHotKeys" - не требуется
+  * удалена опция "battle"/"allowLabelsOnBattleInterface" - не требуется
+  * изменена привязка координат для опции "bindToIcon" в дополнительных полях
+  * изменены макросы хитлога - добавлен префикс "hitlog." (см. macros_ru.txt)
+  * удалена секция "hpLeft" - используйте макросы {{hp*}}
+  * добавлен макрос {{comment}}, отображающий комментарий к игроку из контактов
+  * добавлена опция "battle"/"sixthSenseDuration" - длительность отображения индикатора 6-го чувства
+  * удалена опция "hitLog"/"direction" - не требуется
+
+  [ИЗВЕСТНЫЕ ПРОБЛЕМЫ]
+  * миникарта ещё не готова, большая часть функциональности может не работать (будет исправлено в будущих релизах)
+  * карусель танков: многорядность не реализована (отложено, возможно будет реализовано WG)
+  * некоторые функции работают некорректно при включённой автоперезагрузке конфига
+  * в разделе достижений список техники автоматически открывается на середине при некоторых настройках сортировки
+
+XVM-6.3.2.1:
+  * Исправлен звук лампочки шестого чувства
+  * Исправлены фильтры в карусели
+
+XVM-6.3.2:
+  * обновление для микропатча WoT 0.9.15.0.1
+  * изменен диапазон значений параметра "shadow"/"alpha" с 0..1 до 0..100 в экстра полях
+    карусели и ушей
+
+XVM-6.3.1.1:
+  * обновление для микропатча WoT 0.9.15 #30
+  * добавлена опция "tooltips"/"hideSimplifiedVehParams" - спрятать упрощенные ТТХ
+  * tooltips:
+      добавлены параметры:
+        "invisibilityStillFactor" - Незаметность неподвижной машины (%)
+        "invisibilityMovingFactor" - Незаметность машины в движении (%)
+      удален параметр:
+        "camo_coeff"
+
+XVM-6.3.1:
+  * исправление ошибок
+  * индикатор общего HP команд реализован с помощью battleLabels и py_macro
+  * py_macro: изменено определение экспорта функций:
+      было:  @xvm.export('xvm', 'xvm2sup')
+      стало: @xvm.export('xvm.xvm2sup')
+  * py_macro: в определение экспорта добавлен аргумент 'deterministic', помечающий функцию
+      как детерминированную, или нет (по умолчанию deterministic=True)
+  * переделаны фильтры карусели
+
+  [ИСПРАВЛЕНИЯ]
+  * исправлена опция "useStandardLabels"
+
+  [КОНФИГ]
+  * удалены опции:
+      "minimap"/"circles"/"enabled" - дублирует "minimap"/"useStandardCircles"
+      "minimap"/"lines"/"enabled"   - дублирует "minimap"/"useStandardLabels"
+      "minimap"/"labels"/"enabled"  - дублирует "minimap"/"useStandardLines"
+  * перемещена опция настройки цвета для индикатора общего HP команд:
+      "battle"/"totalHP"/"colors" > "colors"/"totalHP"
+  * удалена устаревшая секция конфига "battle"/"totalHP"
+
+XVM-6.3.0:
   * адаптация к WoT 0.9.15
-  * добавлена опция "battle"/"allowLabelsOnBattleInterface" - показывать пользовательские текстовые поля в окне боевого интерфейса
-  * добавлена опция "hotkeys"/"battleLabelsHotKeys" - использование горячих клавиш в пользовательских текстовых полях в окне боевого интерфейса
-  * добавлены новые секции "battleLabels", "battleLabelsTemplates" для пользовательских текстовых полей в окне боевого интерфейса
-  * добавлен макрос {{chancesStatic}} - шанс на победу в бою (статический)
-  * добавлен макрос {{chancesLive}} - шанс на победу в бою (динамический)
+
+  [ВАЖНЫЕ ИЗМЕНЕНИЯ]
   * добавлен новый тип макросов - динамические макросы, которые выполняют расчет в питоне:
-      {{py:full.path.to.static.func(arg,arg,...)}}
+    python-функции загружаются из res_mods/configs/py_macro/*.py с декоратором @xvm.export(a, b)
     Например, получить процент превосходства по значению xTE:
-      {{py:xvm_main.python.xvm_scale.XvmScaleToSup({{xte}})|==}}
-  * новый сервис xmqp - обмен данными между игроками:
+      {{py:xvm.xvm2sup('{{xte}}')|==}}
+    res_mods/configs/py_macro/xvm.py:
+        xvm2sup = [...]
+        @xvm.export('xvm', 'xvm2sup')
+        def XvmScaleToSup(x=None):
+            if x is None or x == '':
+                return None
+            x = 100 if x == 'XX' else int(x)
+            return xvm2sup[max(0, min(100, x-1))]
+  * секция конфига "captureBar" полностью переделана, без обратной совместимости
+  * изменены названия макросов полосы захвата, добавлены возможности форматирования
+
+  [КОНФИГ]
+  * удалена опция "camera"/"noScroll" - реализована в клиенте
+  * удалена опция "login"/"skipIntro" - реализована в клиенте
+  * новая опция "sounds"/"xvm_battleEnd_*" - звуковые оповещения сообщающие о скором завершении боя
+  * новый файл "xmqp.xc" для настроек сервисов XMQP
+
+  [XMQP]
+  * точечные клики по миникарте
+
+XVM-6.2.2:
+  [ВАЖНЫЕ ИЗМЕНЕНИЯ]
+  * добавлены новые секции "battleLabels", "battleLabelsTemplates" для пользовательских текстовых полей в окне боевого интерфейса
+  * новый сервис xmqp - обмен данными между игроками (экспериментальная функция):
     новые макросы:
       {{x-enabled}} - у игрока активирован сервис xmqp
-      {{x-spotted}} - "Я в засвете"
-    точечные клики по миникарте
+      {{x-sense-on}} - у игрока изучен перк "шестое чувство"
+      {{x-spotted}} - танк игрока обнаружен
+      {{x-fire}} - пожар в танке
+      {{x-overturned}} - танк игрока перевернут
+      {{x-drowning}} - танк игрока тонет
+
+  [КОНФИГ]
+  * добавлена опция "battle"/"allowLabelsOnBattleInterface" - показывать пользовательские текстовые поля в окне боевого интерфейса
+  * добавлена опция "hotkeys"/"battleLabelsHotKeys" - использование горячих клавиш в пользовательских текстовых полях в окне боевого интерфейса
+
+  [МАКРОСЫ]
+  * добавлен макрос {{chancesStatic}} - шанс на победу в бою (статический)
+  * добавлен макрос {{chancesLive}} - шанс на победу в бою (динамический)
 
 XVM-6.2.1.2:
   * адаптация к WoT 0.9.14.1

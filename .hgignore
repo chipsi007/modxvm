@@ -20,11 +20,12 @@ src/xpm/*/__version__.py
 src/xvm/obj/
 src/xpm/.vscode/
 
-src/xvm-as2/include/
-src/xvm-as2/obj
-src/xvm-as2/swf/*.swf
-
 utils/replays/*.wotreplay
 utils/xmqp_test/data/
 utils/xmqp_test/*.pyc
 output/*
+src/installer/src/xvm_defines.iss
+src/installer/src/l10n_result/
+src/installer/src/temp_changelogs/
+src/xvm-native/build/
+src/xvm-native/binaries/tests/

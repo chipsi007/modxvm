@@ -1,14 +1,14 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 #####################################################################
 # MOD INFO
 
 XFW_MOD_INFO = {
     # mandatory
-    'VERSION':       '0.9.14.1',
+    'VERSION':       '0.9.16',
     'URL':           'http://www.modxvm.com/',
     'UPDATE_URL':    'http://www.modxvm.com/en/download-xvm/',
-    'GAME_VERSIONS': ['0.9.14.1'],
+    'GAME_VERSIONS': ['0.9.16'],
     # optional
 }
 
@@ -20,7 +20,7 @@ import traceback
 
 import BigWorld
 from gui.shared import g_itemsCache
-from gui.Scaleform.daapi.view.lobby.techtree.data import _ItemsData
+from gui.Scaleform.daapi.view.lobby.techtree.techtree_dp import _TechTreeDataProvider
 from gui.Scaleform.daapi.view.meta.ModuleInfoMeta import ModuleInfoMeta
 
 from xfw import *
@@ -34,8 +34,8 @@ from xvm_main.python.xvm import l10n
 #####################################################################
 # handlers
 
-@overrideMethod(_ItemsData, '_getAllPossibleXP')
-def ItemsData_getAllPossibleXP(base, self, nodeCD, unlockStats):
+@overrideMethod(_TechTreeDataProvider, 'getAllVehiclePossibleXP')
+def _TechTreeDataProvider_getAllVehiclePossibleXP(base, self, nodeCD, unlockStats):
     if not config.get('hangar/allowExchangeXPInTechTree'):
         return unlockStats.getVehTotalXP(nodeCD)
     return base(self, nodeCD, unlockStats)

@@ -1,4 +1,4 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 import httplib
 from urlparse import urlparse
@@ -12,7 +12,7 @@ import datetime
 
 from xfw import IS_DEVELOPMENT, XFW_NO_TOKEN_MASKING
 
-from constants import *
+from consts import *
 from logger import *
 import utils
 

@@ -1,14 +1,14 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 #####################################################################
 # MOD INFO
 
 XFW_MOD_INFO = {
     # mandatory
-    'VERSION':       '0.9.14.1',
+    'VERSION':       '0.9.16',
     'URL':           'http://www.modxvm.com/',
     'UPDATE_URL':    'http://www.modxvm.com/en/download-xvm/',
-    'GAME_VERSIONS': ['0.9.14.1'],
+    'GAME_VERSIONS': ['0.9.16'],
     # optional
 }
 
@@ -22,17 +22,18 @@ import BigWorld
 import game
 from Account import PlayerAccount
 from CurrentVehicle import g_currentVehicle
-from gui.shared import g_eventBus, g_itemsCache, REQ_CRITERIA
+from gui.shared import g_eventBus, g_itemsCache
 from gui.shared.gui_items import GUI_ITEM_TYPE
+from gui.shared.utils.requesters import REQ_CRITERIA
 from gui.Scaleform.daapi.view.lobby.hangar.AmmunitionPanel import AmmunitionPanel
 from gui.Scaleform.daapi.view.lobby.hangar.TmenXpPanel import TmenXpPanel
 
 from xfw import *
 
-import xvm_main.python.userprefs as userprefs
+from xvm_main.python.consts import *
+from xvm_main.python.logger import *
 import xvm_main.python.config as config
-from xvm_main.python.logger import err, debug
-from xvm_main.python.constants import *
+import xvm_main.python.userprefs as userprefs
 
 import wg_compat
 
@@ -50,14 +51,14 @@ PREF_VERSION = '1.0'
 # initialization/finalization
 
 def start():
-    g_eventBus.addListener(XVM_EVENT.RELOAD_CONFIG, xvm_equip_init)
+    g_eventBus.addListener(XVM_EVENT.CONFIG_LOADED, xvm_equip_init)
 
 BigWorld.callback(0, start)
 
 
 @registerEvent(game, 'fini')
 def fini():
-    g_eventBus.removeListener(XVM_EVENT.RELOAD_CONFIG, xvm_equip_init)
+    g_eventBus.removeListener(XVM_EVENT.CONFIG_LOADED, xvm_equip_init)
 
 
 #####################################################################
@@ -88,24 +89,24 @@ def PlayerAccount_onBecomePlayer(*args, **kwargs):
     xvm_equip_init(*args, **kwargs)
 
 
-# device is changed on vehicle, remember the setting
-@registerEvent(AmmunitionPanel, 'setVehicleModule')
-def AmmunitionPanel_setVehicleModule(self, newId, slotIdx, oldId, isRemove):
+# devices are changed on vehicle, save the setting
+@registerEvent(AmmunitionPanel, 'as_setDataS')
+def AmmunitionPanel_as_setDataS(self, data):
     try:
         if not player_name:
             return
         global equip_settings
         veh_name = g_currentVehicle.item.name
         settings_changed = False
-        if isRemove and veh_name in equip_settings:
-            equip_settings[veh_name][slotIdx] = None
-            settings_changed = True
-        else:
-            newId = int(newId)
-            new_device = g_itemsCache.items.getItemByCD(newId)
-            if new_device and new_device.isRemovable and new_device.itemTypeName == 'optionalDevice':
-                equip_settings[veh_name][slotIdx] = new_device.intCD
-                settings_changed = True
+        for info in data['devices']:
+            if info['slotType'] == 'optionalDevice':
+                slotIndex = info['slotIndex']
+                id = info['id'] if info['removable'] else -1
+                if id == -1:
+                    id = None
+                if equip_settings[veh_name][slotIndex] != id:
+                    settings_changed = True
+                    equip_settings[veh_name][slotIndex] = id
         if settings_changed:
             debug('xvm_equip: devices changed on %s, new set: %s' % (veh_name, equip_settings[veh_name]))
             save_settings()

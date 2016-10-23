@@ -1,40 +1,22 @@
 #!/bin/bash
 
-# XVM team (c) www.modxvm.com 2014-2015
+# XVM team (c) www.modxvm.com 2014-2016
 # XVM nightly build system functions library
 
 #constants
 PLAYERGLOBAL_VERSIONS="11.0 11.1"
 
-#AS2/3 compilation and patching
-build_as2_h(){
-    $XVMBUILD_MONO_FILENAME "$XVMBUILD_FDBUILD_FILEPATH" -notrace $1 > /dev/null || exit 1
-}
-
+# AS3 compilation
 build_as3_h(){
     $XVMBUILD_MONO_FILENAME "$XVMBUILD_FDBUILD_FILEPATH" -notrace -compiler:"$FLEX_HOME" -cp:"" "$1" > /dev/null || exit 1
 }
 
-patch_as2_h(){
-    swfmill swf2xml orig/$1.swf temp/$1.xml || exit 1
-    patch temp/$1.xml $1.xml.patch || exit 1
-    swfmill xml2swf temp/$1.xml $1.swf || exit 1
-}
-
-patch_as2_ffdec_h(){
-    java -jar "$XVMBUILD_FFDEC_FILEPATH" -swf2xml orig/$1.swf temp/$1.xml || exit 1
-    sed -i 's/^M$//' temp/$1.xml
-    patch --binary temp/$1.xml $1.xml.patch || exit 1
-    java -jar "$XVMBUILD_FFDEC_FILEPATH" -xml2swf temp/$1.xml $1.swf || exit 1
-}
-#
-
 #Arch and OS detection
 detect_arch(){
-    if [ "$(uname -m)" == "x86_64" ]; then
-        export arch=amd64
-    elif [ "$(uname -m)" == "i686" ]; then
+    if [ "$(uname -m)" == "i686" ] || [ "$OS" == "Windows" ]; then
         export arch=i686
+    elif [ "$(uname -m)" == "x86_64" ]; then
+        export arch=amd64
     else
         echo "!!! Only i686 and amd64 architectures are supported"
         exit 1
@@ -44,8 +26,10 @@ detect_arch(){
 detect_os(){
     if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
         export OS=Linux
-    elif [ "$(expr substr $(uname -s) 1 4)" == "MSYS"   ] ||
-         [ "$(expr substr $(uname -s) 1 5)" == "MINGW"  ] ||
+    elif [ "$(expr substr $(uname -s) 1 7)" == "MSYS_NT" ]; then
+        export OS=Windows
+        export OS_Version=$(expr substr $(uname -s) 9 4)
+    elif [ "$(expr substr $(uname -s) 1 5)" == "MINGW" ] ||
          [ "$(expr substr $(uname -s) 1 6)" == "CYGWIN" ]; then
         export OS=Windows
     else
@@ -85,7 +69,7 @@ detect_coreutils(){
 
 detect_ffdec(){
     # export XVMBUILD_FFDEC_FILEPATH to set your own ffec.jar location
-    if [ "$XVMBUILD_FFDEC_FILEPATH" == "" ]; then
+    if [ ! -f "$XVMBUILD_FFDEC_FILEPATH" ]; then
         declare -a arr
         arr=$(echo $PATH | tr -s ':' '\n')
         for i in $arr; do
@@ -104,7 +88,7 @@ detect_ffdec(){
 
 detect_fdbuild(){
     # export XVMBUILD_FDBUILD_FILEPATH to set your own fdbuild.exe location
-    if [ "$XVMBUILD_FDBUILD_FILEPATH" == "" ]; then
+    if [ ! -f "$XVMBUILD_FDBUILD_FILEPATH" ]; then
         declare -a arr
         arr=$(echo $PATH | tr -s ':' '\n')
         for i in $arr; do
@@ -236,16 +220,31 @@ detect_python(){
     fi
 }
 
-detect_swfmill(){
-    if !(hash swfmill 2>/dev/null); then
-        echo "!!! swfmill is not found"
+detect_wget(){
+    if !(hash wget 2>/dev/null); then
+        echo "!!! wget is not found"
         exit 1
     fi
 }
 
-detect_wget(){
-    if !(hash wget 2>/dev/null); then
-        echo "!!! wget is not found"
+detect_wine(){
+    if [ "$OS" != "Windows" ]; then
+        if hash wine 2>/dev/null; then
+            export WINEDEBUG=-all
+            export XVMBUILD_WINE_FILENAME="wine"
+            return 0
+        else
+            echo "!!! Wine is not found"
+            return 1
+        fi
+    else
+        export XVMBUILD_WINE_FILENAME=
+    fi
+}
+
+detect_unzip(){
+    if !(hash unzip 2>/dev/null); then
+        echo "!!! unzip is not found"
         exit 1
     fi
 }
@@ -255,4 +254,40 @@ detect_zip(){
         echo "!!! zip is not found"
         exit 1
     fi
+}
+
+load_repositorystats(){
+    #read xvm revision and hash
+    pushd "$XVMBUILD_ROOT_PATH"/ > /dev/null
+        export XVMBUILD_XVM_BRANCH=$(hg parent --template "{branch}") || exit 1
+        export XVMBUILD_XVM_HASH=$(hg parent --template "{node|short}") || exit 1
+        export XVMBUILD_XVM_REVISION=$(hg parent --template "{rev}") || exit 1
+        export XVMBUILD_XVM_COMMITMSG=$(hg parent --template "{desc}") || exit 1
+        export XVMBUILD_XVM_COMMITAUTHOR=$(hg parent --template "{author}" | sed 's/<.*//') || exit 1
+    popd > /dev/null
+
+    #read xfw revision and hash
+    pushd "$XVMBUILD_ROOT_PATH"/src/xfw/ > /dev/null
+        export XVMBUILD_XFW_BRANCH=$(hg parent --template "{branch}") || exit 1
+        export XVMBUILD_XFW_HASH=$(hg parent --template "{node|short}") || exit 1
+        export XVMBUILD_XFW_REVISION=$(hg parent --template "{rev}") || exit 1
+    popd > /dev/null
+}
+
+#Cleaners
+
+clean_repodir(){
+    pushd "$XVMBUILD_ROOT_PATH" > /dev/null
+
+    rm -rf src/xvm/lib/*
+    rm -rf src/xvm/obj/
+    rm -rf src/xfw/src/actionscript/lib/*
+    rm -rf src/xfw/src/actionscript/obj/*
+    rm -rf src/xfw/src/actionscript/output/*
+    rm -rf ~output/
+    rm -rf src/xfw/~output/
+
+    rm -rf xvminst/
+
+    popd > /dev/null
 }
