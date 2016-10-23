@@ -1,14 +1,14 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 #####################################################################
 # MOD INFO
 
 XFW_MOD_INFO = {
     # mandatory
-    'VERSION':       '0.9.14.1',
+    'VERSION':       '0.9.16',
     'URL':           'http://www.modxvm.com/',
     'UPDATE_URL':    'http://www.modxvm.com/en/download-xvm/',
-    'GAME_VERSIONS': ['0.9.14.1'],
+    'GAME_VERSIONS': ['0.9.16'],
     # optional
 }
 
@@ -32,13 +32,6 @@ import xvm_main.python.userprefs as userprefs
 # handlers
 
 firsttime = True
-
-@overrideMethod(IntroPage, '_IntroPage__showMovie')
-def IntroPage_showMovie(base, self, movie):
-    if config.get('login/skipIntro'):
-        BigWorld.callback(0, self.stopVideo)
-    return base(self, movie)
-
 
 @overrideMethod(LoginView, 'as_setVersionS')
 def LoginView_as_setVersionS(base, self, version):

@@ -1,4 +1,4 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 __all__ = ['load', 'get', 'config_data', 'lang_data']
 
@@ -13,7 +13,7 @@ from gui.shared import g_eventBus, events
 from xfw import *
 import xfw.constants as xfw_constants
 
-from constants import *
+from consts import *
 from logger import *
 from default_xvm_xc import DEFAULT_XVM_XC
 import default_config
@@ -164,30 +164,11 @@ def _tuneup_config(config):
     config['__wotVersion'] = XVM.WOT_VERSION
     config['__xvmIntro'] = XVM.XVM_INTRO
     config['__wgApiAvailable'] = GAME_REGION in xfw_constants.URLS.WG_API_SERVERS
-
-    config['battle']['clanIconsFolder'] = utils.fixPath(config['battle']['clanIconsFolder'])
-
-    config['iconset']['battleLoadingAlly']  = utils.fixPath(config['iconset']['battleLoadingAlly'])
-    config['iconset']['battleLoadingEnemy'] = utils.fixPath(config['iconset']['battleLoadingEnemy'])
-    config['iconset']['playersPanelAlly']   = utils.fixPath(config['iconset']['playersPanelAlly'])
-    config['iconset']['playersPanelEnemy']  = utils.fixPath(config['iconset']['playersPanelEnemy'])
-    config['iconset']['statisticFormAlly']  = utils.fixPath(config['iconset']['statisticFormAlly'])
-    config['iconset']['statisticFormEnemy'] = utils.fixPath(config['iconset']['statisticFormEnemy'])
-    config['iconset']['vehicleMarkerAlly']  = utils.fixPath(config['iconset']['vehicleMarkerAlly'])
-    config['iconset']['vehicleMarkerEnemy'] = utils.fixPath(config['iconset']['vehicleMarkerEnemy'])
-
-    if config['battleLoading']['clanIcon']['xr'] is None:
-        config['battleLoading']['clanIcon']['xr'] = config['battleLoading']['clanIcon']['x']
-    if config['battleLoading']['clanIcon']['yr'] is None:
-        config['battleLoading']['clanIcon']['yr'] = config['battleLoading']['clanIcon']['y']
-    if config['statisticForm']['clanIcon']['xr'] is None:
-        config['statisticForm']['clanIcon']['xr'] = config['statisticForm']['clanIcon']['x']
-    if config['statisticForm']['clanIcon']['yr'] is None:
-        config['statisticForm']['clanIcon']['yr'] = config['statisticForm']['clanIcon']['y']
-    if config['playersPanel']['clanIcon']['xr'] is None:
-        config['playersPanel']['clanIcon']['xr'] = config['playersPanel']['clanIcon']['x']
-    if config['playersPanel']['clanIcon']['yr'] is None:
-        config['playersPanel']['clanIcon']['yr'] = config['playersPanel']['clanIcon']['y']
+    try:
+        from __version__ import __revision__
+        config['__xvmRevision'] = __revision__
+    except Exception as ex:
+        pass
 
     # Cleanup empty vehicle names
     config['vehicleNames'] = {k:v for k,v in config['vehicleNames'].iteritems() \
@@ -204,9 +185,7 @@ def _constsSection():
         'VM_COEFF_VMM_DEAD': 0.50,  # vehicle markers manager (dead)
         'VM_COEFF_MM_PLAYER': 0.93, # minimap (player)
         'VM_COEFF_MM_BASE': 0.8,    # minimap (base)
-        'VM_COEFF_FC': 0.93,        # frag correlation
-        'X_SPOTTED_TIME': 9,        # display time for {{x-spotted}} macro
-        'X_MINIMAP_COLOR': 0x00FF00 # color for minimap clicks
+        'VM_COEFF_FC': 0.93         # frag correlation
     }
 
 
@@ -225,10 +204,11 @@ class NetworkServicesSettings(object):
         self.chanceResults = data.get('chanceResults', False) if active else False
         self.scale = data.get('scale', 'xvm')
         self.rating = data.get('rating', 'wgr')
-        self.topClansCount = data.get('topClansCount', 50)
+        self.topClansCount = int(data.get('topClansCount', 50))
         self.flag = data.get('flag', None)
+        self.xmqp = data.get('xmqp', True) if active else False
         # TODO: configure color in the personal cabinet
-        self.x_minimap_clicks_color = int(str(get('consts/X_MINIMAP_COLOR', 0x00FF00)), 0)
+        self.x_minimap_clicks_color = int(str(data.get('minimap_click_color', 0x00FF00)), 0)
 
 networkServicesSettings = NetworkServicesSettings()
 
@@ -249,9 +229,9 @@ class XvmServicesToken(object):
         #trace('config.token._apply')
         if data is None:
             data = {}
-        self.playerId = data.get('playerId', None)
-        if self.playerId is None:
-            self.playerId = data.get('_id', None)
+        self.accountDBID = data.get('accountDBID', None)
+        if self.accountDBID is None:
+            self.accountDBID = data.get('_id', None) # returned from XVM API
         self.expires_at = data.get('expires_at', None)
         self.verChkCnt = data.get('verChkCnt', None)
         self.cnt = data.get('cnt', None)
@@ -275,24 +255,24 @@ class XvmServicesToken(object):
     def restore():
         #trace('config.token.restore')
         try:
-            playerId = utils.getPlayerId()
-            if playerId is None:
+            accountDBID = utils.getAccountDBID()
+            if accountDBID is None:
                 return XvmServicesToken()
-            return XvmServicesToken(userprefs.get('tokens.{0}'.format(playerId)))
+            return XvmServicesToken(userprefs.get('tokens/{0}'.format(accountDBID)))
         except Exception:
             err(traceback.format_exc())
 
 
     def saveToken(self):
         #trace('config.token.saveToken')
-        if self.playerId:
-            userprefs.set('tokens.{0}'.format(self.playerId), self.__dict__)
+        if self.accountDBID:
+            userprefs.set('tokens/{0}'.format(self.accountDBID), self.__dict__)
 
 
-    def saveLastPlayerId(self):
-        #trace('config.token.saveLastPlayerId')
-        if self.playerId:
-            userprefs.set('tokens.lastPlayerId', self.playerId)
+    def saveLastAccountDBID(self):
+        #trace('config.token.saveLastAccountDBID')
+        if self.accountDBID:
+            userprefs.set('tokens/lastAccountDBID', self.accountDBID)
 
 
     def updateTokenFromApi(self):
@@ -332,7 +312,7 @@ class XvmServicesToken(object):
             networkServicesSettings = NetworkServicesSettings()
 
         self.saveToken()
-        self.saveLastPlayerId()
+        self.saveLastAccountDBID()
 
 token = XvmServicesToken()
 

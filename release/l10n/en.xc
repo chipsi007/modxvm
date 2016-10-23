@@ -15,6 +15,7 @@
     "No": "No",
     "Not available short": "n/a",
     "from": "from",
+    "m": "m",
 
     // Ping & Online
     "Initialization": "Initialization",
@@ -25,8 +26,6 @@
     "Chance error": "Chance error",
     "Chance to win": "Chance to win",
     "Team strength": "Team strength",
-    //"global": "global",
-    //"per-vehicle": "per-vehicle",
     "chanceLive": "For alive",
     "chanceBattleTier": "Battle tier",
 
@@ -42,16 +41,35 @@
     "Total": "Total",
     "Last": "Last",
 
-    // Hp Left
-    "hpLeftTitle": "Hitpoints left:",
-
     // Capture
     "enemyBaseCapture": "Base{0} capture by allies!",
     "enemyBaseCaptured": "Base{0} captured by allies!",
     "allyBaseCapture": "Base{0} capture by enemies!",
     "allyBaseCaptured": "Base{0} captured by enemies!",
-    "Timeleft": "Timeleft",
-    "Capturers": "Capturers",
+
+    // Battle interface labels
+    "avgDamage": "Avg damage",
+    "mainGun": "High caliber",
+
+    // DamageLog:
+    "sec": "sec",
+    "reloaded": "reloaded",
+    // Shell kind (macro {{type-shell}})
+    "armor_piercing": "AP",
+    "high_explosive": "HE",
+    "armor_piercing_cr": "APCR",
+    "armor_piercing_he": "HESH",
+    "hollow_charge": "HEAT",
+    // Text at hits no damage (ricochet, no penetration, no damage) (macro {{dmg}})
+    "intermediate_ricochet": "ricochet",
+    "final_ricochet": "ricochet",
+    "armor_not_pierced": "bounce",
+    "armor_pierced_no_damage": "blocked",
+    // Name part of vehicle (macro {{comp-name}})
+    "turret": "turret",
+    "hull": "hull",
+    "chassis": "chassis",
+    "gun": "gun",
 
     // BattleResults
     "Hit percent": "Hit percent",
@@ -128,7 +146,6 @@
     "terrainResistance": "Terrain resistance",
     "gravity": "Gravity",
     "shellSpeed": "Shell speed",
-    "camoCoeff": "Camo coefficients",
     "general": "General",
     "armor": "Armor",
     "firepower": "Firepower",
@@ -155,6 +172,7 @@
     "china": "China",
     "japan": "Japan",
     "czech": "Сzech",
+    "sweden": "Sweden",
     
     // Vehicle type
     "HT": "HT",
@@ -175,7 +193,7 @@
     // Token
     "token/services_unavailable": "Network services unavailable.&nbsp;&nbsp;<a href='#XVM_SITE_UNAVAILABLE#'><font size='11'>more info</font></a>",
     "token/services_inactive": "Network services inactive.&nbsp;&nbsp;<a href='#XVM_SITE_INACTIVE#'><font size='11'>enable</font></a>",
-    "token/blocked": "Status: <font color='#FF0000'>Blocked</font>&nbsp;&nbsp;<a href='#XVM_SITE_BLOCKED'><font size='11'>more info</font></a>",
+    "token/blocked": "Status: <font color='#FF0000'>Blocked</font>&nbsp;&nbsp;<a href='#XVM_SITE_BLOCKED#'><font size='11'>more info</font></a>",
     "token/active": "Status:<tab/><font color='#00FF00'>Active</font>",
     "token/time_left": "Time left:<tab/><font color='#EEEEEE'>{0}d. {1}h. {2}m.</font>",
     "token/time_left_warn": "Time left:<tab/><font color='#EEEE00'>{0}d. {1}h. {2}m.</font>",
@@ -196,13 +214,21 @@
     "profile/xvm_xte_extended_tooltip": "<textformat tabstops='[20, 85, 140]'>{{l10n:profile/xvm_xte_tooltip}}\n\nReference values:\n\t\tdamage\tfrags\n\tCurrent:\t<font color='#FDF4CE' size='14'>{0}</font>\t<font color='#FDF4CE' size='14'>{1}</font>\n\tAverage:\t<font color='#FDF4CE' size='14'>{2}</font>\t<font color='#FDF4CE' size='14'>{3}</font>\n\tTop:\t<font color='#FDF4CE' size='14'>{4}</font>\t<font color='#FDF4CE' size='14'>{5}</font>",
 
     // Carousel
-    "NonElite": "Non elite",
-    "Premium": "Premium",
     "Normal": "Normal",
-    "MultiXP": "Multi XP",
-    "NoMaster": "No master",
+    "NormalTooltipHeader": "Normal Vehicles",
+    "NormalTooltipBody": "Show/hide normal (non-premium) vehicles.",
+    "NonElite": "Non elite",
+    "NonEliteTooltipHeader": "Non Elite Vehicles",
+    "NonEliteTooltipBody": "Show/hide vehicles with not all modules and technical branches researched.",
     "CompleteCrew": "Complete crew",
+    "CompleteCrewTooltipHeader": "Complete Crew",
+    "CompleteCrewTooltipBody": "Show/hide vehicles with complete crew.",
+    "NoMaster": "No master",
+    "NoMasterTooltipHeader": "No Master",
+    "NoMasterTooltipBody": "Show/hide vehicles without \"Ace Tanker\" mastery badge.",
     "ReserveFilter": "Reserve",
+    "ReserveFilterTooltipHeader": "Reserve",
+    "ReserveFilterTooltipBody": "Show/hide reserved vehicles.",
     "check_reserve_menu": "Set as reserve",
     "uncheck_reserve_menu": "Uncheck Reserve label",
     "reserve_confirm_title": "Hide tank",

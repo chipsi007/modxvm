@@ -7,9 +7,6 @@
     // false - disable camera settings.
     // false - отключить настройки камеры.
     "enabled": false,
-    // true - disable switching to sniper mode by mouse wheel
-    // true - не переключаться в снайперский режим колесом мыши
-    "noScroll": false,
     // Arcade mode
     // Аркадный режим
     "arcade": {
@@ -22,9 +19,9 @@
       // Чувствительность прокрутки (default = 5)
       // Scroll sensitivity (по умолчанию = 5)
       "scrollSensitivity": 5,
-      // false - disable dynamic camera
-      // false - выключить динамическую камеру
-      "dynamicCameraEnabled": true
+      // false - disable the shot recoil effect (for the enabled dynamic camera option)
+      // false - выключить эффект отдачи от выстрела (для включенной опции динамической камеры)
+      "shotRecoilEffect": true
     },
     // Postmortem mode
     // Режим после смерти
@@ -38,9 +35,9 @@
       // Чувствительность прокрутки (default = 5)
       // Scroll sensitivity (по умолчанию = 5)
       "scrollSensitivity": 5,
-      // false - disable dynamic camera
-      // false - выключить динамическую камеру
-      "dynamicCameraEnabled": true
+      // false - disable the shot recoil effect (for the enabled dynamic camera option)
+      // false - выключить эффект отдачи от выстрела (для включенной опции динамической камеры)
+      "shotRecoilEffect": true
     },
     // Strategic mode (arty)
     // Стратегический режим (арта)
@@ -48,9 +45,9 @@
       // Camera distance range: [min, max], default - [40, 100]
       // Отдаление камеры: [мин, макс], по умолчанию - [40, 100]
       "distRange": [40, 100],
-      // false - disable dynamic camera
-      // false - выключить динамическую камеру
-      "dynamicCameraEnabled": true
+      // false - disable the shot recoil effect (for the enabled dynamic camera option)
+      // false - выключить эффект отдачи от выстрела (для включенной опции динамической камеры)
+      "shotRecoilEffect": true
     },
     // Sniper mode
     // Снайперский режим
@@ -63,9 +60,9 @@
       // Start zoom value (null for default behavior - last used state)
       // Начальное значение кратности (null для поведения по умолчанию - последнее использовавшееся значение)
       "startZoom": null,
-      // Zoom Indicator
+      // Zoom Indicator (see playersPanel.xc for parameters description)
       // Global macros allowed in all fields
-      // Индикатор масштаба
+      // Индикатор масштаба (см. playersPanel.xc для описания параметров)
       // Можно использовать глобальные макросы во всех полях
       "zoomIndicator": {
         // false - disable.
@@ -82,28 +79,43 @@
         // Opacity in percents (0..100)
         // Прозрачность
         "alpha": 100,
-        // Horizonatal text alignment (left, center, right)
-        // Горизонтальное выравнивание текста (left, center, right)
-        "align": "left",
-        // Vertical text alignment (top, center, bottom)
-        // Вертикальное выравнивание текста (top, center, bottom)
-        "valign": "center",
+        "rotation": 0,
+        "scaleX": 1,
+        "scaleY": 1,
         // Background color
         // Цвет фона
         "bgColor": null,
-        // Border color 
+        // Border color
         // Цвет рамки
         "borderColor": null,
-        // Shadow settings
-        // Настройки тени
-        "shadow": { "distance": 0, "angle": 0, "color": "0x192E0E", "alpha": 100, "blur": 3, "strength": 7 },
+        "antiAliasType": "advanced",
+        "textFormat": {
+          "font": "$TitleFont",
+          "size": 16,
+          "color": "0x95CB29",
+          "align": "left",
+          "valign": "center"
+        },
         // Text format
         // Формат текста
-        "format": "<font face='$TitleFont' color='#95CB29' size='16'>x{{zoom}}</font>"
+        "format": "x{{zoom}}",
+        // Shadow options
+        // Параметры тени
+        "shadow": {
+          // false - no shadow
+          // false - без тени
+          "enabled": true,
+          "distance": 0,             // (in pixels)     / offset distance / дистанция смещения
+          "angle": 0,                // (0.0 .. 360.0)  / offset angle    / угол смещения
+          "color": "0x192E0E",       // "0xXXXXXX"      / color           / цвет
+          "alpha": 100,              // (0 .. 100)      / opacity         / прозрачность
+          "blur": 3,                 // (0.0 .. 255.0)  / blur            / размытие
+          "strength": 2              // (0.0 .. 255.0)  / intensity       / интенсивность
+        }
       },
-      // false - disable dynamic camera
-      // false - выключить динамическую камеру
-      "dynamicCameraEnabled": true
+      // false - disable the shot recoil effect (for the enabled dynamic camera option)
+      // false - выключить эффект отдачи от выстрела (для включенной опции динамической камеры)
+      "shotRecoilEffect": true
     }
   }
 }

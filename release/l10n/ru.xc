@@ -15,6 +15,7 @@
     "No": "Нет",
     "Not available short": "н/д",
     "from": "из",
+    "m": "м",
 
     // Ping & Online
     "Initialization": "Инициализация",
@@ -25,8 +26,6 @@
     "Chance error": "Ошибка расчета шансов",
     "Chance to win": "Шансы на победу",
     "Team strength": "Силы команд",
-    //"global": "общий",
-    //"per-vehicle": "по технике",
     "chanceLive": "Для живых",
     "chanceBattleTier": "Уровень боя",
 
@@ -42,16 +41,35 @@
     "Total": "Всего",
     "Last": "Последний",
 
-    // Hp Left
-    "hpLeftTitle": "Осталось HP:",
-
     // Capture
     "enemyBaseCapture": "Захват базы{0} союзниками!",
     "enemyBaseCaptured": "База{0} захвачена союзниками!",
     "allyBaseCapture": "Захват базы{0} врагами!",
     "allyBaseCaptured": "База{0} захвачена врагами!",
-    "Timeleft": "Осталось",
-    "Capturers": "Захватчиков",
+
+    // Battle interface labels
+    "avgDamage": "Средний урон",
+    "mainGun": "Основной калибр",
+
+    // DamageLog:
+    "sec": "сек",
+    "reloaded": "перезарядился",
+    // Shell kind (macro {{type-shell}})
+    "armor_piercing": "ББ",
+    "high_explosive": "ОФ",
+    "armor_piercing_cr": "БП",
+    "armor_piercing_he": "ХФ",
+    "hollow_charge": "КС",
+    // Text at hits no damage (ricochet, no penetration, no damage) (macro {{dmg}})
+    "intermediate_ricochet": "рикошет",
+    "final_ricochet": "рикошет",
+    "armor_not_pierced": "не пробито",
+    "armor_pierced_no_damage": "без урона",
+    // Name part of vehicle (macro {{comp-name}})
+    "turret": "башня",
+    "hull": "корпус",
+    "chassis": "шасси",
+    "gun": "орудие",
 
     // BattleResults
     "Hit percent": "Процент попаданий",
@@ -128,7 +146,6 @@
     "terrainResistance": "Сопротивление грунтов",
     "gravity": "Гравитация",
     "shellSpeed": "Скорость снаряда",
-    "camoCoeff": "Коэффициенты маскировки",
     "general": "Общие",
     "armor": "Бронирование",
     "firepower": "Огневая мощь",
@@ -155,6 +172,7 @@
     "china": "Китай",
     "japan": "Япония",
     "czech": "Чехословакия",
+    "sweden": "Швеция",
     
     // Vehicle type
     "HT": "ТТ",
@@ -192,13 +210,21 @@
     "lobby/crew/enable_prev_crew_tooltip": "<b><font color='#FDF4CE'>{{l10n:lobby/crew/enable_prev_crew}}</font></b>\nАвтоматически вернуть экипаж, который в предыдущем\nбою был на данной машине",
 
     // Carousel
-    "NonElite": "Не элитный",
-    "Premium": "Премиум",
-    "Normal": "Обычный",
-    "MultiXP": "Мультиопыт",
-    "NoMaster": "Нет мастера",
+    "Normal": "Обычная",
+    "NormalTooltipHeader": "Обычная техника",
+    "NormalTooltipBody": "Включить/отключить отображение обычной (не премиум) техники.",
+    "NonElite": "Не элитная",
+    "NonEliteTooltipHeader": "Не элитная техника",
+    "NonEliteTooltipBody": "Включить/отключить отображение техники, на которой исследованы не все модули и следующие в ветке развития машины.",
     "CompleteCrew": "Полный экипаж",
+    "CompleteCrewTooltipHeader": "Полный экипаж",
+    "CompleteCrewTooltipBody": "Включить/отключить отображение техники с полным экипажем.",
+    "NoMaster": "Нет мастера",
+    "NoMasterTooltipHeader": "Нет мастера",
+    "NoMasterTooltipBody": "Включить/отключить отображение техники без знаки классности «Мастер».",
     "ReserveFilter": "Резерв",
+    "ReserveFilterTooltipHeader": "Резерв",
+    "ReserveFilterTooltipBody": "Включить/отключить отображение резервной техники.",
     "check_reserve_menu": "Отметить как «резерв»",
     "uncheck_reserve_menu": "Снять отметку «резерв»",
     "reserve_confirm_title": "Спрятать танк",

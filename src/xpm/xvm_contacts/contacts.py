@@ -1,4 +1,4 @@
-""" XVM (c) www.modxvm.com 2013-2015 """
+""" XVM (c) www.modxvm.com 2013-2016 """
 
 # PUBLIC
 
@@ -28,7 +28,7 @@ from gui import SystemMessages
 import simplejson
 
 from xfw import *
-from xvm_main.python.constants import *
+from xvm_main.python.consts import *
 from xvm_main.python.loadurl import loadUrl
 from xvm_main.python.logger import *
 import xvm_main.python.config as config
@@ -53,7 +53,8 @@ class _Contacts:
         try:
             self.is_available = False
 
-            self.contacts_disabled = not config.networkServicesSettings.comments
+            if not self.contacts_disabled:
+                self.contacts_disabled = not config.networkServicesSettings.comments
             if self.contacts_disabled:
                 return
 

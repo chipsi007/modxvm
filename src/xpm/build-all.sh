@@ -3,7 +3,8 @@
 #############################
 # CONFIG
 
-RUN_TEST=1
+XPM_CLEAR=${XPM_CLEAR:=0}
+XPM_RUN_TEST=${XPM_RUN_TEST:=1}
 
 #############################
 # INTERNAL
@@ -57,11 +58,10 @@ build()
 
   pyc_dir="../../~output/$2/python/$d"
   pyc_file="../../~output/$2/python/${f}c"
-  sum_dir="../../~output/sha1/$2/python/$d"
-  sum_file="../../~output/sha1/$2/python/$f.sha1"
-  sum=$(sha1sum "$1")
+  cmp_dir="../../~output/cmp/$2/python/$d"
+  cmp_file="../../~output/cmp/$2/python/$f.tmp"
 
-  if [ -f "$pyc_file" ] && [ -f "$sum_file" ] && [ "$(cat $sum_file)" = "$sum" ]; then
+  if [ -f "$pyc_file" ] && [ -f "$cmp_file" ] && cmp "$1" "$cmp_file" >/dev/null 2>&1; then
     return 0
   fi
 
@@ -70,8 +70,8 @@ build()
   fi
   result="$("$XVMBUILD_PYTHON_FILEPATH" -c "import py_compile; py_compile.compile('$1')" 2>&1)"
   if [ "$result" == "" ]; then
-    mkdir -p "$sum_dir"
-    sha1sum $1 > "$sum_file"
+    mkdir -p "$cmp_dir"
+    cp -f "$1" "$cmp_file"
   else
     echo -e "$result"
   fi
@@ -86,30 +86,36 @@ build()
 
 pushd $(dirname $0) >/dev/null
 
-clear
+if [ "$XPM_CLEAR" = "1" ]; then
+    clear
+fi
 
 make_dirs
 
 echo 'building xfw'
 build_xfw
 
+echo 'updating versions'
+#st=$(date +%s%N)
+version_template=$(hg parent --template "__revision__ = '{rev}'\n__branch__ = '{branch}'")
 # create __version__.py files
 for dir in $(find . -maxdepth 1 -type "d" ! -path "."); do
   echo "# This file was created automatically from build script" > $dir/__version__.py
-  echo "__revision__ = '`cd $dir && hg parent --template "{rev}"`'" >> $dir/__version__.py
-  echo "__branch__ = '`cd $dir && hg parent --template "{branch}"`'" >> $dir/__version__.py
+  echo "$version_template" >> $dir/__version__.py
 done
+#echo "$(($(date +%s%N)-$st))"
 
 # build *.py files
 echo 'building xvm'
+#st=$(date +%s%N)
 for fn in $(find . -type "f" -name "*.py"); do
   f=${fn#./}
   m=${f%%/*}
   build $f mods/packages/$m
 done
+#echo "$(($(date +%s%N)-$st))"
 
 # generate default config from .xc files and xvm.xc.sample
-# TODO: review and refactor
 echo 'generate default_config.pyc and xvm.xc.sample'
 dc_fn=../../~output/mods/packages/xvm_main/python/default_config.py
 rm -f "${dc_fn}c"
@@ -140,6 +146,6 @@ rm -f "$xvm_xc_sample_trgt"
 popd >/dev/null
 
 # run test
-if [ "$OS" = "Windows_NT" -a "$XFW_DEVELOPMENT" = "1" -a "$RUN_TEST" = "1" ]; then
+if [ "$OS" = "Windows_NT" -a "$XFW_DEVELOPMENT" = "1" -a "$XPM_RUN_TEST" = "1" ]; then
   sh "$(dirname $(realpath $(cygpath --unix $0)))/../../utils/test.sh"
 fi
