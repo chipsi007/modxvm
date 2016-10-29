@@ -1,7 +1,7 @@
 """ XVM (c) www.modxvm.com 2013-2016 """
 
 class XVM(object):
-    XVM_VERSION    = '6.4.6.3-dev'
+    XVM_VERSION    = '6.4.8-dev'
     WOT_VERSION    = '0.9.16'
     XVM_INTRO      = 'www.modxvm.com'
 
@@ -35,8 +35,6 @@ class XVM_EVENT(object):
     RELOAD_CONFIG = 'xvm.reload_config'
     CONFIG_LOADED = 'xvm.config_loaded'
     SYSTEM_MESSAGE = 'xvm.system_message'
-    XMQP_CONNECTED = 'xvm.xmqp_connected'
-    XMQP_MESSAGE = 'xvm.xmqp_message'
 
 # PY<->AS3 commands
 

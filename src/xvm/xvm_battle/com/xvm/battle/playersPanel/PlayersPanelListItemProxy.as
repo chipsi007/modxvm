@@ -148,7 +148,7 @@ package com.xvm.battle.playersPanel
         public function setPlayerNameProps(userProps:IUserProps):void
         {
             _userProps = userProps;
-            _vehicleID = BattleState.getVehicleID(_userProps.userName);
+            _vehicleID = BattleState.getVehicleIDByPlayerName(_userProps.userName);
             invalidate(INVALIDATE_PLAYER_STATE, INVALIDATE_PANEL_STATE);
         }
 
@@ -874,10 +874,6 @@ package com.xvm.battle.playersPanel
 
         GlobalEventDispatcher.addEventListener(Events.E_UPDATE_STAGE, this, invalidate);
         GlobalEventDispatcher.addEventListener(Events.E_STAT_LOADED, this, invalidate);
-        GlobalEventDispatcher.addEventListener(Events.XMQP_HOLA, this, invalidate);
-        GlobalEventDispatcher.addEventListener(Events.XMQP_FIRE, this, invalidate);
-        GlobalEventDispatcher.addEventListener(Events.XMQP_VEHICLE_TIMER, this, invalidate);
-        GlobalEventDispatcher.addEventListener(Events.XMQP_SPOTTED, this, invalidate);
         GlobalEventDispatcher.addEventListener(Events.E_BATTLE_STATE_CHANGED, this, onBattleStateChanged);
 
     private static function createMouseHandler(extraPanels:MovieClip):Void
