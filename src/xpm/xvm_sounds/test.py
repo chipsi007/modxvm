@@ -9,6 +9,8 @@ import SoundGroups
 from xfw import *
 import xvm_main.python.config as config
 from xvm_main.python.logger import *
+
+import imp
 import traceback
 
 #####################################################################
@@ -25,4 +27,14 @@ def _test():
     SoundGroups.g_instance.playSound2D(XVM_SOUND_EVENT.SIXTH_SENSE_RUDY)
     BigWorld.callback(3, _test)
 
-#BigWorld.callback(10, _test)
+try:
+    XVMNativeSounds = imp.load_dynamic('XVMNativeSounds','./res_mods/mods/packages/xvm_sounds/native/XVMNativeSounds.pyd')
+
+    bankID = XVMNativeSounds.bank_load('./res_mods/0.9.16/audioww/XVM.bnk')
+    #XVMNativeSounds.bank_unload(bankID)
+
+    BigWorld.callback(10, _test)
+except Exception:
+    print("=============================")
+    traceback.print_exc()
+    print("=============================")
