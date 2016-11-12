@@ -1,0 +1,2 @@
+src/xfw = ../xfw
+src/xvm-native/libpython = ../wot.libpython
