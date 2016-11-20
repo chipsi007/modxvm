@@ -18,11 +18,11 @@ from vehicleMarkers import g_markers
 class BC(object):
     setVehiclesData = 'BC_setVehiclesData'
     addVehiclesInfo = 'BC_addVehiclesInfo'
-    updateVehiclesInfo = 'BC_updateVehiclesInfo'
+    updateVehiclesData = 'BC_updateVehiclesData'
     updateVehicleStatus = 'BC_updateVehicleStatus'
     updatePlayerStatus = 'BC_updatePlayerStatus'
     setVehiclesStats = 'BC_setVehiclesStats'
-    updateVehiclesStats = 'BC_updateVehiclesStats'
+    updateVehiclesStat = 'BC_updateVehiclesStat'
     updatePersonalStatus = 'BC_updatePersonalStatus'
     setArenaInfo = 'BC_setArenaInfo'
     setUserTags = 'BC_setUserTags'
@@ -36,6 +36,7 @@ class BC(object):
 
 @registerEvent(BattleStatisticsDataController, 'as_setVehiclesDataS')
 def as_setVehiclesDataS(self, data):
+    g_markers.vehiclesData = data
     g_markers.call(BC.setVehiclesData, data)
 
 @registerEvent(BattleStatisticsDataController, 'as_addVehiclesInfoS')
@@ -44,7 +45,7 @@ def as_addVehiclesInfoS(self, data):
 
 @registerEvent(BattleStatisticsDataController, 'as_updateVehiclesInfoS')
 def as_updateVehiclesInfoS(self, data):
-    g_markers.call(BC.updateVehiclesInfo, data)
+    g_markers.call(BC.updateVehiclesData, data)
 
 @registerEvent(BattleStatisticsDataController, 'as_updateVehicleStatusS')
 def as_updateVehicleStatusS(self, data):
@@ -60,7 +61,7 @@ def as_setVehiclesStatsS(self, data):
 
 @registerEvent(BattleStatisticsDataController, 'as_updateVehiclesStatsS')
 def as_updateVehiclesStatsS(self, data):
-    g_markers.call(BC.updateVehiclesStats, data)
+    g_markers.call(BC.updateVehiclesStat, data)
 
 @registerEvent(BattleStatisticsDataController, 'as_updatePersonalStatusS')
 def as_updatePersonalStatusS(self, added, removed):
