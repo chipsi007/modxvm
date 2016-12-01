@@ -1,4 +1,5 @@
-﻿  * added option:
+﻿XVM-6.5.0-dev:
+  * added option:
       "hangar"/"notificationsButtonType" - behavior of the system channel notifications button on new notifications
   * added macros:
       {{top_tankers_rank}} - player's rank in the "Top Tankers" game event
@@ -10,7 +11,7 @@ XVM-6.4.9.1:
 
 XVM-6.4.9:
   [DAMAGE LOG]
-  * Reloading timer was removed due to new "fair play" policy  
+  * Reloading timer was removed due to new "fair play" policy
 
   [MISC]
   * Python part of XVM now distributed in source code (.py files)
@@ -39,7 +40,7 @@ XVM-6.4.8:
 
   [MISC]
   * Various bugs fixes
-  
+
   [DOC]
   * Added description for the parameters used in setting extra field (see extra-field.txt)
 

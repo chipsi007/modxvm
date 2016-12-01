@@ -5,10 +5,10 @@
 
 XFW_MOD_INFO = {
     # mandatory
-    'VERSION':       '0.9.16',
+    'VERSION':       '0.9.17.0',
     'URL':           'http://www.modxvm.com/',
     'UPDATE_URL':    'http://www.modxvm.com/en/download-xvm/',
-    'GAME_VERSIONS': ['0.9.16'],
+    'GAME_VERSIONS': ['0.9.17.0'],
     # optional
 }
 
@@ -20,7 +20,7 @@ import re
 import traceback
 
 import BigWorld
-from gui.Scaleform.daapi.view.battle_loading import BattleLoading
+from gui.Scaleform.daapi.view.battle.shared.battle_loading import BattleLoading
 
 from xfw import *
 
@@ -31,7 +31,7 @@ import xvm_main.python.config as config
 #####################################################################
 # handlers
 
-@overrideMethod(BattleLoading, 'as_setTipTitleS')
+#@overrideMethod(BattleLoading, 'as_setTipTitleS')
 def BattleLoading_as_setTipTitleS(base, self, title):
     title = cgi.escape('XVM v{}     {}'.format(config.get('__xvmVersion'), config.get('__xvmIntro')))
     stateInfo = config.get('__stateInfo')
@@ -43,7 +43,7 @@ def BattleLoading_as_setTipTitleS(base, self, title):
     return base(self, title)
 
 
-@overrideMethod(BattleLoading, 'as_setTipS')
+#@overrideMethod(BattleLoading, 'as_setTipS')
 def BattleLoading_as_setTipS(base, self, val):
     stateInfo = config.get('__stateInfo')
     if 'error' in stateInfo and stateInfo['error']:

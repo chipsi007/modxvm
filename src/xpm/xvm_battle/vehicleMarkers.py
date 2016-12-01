@@ -12,9 +12,10 @@ import constants
 import game
 from Avatar import PlayerAvatar
 from messenger import MessengerEntry
+from helpers import dependency
+from skeletons.gui.battle_session import IBattleSessionProvider
 from gui.shared import g_eventBus, events
 from gui.app_loader.settings import GUI_GLOBAL_SPACE_ID
-from gui.battle_control import g_sessionProvider
 from gui.Scaleform.daapi.view.battle.shared.markers2d.manager import MarkersManager
 
 from xfw import *
@@ -89,8 +90,8 @@ def _PlayerAvatar_vehicle_onEnterWorld(self, vehicle):
 # VMM
 
 @overrideMethod(MarkersManager, '__init__')
-def _MarkersManager__init__(base, self, parentUI):
-    base(self, parentUI)
+def _MarkersManager__init__(base, self):
+    base(self)
     g_markers.init(self)
 
 @overrideMethod(MarkersManager, 'beforeDelete')
@@ -99,12 +100,12 @@ def _MarkersManager_beforeDelete(base, self):
     base(self)
 
 @overrideMethod(MarkersManager, 'createMarker')
-def _MarkersManager_createMarker(base, self, mProv, symbol, active = True):
+def _MarkersManager_createMarker(base, self, symbol, *args, **kwargs):
     if g_markers.active:
         if symbol == 'VehicleMarker':
             symbol = 'com.xvm.vehiclemarkers.ui::XvmVehicleMarker'
     #debug('createMarker: ' + str(symbol))
-    handle = base(self, mProv, symbol, active)
+    handle = base(self, symbol, *args, **kwargs)
     return handle
 
 _exInfo = False
@@ -132,8 +133,11 @@ class VehicleMarkers(object):
 
     enabled = True
     initialized = False
-    guiType = 0
+    guiType = None
+    playerVehicleID = None
     manager = None
+    vehiclesData = None
+    sessionProvider = dependency.descriptor(IBattleSessionProvider)
 
     @property
     def active(self):
@@ -146,9 +150,12 @@ class VehicleMarkers(object):
     def init(self, manager):
         self.manager = manager
         self.manager.addExternalCallback('xvm.cmd', self.onVMCommand)
+        self.playerVehicleID = self.sessionProvider.getArenaDP().getPlayerVehicleID()
 
     def destroy(self):
         self.initialized = False
+        self.guiType = None
+        self.playerVehicleID = None
         self.manager.removeExternalCallback('xvm.cmd')
         self.manager = None
 
@@ -181,7 +188,7 @@ class VehicleMarkers(object):
             elif cmd == XVM_COMMAND.GET_CLAN_ICON:
                 self.call(XVM_VM_COMMAND.AS_CMD_RESPONSE, stats.getClanIcon(int(args[0])))
             elif cmd == XVM_COMMAND.LOAD_STAT_BATTLE:
-                stats.getBattleStat(args, self.call, GUI_GLOBAL_SPACE_ID.BATTLE)
+                stats.getBattleStat(args, self.call)
             # profiler
             elif cmd in (XVM_PROFILER_COMMAND.BEGIN, XVM_PROFILER_COMMAND.END):
                 g_eventBus.handleEvent(events.HasCtxEvent(cmd, args[0]))
@@ -229,6 +236,8 @@ class VehicleMarkers(object):
         try:
             if self.active:
                 self.call(XVM_BATTLE_COMMAND.AS_RESPONSE_BATTLE_GLOBAL_DATA, *shared.getGlobalBattleData())
+                if self.vehiclesData:
+                    self.call('BC_setVehiclesData', self.vehiclesData)
         except Exception, ex:
             err(traceback.format_exc())
         #debug('vm:respondGlobalBattleData: {:>8.3f} s'.format(time.clock() - s))
@@ -254,7 +263,7 @@ class VehicleMarkers(object):
                             data['marksOnGun'] = entity.publicInfo.marksOnGun
 
                 if targets & INV.FRAGS:
-                    arenaDP = g_sessionProvider.getArenaDP()
+                    arenaDP = self.sessionProvider.getArenaDP()
                     vStatsVO = arenaDP.getVehicleStats(vehicleID)
                     data['frags'] = vStatsVO.frags
 
@@ -269,8 +278,11 @@ class VehicleMarkers(object):
             if self.plugins:
                 plugin = self.plugins.getPlugin('vehicles')
                 if plugin:
-                    arenaDP = g_sessionProvider.getArenaDP()
+                    arenaDP = self.sessionProvider.getArenaDP()
                     for vInfo in arenaDP.getVehiclesInfoIterator():
+                        vehicleID = vInfo.vehicleID
+                        if vehicleID == self.playerVehicleID or vInfo.isObserver():
+                            continue
                         plugin._destroyVehicleMarker(vInfo.vehicleID)
                         plugin.addVehicleInfo(vInfo, arenaDP)
         except Exception, ex:
