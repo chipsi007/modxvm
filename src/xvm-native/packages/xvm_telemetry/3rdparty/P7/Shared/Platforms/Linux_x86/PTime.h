@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -23,6 +23,11 @@
 
 //time offset from January 1, 1601 to January 1, 1970, resolution 100ns
 #define TIME_OFFSET_1601_1970                            (116444736000000000ULL)
+
+#define TIME_HRS_100NS                                            36000000000ull
+#define TIME_MIN_100NS                                              600000000ull
+#define TIME_SEC_100NS                                               10000000ull
+#define TIME_MSC_100NS                                                  10000ull
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -57,11 +62,6 @@ static __attribute__ ((unused)) tUINT64 GetPerformanceCounter()
     l_qwReturn += (tUINT64)(l_sTime.tv_nsec) / 100;
     
     return l_qwReturn;
-    
-    //LARGE_INTEGER l_qwValue;
-    //l_qwValue.QuadPart = 0;
-    //QueryPerformanceCounter(&l_qwValue);
-    //return l_qwValue.QuadPart;
 }//GetPerformanceCounter
 
 
@@ -70,11 +70,62 @@ static __attribute__ ((unused)) tUINT64 GetPerformanceCounter()
 static __attribute__ ((unused)) tUINT64 GetPerformanceFrequency()
 {
     return 10000000; //100 nano second
-    //LARGE_INTEGER l_qwValue;
-    //l_qwValue.QuadPart = 0;
-    //QueryPerformanceFrequency(&l_qwValue);
-    //return l_qwValue.QuadPart;
 }//GetPerformanceFrequency
+
+
+////////////////////////////////////////////////////////////////////////////////
+//GetLocalTime
+//convert a 64-bit value of 100-nanosecond intervals since January 1, 1601 (UTC)
+//to readable form
+static __attribute__ ((unused)) void GetLocalTime(tUINT64  i_qwTime,
+                                                  tUINT32 &o_rYear,
+                                                  tUINT32 &o_rMonth,
+                                                  tUINT32 &o_rDay,
+                                                  tUINT32 &o_rHour,
+                                                  tUINT32 &o_rMinutes,
+                                                  tUINT32 &o_rSeconds,
+                                                  tUINT32 &o_rMilliseconds,
+                                                  tUINT32 &o_rMicroseconds,
+                                                  tUINT32 &o_rNanoseconds
+                                                 )
+{
+    tUINT32 l_dwReminder = i_qwTime % TIME_MSC_100NS; //micro & 100xNanoseconds
+    tUINT32 l_dwNano     = i_qwTime % 10;
+    tUINT32 l_dwMicro    = l_dwReminder / 10;
+
+    i_qwTime -= l_dwReminder;
+
+    tUINT32 l_dwMilli = (i_qwTime % TIME_SEC_100NS) / TIME_MSC_100NS;
+
+    i_qwTime -= TIME_OFFSET_1601_1970;
+
+    time_t  l_llTime = i_qwTime / TIME_SEC_100NS;
+    tm     *l_pTime  = localtime(&l_llTime);
+    if (l_pTime)
+    {
+        o_rYear         = 1900 + l_pTime->tm_year;
+        o_rMonth        = l_pTime->tm_mon;
+        o_rDay          = l_pTime->tm_mday;
+        o_rHour         = l_pTime->tm_hour;
+        o_rMinutes      = l_pTime->tm_min;
+        o_rSeconds      = l_pTime->tm_sec;
+        o_rMilliseconds = l_dwMilli;
+        o_rMicroseconds = l_dwMicro;
+        o_rNanoseconds  = l_dwNano;
+    }
+    else
+    {
+        o_rYear         = 0;
+        o_rMonth        = 0;
+        o_rDay          = 0;
+        o_rHour         = 0;
+        o_rMinutes      = 0;
+        o_rSeconds      = 0;
+        o_rMilliseconds = l_dwMilli;
+        o_rMicroseconds = l_dwMicro;
+        o_rNanoseconds  = l_dwNano;
+    }
+}//GetLocalTime
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -100,22 +151,6 @@ static __attribute__ ((unused)) void GetEpochTime(tUINT32 *o_pHi, tUINT32 *o_pLo
     {
         *o_pLow = (tUINT32)(l_qwResult & 0xFFFFFFFF);
     }
-    
-    
-    //SYSTEMTIME l_sSTime = {0};
-    //FILETIME   l_sFTime = {0};
-    //GetSystemTime(&l_sSTime);
-    //
-    //SystemTimeToFileTime(&l_sSTime, &l_sFTime);
-    //if (o_pHi)
-    //{
-    //    *o_pHi = l_sFTime.dwHighDateTime;
-    //}
-    //
-    //if (o_pLow)
-    //{
-    //    *o_pLow = l_sFTime.dwLowDateTime;
-    //}
 }//GetEpochTime
 
 #endif //PTIME_H

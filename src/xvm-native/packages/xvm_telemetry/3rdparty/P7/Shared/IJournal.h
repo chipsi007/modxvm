@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -55,7 +55,7 @@ public:
         eTIME_YYYYMMDDHHMMSSMS = 0,
         eTIME_YYYYMMDDHHMMSS      ,
         eTIME_HHMMSSMS            ,
-        eTIME_HHMMSS              ,
+        eTIME_HHMMSS
     };
 
     enum eLevel
@@ -67,7 +67,7 @@ public:
         eLEVEL_ERROR        ,
         eLEVEL_CRITICAL     ,
 
-        eLEVEL_COUNT        ,
+        eLEVEL_COUNT
     };
 
     virtual tBOOL            Initialize(const tXCHAR *i_pName)              = 0;

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -57,7 +57,7 @@ protected:
     {
         EROLLING_NONE,
         EROLLING_MEGABYTES,
-        EROLLING_HOURS,
+        EROLLING_HOURS
     };
 
 private:

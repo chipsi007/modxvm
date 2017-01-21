@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -16,8 +16,12 @@
 // License along with this library.                                            /
 //                                                                             /
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef UTF8_H
-#define UTF8_H
+#ifndef UTF_CONV_H
+#define UTF_CONV_H
+
+////////////////////////////////////////////////////////////////////////////////
+//                     Basic UTF LE conversion functions
+////////////////////////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -65,6 +69,87 @@ static UNUSED_FUNC tINT32 Get_UTF8_Length(const char *i_pText)
 
     return l_dwLength;
 }//Get_utf8_Length
+
+
+////////////////////////////////////////////////////////////////////////////////
+//Get_UTF8_Bytes
+//return: count characters in UTF-16 string
+static UNUSED_FUNC size_t Get_UTF8_Stat(const tWCHAR *i_pStr, 
+                                        size_t       &o_rBytes, 
+                                        size_t       &o_rChars)
+{
+    size_t  l_szReturn = 0;
+    tUINT32 l_dwCh     = 0;
+    
+    if (NULL == i_pStr)
+    {
+        return -1;
+    }
+
+    o_rBytes = 0;
+    o_rChars = 0;
+
+    while (0ul != (*i_pStr)) 
+    {
+        l_dwCh = (tUINT16)(*i_pStr);
+
+        if (    (l_dwCh >= 0xD800ul) //processing surrogate pairs
+             && (l_dwCh <= 0xDFFFul)
+           )
+        {
+            tUINT32 l_dwTrailing = (tUINT16)*(++i_pStr);
+            l_szReturn ++;
+            if (    (0xDC00ul <= l_dwTrailing)
+                 && (0xDFFFul >= l_dwTrailing)
+               )
+            {
+                l_dwCh = 0x10000ul + (((l_dwCh & 0x3FFul) << 10) | (l_dwTrailing & 0x3FFul));
+            }
+            else //unexpected 
+            {
+                l_dwCh = '?';
+            }
+        }
+
+        if (0x80 > l_dwCh)
+        {
+            o_rBytes++;
+            o_rChars++;
+        }
+        else if (0x800ul > l_dwCh)
+        {
+            o_rBytes += 2;
+            o_rChars++;
+        }
+        else if (0x10000ul > l_dwCh)
+        {
+            o_rBytes += 3;
+            o_rChars++;
+        }
+        else if (0x200000ul  > l_dwCh)
+        {
+            o_rBytes += 4;
+            o_rChars++;
+        }
+        else
+        {
+            o_rBytes += 1;
+            o_rChars++;
+        }
+
+        if (*i_pStr)
+        {
+            ++i_pStr;
+            ++l_szReturn;
+        }
+        else
+        {
+            break;
+        }
+    }
+    
+    return l_szReturn;
+}//Get_UTF8_Bytes
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +220,149 @@ static UNUSED_FUNC tINT32 Convert_UTF8_To_UTF16(const char *i_pSrc,
     
     return l_iLength;
 }//Convert_UTF8_To_UTF16
+
+
+////////////////////////////////////////////////////////////////////////////////
+//Convert_UTF32_To_UTF8 (LE)
+//Return - count of the used bytes, except trailing 0, if destination buffer 
+//size is not enough to store whole source string, result will be truncated
+static UNUSED_FUNC tINT32 Convert_UTF32_To_UTF8(const tUINT32 *i_pSrc, 
+                                                tACHAR        *o_pDst, 
+                                                tUINT32        i_dwDst_Len
+                                               )
+{
+    tINT32  l_iLength = i_dwDst_Len;
+    tUINT32 l_dwCh    = 0;
+    
+    if (    (NULL == i_pSrc)
+         || (NULL == o_pDst)  
+         || (0    >= i_dwDst_Len)   
+       )
+    {
+        return -1;
+    }
+
+    while (    ( 0ul != (*i_pSrc)) 
+            && (2 <= l_iLength)
+          )
+    {
+        l_dwCh = (*i_pSrc);
+
+        if (0x80 > l_dwCh)
+        {
+            *o_pDst = (tACHAR)(l_dwCh & 0x7Ful);
+            o_pDst ++;
+            l_iLength--;
+        }
+        else if (0x800ul > l_dwCh)
+        {
+            if (3 <= l_iLength)
+            {
+                *o_pDst = (tACHAR)(0xC0ul | ((l_dwCh >> 6) & 0x1Ful));  o_pDst ++;
+                *o_pDst = (tACHAR)(0x80ul | ((l_dwCh >> 0) & 0x3Ful));  o_pDst ++;
+                l_iLength -= 2;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if (0x10000ul > l_dwCh)
+        {
+            if (4 <= l_iLength)
+            {
+                *o_pDst = (tACHAR)(0xE0ul | ((l_dwCh >> 12) & 0x0Ful));  o_pDst ++;
+                *o_pDst = (tACHAR)(0x80ul | ((l_dwCh >>  6) & 0x3Ful));  o_pDst ++;
+                *o_pDst = (tACHAR)(0x80ul | ((l_dwCh >>  0) & 0x3Ful));  o_pDst ++;
+                l_iLength -= 3;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if (0x200000ul  > l_dwCh)
+        {
+            if (5 <= l_iLength)
+            {
+                *o_pDst = (tACHAR)(0xF0ul | ((l_dwCh >> 18) & 0x07ul)); o_pDst ++;
+                *o_pDst = (tACHAR)(0x80ul | ((l_dwCh >> 12) & 0x3Ful)); o_pDst ++;
+                *o_pDst = (tACHAR)(0x80ul | ((l_dwCh >>  6) & 0x3Ful)); o_pDst ++;
+                *o_pDst = (tACHAR)(0x80ul | ((l_dwCh >>  0) & 0x3Ful)); o_pDst ++;
+                l_iLength -= 4;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else
+        {
+            *o_pDst = '?';
+            o_pDst ++;
+            l_iLength -= 1;
+        }
+
+        if (*i_pSrc)
+        {
+            ++i_pSrc;
+        }
+        else
+        {
+            break;
+        }
+    }
+    
+    *o_pDst = 0;
+    
+    return i_dwDst_Len - l_iLength;
+}//Convert_UTF32_To_UTF8
+
+
+////////////////////////////////////////////////////////////////////////////////
+//Convert_UTF32_To_UTF16 (LE)
+//Return - count of the used bytes, except trailing 0, if destination buffer 
+//size is not enough to store whole source string, result will be truncated
+static UNUSED_FUNC tINT32 Convert_UTF32_To_UTF16(const tUINT32 *i_pSrc, 
+                                                 tWCHAR        *o_pDst, 
+                                                 tUINT32        i_dwDst_Len
+                                                )
+{
+    tINT32  l_iLength = i_dwDst_Len;
+    tUINT32 l_dwCh;
+    
+    if (    (NULL == i_pSrc)
+         || (NULL == o_pDst)  
+         || (0    >= i_dwDst_Len)   
+       )
+    {
+        return -1;
+    }
+
+    while (    ( 0ul != (*i_pSrc)) 
+            && (3 <= l_iLength)
+          )
+    {
+        if (*i_pSrc < 0x10000u)
+        {
+            *o_pDst++ = (tWCHAR)*i_pSrc;
+            l_iLength --;
+        }
+        else
+        {
+            l_dwCh = *i_pSrc - 0x10000u;
+            *o_pDst++ = (tWCHAR)(0xD800 | ((l_dwCh >> 10) & 0xFFFF));
+            *o_pDst++ = (tWCHAR)(0xDC00 | ((l_dwCh & 0x3FF) & 0xFFFF));
+            l_iLength -= 2;
+        }
+
+        ++i_pSrc;
+    }
+    
+    *o_pDst = 0;
+    
+    return i_dwDst_Len - l_iLength;
+}//Convert_UTF32_To_UTF16
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -251,4 +479,4 @@ static UNUSED_FUNC tINT32 Convert_UTF16_To_UTF8(const tWCHAR *i_pSrc,
 }//Convert_UTF8_To_UTF16
 
 
-#endif //UTF8_H
+#endif //UTF_CONV_H

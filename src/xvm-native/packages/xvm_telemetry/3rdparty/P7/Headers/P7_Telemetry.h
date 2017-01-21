@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -31,6 +31,8 @@
 
 #include "P7_Client.h"
 #include "P7_Cproxy.h"
+
+#define TELEMETRY_DEFAULT_SHARED_NAME                         TM("P7.Telemetry")
 
 //__declspec(novtable)
 class IP7_Telemetry
@@ -81,10 +83,10 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Create_Telemetry - function creates new instance of IP7_Telemetry object
 //                      See documentation for details.
-extern "C" IP7_Telemetry* __cdecl P7_Create_Telemetry(IP7_Client             *i_pClient,
-                                                      const tXCHAR           *i_pName,
-                                                      const stTelemetry_Conf *i_pConf = NULL
-                                                     );
+extern "C" P7_EXPORT IP7_Telemetry* __cdecl P7_Create_Telemetry(IP7_Client             *i_pClient,
+                                                                const tXCHAR           *i_pName,
+                                                                const stTelemetry_Conf *i_pConf = NULL
+                                                               );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -93,7 +95,7 @@ extern "C" IP7_Telemetry* __cdecl P7_Create_Telemetry(IP7_Client             *i_
 //current process - function will return NULL. Do not forget to call Release  on 
 //interface when you finish your work
 //See documentation for details.
-extern "C" IP7_Telemetry* __cdecl P7_Get_Shared_Telemetry(const tXCHAR *i_pName);
+extern "C" P7_EXPORT IP7_Telemetry* __cdecl P7_Get_Shared_Telemetry(const tXCHAR *i_pName);
 
 
 #endif //P7_TELEMETRY_H

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -320,7 +320,7 @@ public:
             goto l_lblExit;
         }
 
-        swprintf_s(l_pName,
+        swprintf_s(l_pName, l_szName,
                    L"\\StringFileInfo\\%08x\\%s", 
                    (tUINT32)((*l_pCodePage) << 16 | (*l_pCodePage) >> 16),
                    i_pName

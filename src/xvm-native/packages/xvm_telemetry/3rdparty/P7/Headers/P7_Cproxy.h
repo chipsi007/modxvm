@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -23,7 +23,10 @@
 //                        +-------------------+                                /
 //                        |       Sink        |                                /
 //                        | * Network (Baical)|                                /
-//                        | * File            |                                /
+//                        | * FileBin         |                                /
+//                        | * FileTxt         |                                /
+//                        | * Console         |                                /
+//                        | * Syslog          |                                /
 //                        | * Auto            |                                /
 //                        | * Null            |                                /
 //                        +---------^---------+                                /
@@ -82,7 +85,7 @@ typedef void (__cdecl *fnConnect)(void *i_pContext, tBOOL i_bConnected);
 //N.B: P7 client in addition will analyze  your  application  command  line  and 
 //     arguments specified through command line will have higher  priority  then 
 //     i_sArgs arguments
-extern hP7_Client __cdecl P7_Client_Create(const tXCHAR *i_pArgs);
+extern P7_EXPORT hP7_Client __cdecl P7_Client_Create(const tXCHAR *i_pArgs);
 
 //dll/so function prototype
 typedef hP7_Client (__cdecl *fnP7_Client_Create)(const tXCHAR *i_pArgs);
@@ -94,7 +97,7 @@ typedef hP7_Client (__cdecl *fnP7_Client_Create)(const tXCHAR *i_pArgs);
 //If no instance was registered inside current process -  function  will  return 
 //NULL. Do not forget to call P7_Client_Free() when you finish your work.
 //See documentation for details.
-extern hP7_Client __cdecl P7_Client_Get_Shared(const tXCHAR *i_pName);
+extern P7_EXPORT hP7_Client __cdecl P7_Client_Get_Shared(const tXCHAR *i_pName);
 
 //dll/so function prototype
 typedef hP7_Client (__cdecl *fnP7_Client_Get_Shared)(const tXCHAR *i_pName);
@@ -104,9 +107,9 @@ typedef hP7_Client (__cdecl *fnP7_Client_Get_Shared)(const tXCHAR *i_pName);
 //P7_Client_Share - function to share current P7 client object in address  space 
 //of the current process, to get shared client use function P7_Client_Get_Shared
 //See documentation for details.
-extern tBOOL __cdecl P7_Client_Share(hP7_Client    i_hClient, 
-                                     const tXCHAR *i_pName
-                                    );
+extern P7_EXPORT tBOOL __cdecl P7_Client_Share(hP7_Client    i_hClient, 
+                                               const tXCHAR *i_pName
+                                              );
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Client_Share)(hP7_Client    i_hClient, 
                                            const tXCHAR *i_pName
@@ -116,7 +119,7 @@ typedef tBOOL (__cdecl *fnP7_Client_Share)(hP7_Client    i_hClient,
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Client_Add_Ref - increase reference counter for the client
 //See documentation for details.
-extern tINT32 __cdecl P7_Client_Add_Ref(hP7_Client i_hClient);
+extern P7_EXPORT tINT32 __cdecl P7_Client_Add_Ref(hP7_Client i_hClient);
 
 //dll/so function prototype
 typedef tINT32 (__cdecl *fnP7_Client_Add_Ref)(hP7_Client i_hClient);
@@ -125,7 +128,7 @@ typedef tINT32 (__cdecl *fnP7_Client_Add_Ref)(hP7_Client i_hClient);
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Client_Release - function release the client, reference counter  technology 
 //See documentation for details.
-extern tINT32 __cdecl P7_Client_Release(hP7_Client i_hClient);
+extern P7_EXPORT tINT32 __cdecl P7_Client_Release(hP7_Client i_hClient);
 
 //dll/so function prototype
 typedef tINT32 (__cdecl *fnP7_Client_Release)(hP7_Client i_hClient);
@@ -135,6 +138,28 @@ typedef tINT32 (__cdecl *fnP7_Client_Release)(hP7_Client i_hClient);
 ////////////////////////////////////////////////////////////////////////////////
 //                          P7 Crash processor                                //
 ////////////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////////////
+//This function setup crash handler to catch and process exceptions like 
+// * access violation/segmentation fault
+// * division by zero
+// * pure virtual call
+// * etc.
+//When crash occurs handler will call P7_Exceptional_Flush function automatically 
+extern P7_EXPORT void __cdecl P7_Set_Crash_Handler();
+
+//dll/so function prototype
+typedef void (__cdecl *fnP7_Set_Crash_Handler)();
+
+////////////////////////////////////////////////////////////////////////////////
+//This function clears crash handler
+extern P7_EXPORT void __cdecl P7_Clr_Crash_Handler();
+
+//dll/so function prototype
+typedef void (__cdecl *fnP7_Clr_Crash_Handler)();
+
+
+////////////////////////////////////////////////////////////////////////////////
 //Function allows to flush (deliver) not  delivered/saved  P7  buffers  for  all
 //opened clients and related channels owned by process in CASE OF your app/proc.
 //crash.
@@ -142,9 +167,10 @@ typedef tINT32 (__cdecl *fnP7_Client_Release)(hP7_Client i_hClient);
 //file/socket. 
 //Classical scenario: your application has been crushed, you catch the moment of
 //crush and call this function once.
+//Has to be used if integrator implements own crash handling mechanism.
 //N.B.: DO NOT USE OTHER P7 FUNCTION AFTER CALLING OF THIS FUNCTION
 //See documentation for details.
-extern void __cdecl P7_Exceptional_Flush();
+extern P7_EXPORT void __cdecl P7_Exceptional_Flush();
 
 //dll/so function prototype
 typedef void (__cdecl *fnP7_Exceptional_Flush)();
@@ -178,10 +204,10 @@ typedef struct
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Create - function create new instance of IP7_Telemetry object
 //See documentation for details.
-extern hP7_Telemetry __cdecl P7_Telemetry_Create(hP7_Client              i_hClient,
-                                                 const tXCHAR           *i_pName,
-                                                 const stTelemetry_Conf *i_pConf
-                                                );
+extern P7_EXPORT hP7_Telemetry __cdecl P7_Telemetry_Create(hP7_Client              i_hClient,
+                                                           const tXCHAR           *i_pName,
+                                                           const stTelemetry_Conf *i_pConf
+                                                          );
 
 //dll/so function prototype
 typedef hP7_Telemetry (__cdecl *fnP7_Telemetry_Create)(hP7_Client              i_hClient,
@@ -196,9 +222,9 @@ typedef hP7_Telemetry (__cdecl *fnP7_Telemetry_Create)(hP7_Client              i
 //space of the current process, to get shared client use function 
 //P7_Telemetry_Get_Shared
 //See documentation for details.
-extern tBOOL __cdecl P7_Telemetry_Share(hP7_Telemetry i_hTelemetry, 
-                                        const tXCHAR *i_pName
-                                       );
+extern P7_EXPORT tBOOL __cdecl P7_Telemetry_Share(hP7_Telemetry i_hTelemetry, 
+                                                  const tXCHAR *i_pName
+                                                 );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Telemetry_Share)(hP7_Telemetry i_hTelemetry, 
@@ -212,7 +238,7 @@ typedef tBOOL (__cdecl *fnP7_Telemetry_Share)(hP7_Telemetry i_hTelemetry,
 //current process - function will return NULL. Do not forget to call Release
 //on interface when you finish your work
 //See documentation for details.
-extern hP7_Telemetry __cdecl P7_Telemetry_Get_Shared(const tXCHAR *i_pName);
+extern P7_EXPORT hP7_Telemetry __cdecl P7_Telemetry_Get_Shared(const tXCHAR *i_pName);
 
 //dll/so function prototype
 typedef hP7_Telemetry (__cdecl *fnP7_Telemetry_Get_Shared)(const tXCHAR *i_pName);
@@ -223,14 +249,14 @@ typedef hP7_Telemetry (__cdecl *fnP7_Telemetry_Get_Shared)(const tXCHAR *i_pName
 //counters - 256, if you need more - we recommends you to create another telem.
 //channel using P7_Telemetry_Create() function
 //See documentation for details.
-extern tBOOL __cdecl P7_Telemetry_Create_Counter(hP7_Telemetry i_hTelemetry,
-                                                 const tXCHAR *i_pName, 
-                                                 tINT64        i_llMin,
-                                                 tINT64        i_llMax,
-                                                 tINT64        i_llAlarm,
-                                                 tUINT8        i_bOn,
-                                                 tUINT8       *o_pCounter_ID 
-                                                );
+extern P7_EXPORT tBOOL __cdecl P7_Telemetry_Create_Counter(hP7_Telemetry i_hTelemetry,
+                                                           const tXCHAR *i_pName, 
+                                                           tINT64        i_llMin,
+                                                           tINT64        i_llMax,
+                                                           tINT64        i_llAlarm,
+                                                           tUINT8        i_bOn,
+                                                           tUINT8       *o_pCounter_ID 
+                                                          );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Telemetry_Create_Counter)(hP7_Telemetry i_hTelemetry,
@@ -246,10 +272,10 @@ typedef tBOOL (__cdecl *fnP7_Telemetry_Create_Counter)(hP7_Telemetry i_hTelemetr
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Put_Value - add counter smaple value
 //See documentation for details.
-extern tBOOL __cdecl P7_Telemetry_Put_Value(hP7_Telemetry i_hTelemetry,
-                                            tUINT8        i_bCounter_ID,
-                                            tINT64        i_llValue
-                                            );
+extern P7_EXPORT tBOOL __cdecl P7_Telemetry_Put_Value(hP7_Telemetry i_hTelemetry,
+                                                      tUINT8        i_bCounter_ID,
+                                                      tINT64        i_llValue
+                                                      );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Telemetry_Put_Value)(hP7_Telemetry i_hTelemetry,
@@ -261,10 +287,10 @@ typedef tBOOL (__cdecl *fnP7_Telemetry_Put_Value)(hP7_Telemetry i_hTelemetry,
 ////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Find_Counter - find counter ID by name
 //See documentation for details.
-extern tBOOL __cdecl P7_Telemetry_Find_Counter(hP7_Telemetry i_hTelemetry,
-                                               const tXCHAR *i_pName,
-                                               tUINT8       *o_pCounter_ID
-                                              );
+extern P7_EXPORT tBOOL __cdecl P7_Telemetry_Find_Counter(hP7_Telemetry i_hTelemetry,
+                                                         const tXCHAR *i_pName,
+                                                         tUINT8       *o_pCounter_ID
+                                                        );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Telemetry_Find_Counter)(hP7_Telemetry i_hTelemetry,
@@ -276,7 +302,7 @@ typedef tBOOL (__cdecl *fnP7_Telemetry_Find_Counter)(hP7_Telemetry i_hTelemetry,
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Add_Ref - increase reference counter for the telemetry channel
 //See documentation for details.
-extern tINT32 __cdecl P7_Telemetry_Add_Ref(hP7_Telemetry i_hTelemetry);
+extern P7_EXPORT tINT32 __cdecl P7_Telemetry_Add_Ref(hP7_Telemetry i_hTelemetry);
 
 //dll/so function prototype
 typedef tINT32 (__cdecl *fnP7_Telemetry_Add_Ref)(hP7_Telemetry i_hTelemetry);
@@ -288,7 +314,7 @@ typedef tINT32 (__cdecl *fnP7_Telemetry_Add_Ref)(hP7_Telemetry i_hTelemetry);
 //program parts, and every instance has to be released to completely destroy the 
 //P7 telemetry object
 //See documentation for details.
-extern tINT32 __cdecl P7_Telemetry_Release(hP7_Telemetry i_hTelemetry);
+extern P7_EXPORT tINT32 __cdecl P7_Telemetry_Release(hP7_Telemetry i_hTelemetry);
 
 //dll/so function prototype
 typedef tINT32 (__cdecl *fnP7_Telemetry_Release)(hP7_Telemetry i_hTelemetry);
@@ -339,9 +365,9 @@ typedef void* hP7_Trace_Module;
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Create_Trace - function create new instance of IP7_Trace object
 //See documentation for details.
-extern hP7_Trace __cdecl P7_Trace_Create(hP7_Client    i_hClient,
-                                           const tXCHAR *i_pName
-                                          );
+extern P7_EXPORT hP7_Trace __cdecl P7_Trace_Create(hP7_Client    i_hClient,
+                                                   const tXCHAR *i_pName
+                                                  );
 
 //dll/so function prototype
 typedef hP7_Trace (__cdecl *fnP7_Trace_Create)(hP7_Client    i_hClient,
@@ -355,7 +381,7 @@ typedef hP7_Trace (__cdecl *fnP7_Trace_Create)(hP7_Client    i_hClient,
 //process - function will return NULL. Do not forget to call Release
 //on interface when you finish your work
 //See documentation for details.
-extern hP7_Trace __cdecl P7_Trace_Get_Shared(const tXCHAR *i_pName);
+extern P7_EXPORT hP7_Trace __cdecl P7_Trace_Get_Shared(const tXCHAR *i_pName);
 
 //dll/so function prototype
 typedef hP7_Trace (__cdecl *fnP7_Trace_Get_Shared)(const tXCHAR *i_pName);
@@ -366,9 +392,9 @@ typedef hP7_Trace (__cdecl *fnP7_Trace_Get_Shared)(const tXCHAR *i_pName);
 //the current process, to get shared trace channel use function 
 //P7_Trace_Get_Shared()
 //See documentation for details.
-extern tBOOL __cdecl P7_Trace_Share(hP7_Trace     i_hTrace, 
-                                    const tXCHAR *i_pName
-                                   );
+extern P7_EXPORT tBOOL __cdecl P7_Trace_Share(hP7_Trace     i_hTrace, 
+                                              const tXCHAR *i_pName
+                                             );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Trace_Share)(hP7_Trace     i_hTrace, 
@@ -381,10 +407,10 @@ typedef tBOOL (__cdecl *fnP7_Trace_Share)(hP7_Trace     i_hTrace,
 //with less priority will be rejected by channel. You may set  verbosity  online 
 //from Baical server
 //See documentation for details.
-extern void __cdecl P7_Trace_Set_Verbosity(hP7_Trace        i_hTrace, 
-                                           hP7_Trace_Module i_hModule, 
-                                           tUINT32          i_dwVerbosity
-                                          );
+extern P7_EXPORT void __cdecl P7_Trace_Set_Verbosity(hP7_Trace        i_hTrace, 
+                                                     hP7_Trace_Module i_hModule, 
+                                                     tUINT32          i_dwVerbosity
+                                                    );
 
 
 //dll/so function prototype
@@ -398,10 +424,10 @@ typedef void (__cdecl *fnP7_Trace_Set_Verbosity)(hP7_Trace        i_hTrace,
 //P7_Trace_Register_Thread - function used to specify name for current/special
 //thread.
 //See documentation for details.
-extern tBOOL __cdecl P7_Trace_Register_Thread(hP7_Trace     i_hTrace, 
-                                              const tXCHAR *i_pName,
-                                              tUINT32       i_dwThreadId
-                                             );
+extern P7_EXPORT tBOOL __cdecl P7_Trace_Register_Thread(hP7_Trace     i_hTrace, 
+                                                        const tXCHAR *i_pName,
+                                                        tUINT32       i_dwThreadId
+                                                       );
 
 
 //dll/so function prototype
@@ -415,9 +441,9 @@ typedef tBOOL (__cdecl *fnP7_Trace_Register_Thread)(hP7_Trace     i_hTrace,
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Unregister_Thread - function used to unregister current/special thread.
 //See documentation for details.
-extern tBOOL __cdecl P7_Trace_Unregister_Thread(hP7_Trace i_hTrace, 
-                                                tUINT32   i_dwThreadId
-                                               );
+extern P7_EXPORT tBOOL __cdecl P7_Trace_Unregister_Thread(hP7_Trace i_hTrace, 
+                                                          tUINT32   i_dwThreadId
+                                                         );
             
 
 //dll/so function prototype
@@ -431,9 +457,9 @@ typedef tBOOL (__cdecl *fnP7_Trace_Unregister_Thread)(hP7_Trace i_hTrace,
 //P7_Trace_Register_Module - function used to register module for following usage
 //by P7_Trace_Add/P7_Trace_Embedded/P7_Trace_Managed functions
 //See documentation for details.
-extern hP7_Trace_Module __cdecl P7_Trace_Register_Module(hP7_Trace     i_hTrace, 
-                                                         const tXCHAR *i_pName
-                                                        );
+extern P7_EXPORT hP7_Trace_Module __cdecl P7_Trace_Register_Module(hP7_Trace     i_hTrace, 
+                                                                   const tXCHAR *i_pName
+                                                                  );
 
 
 //dll/so function prototype
@@ -452,16 +478,16 @@ typedef hP7_Trace_Module (__cdecl *fnP7_Trace_Register_Module)(hP7_Trace     i_h
 //      functionality from other languages please call Trace_Managed()  function
 ////////////////////////////////////////////////////////////////////////////////
 //See documentation for details.
-extern tBOOL __cdecl P7_Trace_Add(hP7_Trace        i_hTrace,
-                                  tUINT16          i_wTrace_ID,   
-                                  tUINT32          i_dwLevel, 
-                                  hP7_Trace_Module i_hModule,
-                                  tUINT16          i_wLine,
-                                  const char      *i_pFile,
-                                  const char      *i_pFunction,
-                                  const tXCHAR    *i_pFormat,
-                                  ...
-                                  );
+extern P7_EXPORT tBOOL __cdecl P7_Trace_Add(hP7_Trace        i_hTrace,
+                                            tUINT16          i_wTrace_ID,   
+                                            tUINT32          i_dwLevel, 
+                                            hP7_Trace_Module i_hModule,
+                                            tUINT16          i_wLine,
+                                            const char      *i_pFile,
+                                            const char      *i_pFunction,
+                                            const tXCHAR    *i_pFormat,
+                                            ...
+                                            );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Trace_Add)(hP7_Trace        i_hTrace,
@@ -484,15 +510,16 @@ typedef tBOOL (__cdecl *fnP7_Trace_Add)(hP7_Trace        i_hTrace,
 //Usage scenario: you already have function with variable arguments, but body of 
 //your function may be replaced by Trace_Embedded.
 //See documentation for details.
-extern tBOOL __cdecl P7_Trace_Embedded(hP7_Trace        i_hTrace,
-                                       tUINT16          i_wTrace_ID,   
-                                       tUINT32          i_dwLevel, 
-                                       hP7_Trace_Module i_hModule,
-                                       tUINT16          i_wLine,
-                                       const char      *i_pFile,
-                                       const char      *i_pFunction,
-                                       const tXCHAR   **i_ppFormat
-                                      );
+extern P7_EXPORT tBOOL __cdecl P7_Trace_Embedded(hP7_Trace        i_hTrace,
+                                                 tUINT16          i_wTrace_ID,   
+                                                 tUINT32          i_dwLevel, 
+                                                 hP7_Trace_Module i_hModule,
+                                                 tUINT16          i_wLine,
+                                                 const char      *i_pFile,
+                                                 const char      *i_pFunction,
+                                                 const tXCHAR   **i_ppFormat,
+                                                 va_list         *i_pVa_List
+                                                );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Trace_Embedded)(hP7_Trace        i_hTrace,
@@ -502,7 +529,8 @@ typedef tBOOL (__cdecl *fnP7_Trace_Embedded)(hP7_Trace        i_hTrace,
                                              tUINT16          i_wLine,
                                              const char      *i_pFile,
                                              const char      *i_pFunction,
-                                             const tXCHAR   **i_ppFormat
+                                             const tXCHAR   **i_ppFormat,
+                                             va_list         *i_pVa_List
                                             );
 
 
@@ -511,15 +539,15 @@ typedef tBOOL (__cdecl *fnP7_Trace_Embedded)(hP7_Trace        i_hTrace,
 //This function is intended for use by MANAGED languages like C#, Python, etc
 //It is slightly slower than P7_Trace_Add.
 //See documentation for details.
-extern tBOOL __cdecl P7_Trace_Managed(hP7_Trace        i_hTrace,
-                                      tUINT16          i_wTrace_ID,   
-                                      tUINT32          i_dwLevel,
-                                      hP7_Trace_Module i_hModule,
-                                      tUINT16          i_wLine,
-                                      const tXCHAR    *i_pFile,
-                                      const tXCHAR    *i_pFunction,
-                                      const tXCHAR    *i_pMessage
-                                     );
+extern P7_EXPORT tBOOL __cdecl P7_Trace_Managed(hP7_Trace        i_hTrace,
+                                                tUINT16          i_wTrace_ID,   
+                                                tUINT32          i_dwLevel,
+                                                hP7_Trace_Module i_hModule,
+                                                tUINT16          i_wLine,
+                                                const tXCHAR    *i_pFile,
+                                                const tXCHAR    *i_pFunction,
+                                                const tXCHAR    *i_pMessage
+                                               );
 
 //dll/so function prototype
 typedef tBOOL (__cdecl *fnP7_Trace_Managed)(hP7_Trace        i_hTrace,
@@ -536,7 +564,7 @@ typedef tBOOL (__cdecl *fnP7_Trace_Managed)(hP7_Trace        i_hTrace,
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Add_Ref - increase reference counter for the telemetry channel
 //See documentation for details.
-extern tINT32 __cdecl P7_Trace_Add_Ref(hP7_Trace i_hTrace);
+extern P7_EXPORT tINT32 __cdecl P7_Trace_Add_Ref(hP7_Trace i_hTrace);
 
 //dll/so function prototype
 typedef tINT32 (__cdecl *fnP7_Trace_Add_Ref)(hP7_Trace i_hTrace);
@@ -548,7 +576,7 @@ typedef tINT32 (__cdecl *fnP7_Trace_Add_Ref)(hP7_Trace i_hTrace);
 //program parts, and every instance has to be released to completely destroy the 
 //P7 trace object
 //See documentation for details.
-extern tINT32 __cdecl P7_Trace_Release(hP7_Trace i_hTrace);
+extern P7_EXPORT tINT32 __cdecl P7_Trace_Release(hP7_Trace i_hTrace);
 
 //dll/so function prototype
 typedef tINT32 (__cdecl *fnP7_Trace_Release)(hP7_Trace i_hTrace);

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -23,16 +23,15 @@
 #define TRACE_H
 
 #define P7TRACE_ITEM_BLOCK_ASTRING                                          (-1)
-#define P7TRACE_ITEM_BLOCK_WSTRING                                          (-2)
-#define P7TRACE_ITEM_BLOCK_USTRING                                          (-3)
-#define P7TRACE_ITEM_BLOCK_12BYTES                                          (-4)
+#define P7TRACE_ITEM_BLOCK_USTRING16                                        (-2)
+#define P7TRACE_ITEM_BLOCK_USTRING8                                         (-3)
+#define P7TRACE_ITEM_BLOCK_USTRING32                                        (-4)
 
 #define P7TRACE_KEY_LENGTH                                                   (2)
 
 //#define P7TRACE_MAP_FILE_NAME                                  L"Local\\P7Trace"
 //#define P7TRACE_MAP_FILE_SIZE          (sizeof(CP7Trace*) + sizeof(IP7_Client*))
 
-#define P7TRACE_FLAG_STACK_64BITS_ALIGNMENT                       (0x00000001ul)
 #define P7TRACE_THREADS_POOL_SIZE                                           (32)
 #define P7TRACE_THREADS_MAX_SIZE                                           (128)
 
@@ -50,6 +49,7 @@ public:
         eFileName,
         eFunctionName,
         eArguments,
+        eVaValues,
         eCount
     };
 
@@ -66,7 +66,7 @@ protected:
         size_t  szBuffer;
     };
 
-    sBlock *m_pCurrent; //dynamic, eternal buffers - allocated once
+    sBlock *m_pCurrent; //dynamic, internal buffers - allocated once
     size_t  m_szCurrent;
     size_t  m_szCurrentUsed;
     size_t  m_szTotal;
@@ -171,10 +171,11 @@ public:
         }
         else if ((m_szTotal + i_szBuffer) <= m_szMax)
         {
-            sBlock *l_pTemp = m_pCurrent;
-            m_pCurrent      = m_pCurrent->pNext;
-            l_pTemp->pNext  = m_pBusy;
-            m_pBusy         = l_pTemp;
+            //add current buffer to busy queue
+            m_pCurrent->pNext = m_pBusy;
+            m_pBusy           = m_pCurrent;
+
+            //allocate new buffer
             m_szCurrentUsed = 0;
             m_szCurrent     = (i_szBuffer <= m_szRecommended) ? m_szRecommended : i_szBuffer;
             m_pCurrent      = (sBlock*)malloc(sizeof(sBlock) + m_szCurrent);
@@ -236,10 +237,12 @@ class CP7Trace_Desc
     //value from IP7_Client are different - it mean we loose connection
     tUINT32        m_dwResets; 
     tUINT32        m_dwSize;
-    tUINT8        *m_pBuffer;//Buffer will contain sP7T_Header_Desc
+    tUINT8        *m_pBuffer;//Buffer will contain sP7Trace_Format
 
     tINT32        *m_pBlocks;
     tINT32         m_dwBlocks_Count;
+    sP7Trace_Arg  *m_pArgs;
+    tUINT32        m_dwArgs_Count;
 
     tKeyType       m_pKey[P7TRACE_KEY_LENGTH]; 
 
@@ -271,7 +274,8 @@ public:
     tINT32  *Get_Blocks(tUINT32 *o_pCount);
     void     Set_Resets(tUINT32 i_dwDrops);
     tUINT32  Get_Resets();
-
+    tUINT32  Get_Arguments_Count();
+    const sP7Trace_Arg *Get_Arguments(tUINT32 &o_rCount);
     tBOOL    Is_Equal(tKeyType *i_pKey);
     tBOOL    Is_Greater(tKeyType *i_pKey);
 
@@ -388,9 +392,23 @@ class CP7Trace:
 {
     struct sStack_Desc
     {
-        size_t szOffset;
-        size_t szPattern;
-        tUINT8 pPattern[8];
+        enum eType
+        {
+            eTypeU32,
+            eTypeU64,
+            eTypeD64
+        };
+
+        union uVal
+        {
+            tUINT32 dw32;
+            tUINT64 dw64;
+            tDOUBLE db64;
+        };
+
+        CP7Trace::sStack_Desc::uVal  uValue;
+        CP7Trace::sStack_Desc::eType eType;
+        tBOOL bLast;
     };
 
     typedef sData_Block<sP7Trace_Thread_Start> sThreadsR; //running threads
@@ -438,16 +456,19 @@ class CP7Trace:
 
     CShared::hShared   m_hShared;
     CMemoryManager     m_cMemory;
+
+    tUINT8            *m_pVargs;
+    size_t             m_szVargs;
 public:
     CP7Trace(IP7_Client *i_pClient, const tXCHAR *i_pName); //for arguments description see P7_Client.h
     virtual ~CP7Trace();
 
     tBOOL Is_Initialized();
 
-    void On_Init(sP7C_Channel_Info *i_pInfo);
-    void On_Receive(tUINT32 i_dwChannel, tUINT8 *i_pBuffer, tUINT32 i_dwSize);
-    void On_Status(tUINT32 i_dwChannel, const sP7C_Status *i_pStatus);
-    void On_Flush(tUINT32 i_dwChannel, tBOOL *io_pCrash);
+    void  On_Init(sP7C_Channel_Info *i_pInfo);
+    void  On_Receive(tUINT32 i_dwChannel, tUINT8 *i_pBuffer, tUINT32 i_dwSize);
+    void  On_Status(tUINT32 i_dwChannel, const sP7C_Status *i_pStatus);
+    void  On_Flush(tUINT32 i_dwChannel, tBOOL *io_pCrash);
 
     tBOOL Register_Thread(const tXCHAR *i_pName, tUINT32 i_dwThreadId);
     tBOOL Unregister_Thread(tUINT32 i_dwThreadId);
@@ -473,6 +494,16 @@ public:
                          const char        *i_pFile,
                          const char        *i_pFunction,
                          const tXCHAR     **i_ppFormat
+                        );
+
+    tBOOL Trace_Embedded(tUINT16            i_wTrace_ID,   
+                         eP7Trace_Level     i_eLevel, 
+                         IP7_Trace::hModule i_hModule,
+                         tUINT16            i_wLine,
+                         const char        *i_pFile,
+                         const char        *i_pFunction,
+                         const tXCHAR     **i_ppFormat,
+                         va_list           *i_pVa_List
                         );
 
     tBOOL Trace_Managed(tUINT16            i_wTrace_ID,   
@@ -503,21 +534,22 @@ public:
     tBOOL Share(const tXCHAR *i_pName);
 
 private:
-    void    Flush();
+    void  Flush();
 
-    tBOOL   Trace_Raw(tUINT16            i_wTrace_ID,   
-                      eP7Trace_Level     i_eLevel, 
-                      IP7_Trace::hModule i_hModule,
-                      tUINT16            i_wLine,
-                      const char        *i_pFile,
-                      const char        *i_pFunction,
-                      tKeyType          *i_pKey,
-                      const tXCHAR     **i_ppFormat
-                  );
+    tBOOL Trace_Raw(tUINT16            i_wTrace_ID,   
+                    eP7Trace_Level     i_eLevel, 
+                    IP7_Trace::hModule i_hModule,
+                    tUINT16            i_wLine,
+                    const char        *i_pFile,
+                    const char        *i_pFunction,
+                    tKeyType          *i_pKey,
+                    const tXCHAR     **i_ppFormat,
+                    va_list           *i_pVa_List
+                );
 
-    tBOOL   Inc_Chunks(tUINT32 i_dwInc);
+    tBOOL Inc_Chunks(tUINT32 i_dwInc);
 
-    tUINT32 Get_Stack_Alignment(const CP7Trace::sStack_Desc *i_pDesc, ...);
+    tBOOL Is_VarArgs(const CP7Trace::sStack_Desc *i_pDesc, ...);
 };
 
 #endif //TRACE_H

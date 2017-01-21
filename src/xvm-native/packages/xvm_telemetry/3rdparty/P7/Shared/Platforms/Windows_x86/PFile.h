@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -37,7 +37,7 @@ public:
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    ~CPFile()
+    virtual ~CPFile()
     {
         Close(FALSE);
     }
@@ -204,7 +204,6 @@ public:
 
         size_t  l_szReturn   = 0;
         DWORD   l_dwWritten = 0;
-        int     l_iError    = 0;
 
         while (l_szReturn < i_szBuffer)
         {

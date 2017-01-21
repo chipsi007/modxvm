@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -67,7 +67,7 @@
     //http://lxr.free-electrons.com/source/arch/arm/include/asm/atomic.h 
 
     #define ATOMIC_ADD(ptr, val) \
-         ({ volatile register tINT32 *__ptr asm("r2") = (ptr); \
+         __extension__ ({ volatile register tINT32 *__ptr asm("r2") = (ptr); \
             register tINT32 __result asm("r1"); \
             asm volatile ( \
                 "1: @ atomic_add\n\t" \
@@ -84,7 +84,7 @@
 
 
     #define ATOMIC_SUB(ptr, val) \
-         ({ volatile register tINT32 *__ptr asm("r2") = (ptr); \
+         __extension__ ({ volatile register tINT32 *__ptr asm("r2") = (ptr); \
             register tINT32 __result asm("r1"); \
             asm volatile ( \
                 "1: @ atomic_add\n\t" \
@@ -102,7 +102,7 @@
 //#ifdef __ARM_ARCH_5TEJ__
 #elif defined(__ARM_ARCH_7A__) || defined(__ARM_ARCH_7__) || defined(__ARM_ARCH_6__) 
     #define ATOMIC_ADD(ptr, val) \
-        ({ int32_t tmp; \
+        __extension__ ({ int32_t tmp; \
            int result; \
            __asm__ __volatile__("@ atomic_add\n" \
           "1:	ldrex	%0, [%3]\n" \
@@ -116,7 +116,7 @@
         result;})
     
     #define ATOMIC_SUB(ptr, val) \
-        ({ unsigned long tmp; \
+        __extension__ ({ unsigned long tmp; \
            int result; \
           __asm__ __volatile__("@ atomic_sub\n" \
           "1:	ldrex	%0, [%3]\n" \

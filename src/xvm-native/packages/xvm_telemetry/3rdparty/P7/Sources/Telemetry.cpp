@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -33,11 +33,19 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Create_Telemetry
-IP7_Telemetry * __cdecl P7_Create_Telemetry(IP7_Client             *i_pClient, 
-                                            const tXCHAR           *i_pName, 
-                                            const stTelemetry_Conf *i_pConf
-                                           )
+P7_EXPORT IP7_Telemetry * __cdecl P7_Create_Telemetry(IP7_Client             *i_pClient, 
+                                                      const tXCHAR           *i_pName, 
+                                                      const stTelemetry_Conf *i_pConf
+                                                      )
 {
+    //telemetry isn't supported by next sinks
+    if (    (!i_pClient)
+         || (IP7_Client::eText <= i_pClient->Get_Type())
+       )
+    {
+        return NULL;
+    }
+
     //Check parameters
     if (i_pConf)
     {
@@ -70,7 +78,7 @@ IP7_Telemetry * __cdecl P7_Create_Telemetry(IP7_Client             *i_pClient,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Get_Shared_Trace
-IP7_Telemetry * __cdecl P7_Get_Shared_Telemetry(const tXCHAR *i_pName)
+P7_EXPORT IP7_Telemetry * __cdecl P7_Get_Shared_Telemetry(const tXCHAR *i_pName)
 {
     IP7_Telemetry *l_pReturn = NULL;
     tUINT32        l_dwLen1  = PStrLen(TELEMETRY_SHARED_PREFIX);

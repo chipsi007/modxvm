@@ -5,6 +5,7 @@ option(P7_BUILD_SHARED "build shared version" ON)
 
 set(SOURCES "Sources/ClBaical.cpp"
             "Sources/ClFile.cpp"
+            "Sources/ClText.cpp"
             "Sources/Client.cpp"
             "Sources/ClNull.cpp"
             "Sources/CRC32.cpp"
@@ -13,8 +14,7 @@ set(SOURCES "Sources/ClBaical.cpp"
             "Sources/Trace.cpp")
 
 if(WIN32)
-  set(RESOURCES "Sources/P7Client.def"
-                "Sources/P7Client.rc")
+  set(RESOURCES "Sources/P7Client.rc")
 else()
   set(RESOURCES "")
 endif()

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -30,6 +30,31 @@
 #define P7_TRACE_H
 
 #include "P7_Client.h"
+#include <stdarg.h> 
+
+#define TRACE_DEFAULT_SHARED_NAME                                 TM("P7.Trace")
+
+////////////////////////////////////////////////////////////////////////////////
+//P7.Trace uses optimization to read variable arguments directly from the stack/
+//but some systems optimizes storing of var.args  and  uses processor resistors/ 
+//stack re-ordering, extra-padding and other techniques, so if you detect than /
+//library print wrong values - please activate this macro  manually  for  your /
+//platform/project                                                             /
+////////////////////////////////////////////////////////////////////////////////
+//#define P7TRACE_NO_VA_ARG_OPTIMIZATION
+
+//disable va_arg optimization for Linux, too many ways how GCC + Linux uses 
+//stack and registers to store va_arg
+#if defined(__linux__)
+    #define P7TRACE_NO_VA_ARG_OPTIMIZATION
+#endif
+
+////////////////////////////////////////////////////////////////////////////////
+//in some platforms access to 64 not aligned variable is  illegal,  if  it  the/ 
+//case please active the macro                                                 /
+////////////////////////////////////////////////////////////////////////////////
+//#define P7TRACE_64BITS_ALIGNED_ACCESS
+
 
 ////////////////////////////////////////////////////////////////////////////////
 enum eP7Trace_Level
@@ -41,7 +66,7 @@ enum eP7Trace_Level
     EP7TRACE_LEVEL_ERROR           ,
     EP7TRACE_LEVEL_CRITICAL        ,
 
-    EP7TRACE_LEVEL_COUNT           ,
+    EP7TRACE_LEVEL_COUNT
 };
 
 
@@ -194,7 +219,10 @@ public:
                        )                                                    = 0;
 
     ////////////////////////////////////////////////////////////////////////////
-    //Trace_Embedded - send trace message to Baical server.
+    //N.B: FUNCTION IS OBSOLETE,                                              //
+    //     Please use instead function Trace_Embedded(..., va_list*)          //
+    ////////////////////////////////////////////////////////////////////////////
+    //Trace_Embedded - send trace message
     //this function is a copy of Trace function, but it is dedicated to embedded 
     //usage (you already have function with variable arguments, but body of your
     //function may be replaced by Trace_Embedded).
@@ -209,7 +237,23 @@ public:
                                 )                                           = 0;
 
     ////////////////////////////////////////////////////////////////////////////
-    //Trace_Managed - send trace message to Baical server.
+    //Trace_Embedded - send trace message
+    //this function is a copy of Trace function, but it is dedicated to embedded 
+    //usage (you already have function with variable arguments, but body of your
+    //function may be replaced by Trace_Embedded).
+    //See documentation for details.
+    virtual tBOOL Trace_Embedded(tUINT16            i_wTrace_ID,   
+                                 eP7Trace_Level     i_eLevel, 
+                                 IP7_Trace::hModule i_hModule,
+                                 tUINT16            i_wLine,
+                                 const char        *i_pFile,
+                                 const char        *i_pFunction,
+                                 const tXCHAR     **i_ppFormat,
+                                 va_list           *i_pVa_List
+                                )                                           = 0;
+
+    ////////////////////////////////////////////////////////////////////////////
+    //Trace_Managed - send trace message
     //this function is intended for use by MANAGED languages like C#,python, etc
     //See documentation for details.
     virtual tBOOL Trace_Managed(tUINT16            i_wTrace_ID,   
@@ -226,9 +270,9 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Create_Trace - function create new instance of IP7_Trace object
 //See documentation for details.
-extern "C" IP7_Trace * __cdecl P7_Create_Trace(IP7_Client   *i_pClient,
-                                               const tXCHAR *i_pName
-                                              );
+extern "C" P7_EXPORT IP7_Trace * __cdecl P7_Create_Trace(IP7_Client   *i_pClient,
+                                                         const tXCHAR *i_pName
+                                                         );
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -237,6 +281,6 @@ extern "C" IP7_Trace * __cdecl P7_Create_Trace(IP7_Client   *i_pClient,
 //current process - function will return NULL. Do not forget to call Release
 //on interface when you finish your work.
 //See documentation for details.
-extern "C" IP7_Trace  * __cdecl P7_Get_Shared_Trace(const tXCHAR *i_pName);
+extern "C" P7_EXPORT IP7_Trace  * __cdecl P7_Get_Shared_Trace(const tXCHAR *i_pName);
 
 #endif //P7_TRACE_H

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -558,7 +558,6 @@ private:
         BOOL  l_bResult    = TRUE;
         DWORD l_dwReturned = 0;
         DWORD l_dwWriten   = 0;
-        DWORD l_dwSize     = 0;
 
         if ( (0 >= i_dwSize) || (NULL == i_pBuffer) )
         {
@@ -589,7 +588,7 @@ private:
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    BOOL Remove_Old_Journals(wchar_t *i_pFolder, DWORD i_dwMax_Files, wchar_t *i_pExtension) 
+    BOOL Remove_Old_Journals(wchar_t *i_pFolder, DWORD i_dwMax_Files, const wchar_t *i_pExtension) 
     {
         wchar_t          l_pFileName[ MAX_PATH ] = L"9999";
         DWORD            l_dwPrev_Error_Mode = 0;
@@ -654,7 +653,7 @@ private:
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    ~CJournal() //use Release() instead
+    virtual ~CJournal() //use Release() instead
     {
         if (m_hThread)
         {

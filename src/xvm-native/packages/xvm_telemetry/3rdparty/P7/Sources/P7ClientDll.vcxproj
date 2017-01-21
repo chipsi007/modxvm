@@ -114,7 +114,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>P7Client.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -137,7 +138,8 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>P7Client.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -165,7 +167,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>P7Client.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -193,7 +196,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>Ws2_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <ModuleDefinitionFile>P7Client.def</ModuleDefinitionFile>
+      <ModuleDefinitionFile>
+      </ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
       <Command>
@@ -214,6 +218,7 @@
     <ClInclude Include="ClFile.h" />
     <ClInclude Include="Client.h" />
     <ClInclude Include="ClNull.h" />
+    <ClInclude Include="ClText.h" />
     <ClInclude Include="Common.h" />
     <ClInclude Include="CommonClient.h" />
     <ClInclude Include="PacketsPool.h" />
@@ -229,6 +234,7 @@
     <ClCompile Include="ClFile.cpp" />
     <ClCompile Include="Client.cpp" />
     <ClCompile Include="ClNull.cpp" />
+    <ClCompile Include="ClText.cpp" />
     <ClCompile Include="CRC32.cpp" />
     <ClCompile Include="Proxy.cpp" />
     <ClCompile Include="Telemetry.cpp" />

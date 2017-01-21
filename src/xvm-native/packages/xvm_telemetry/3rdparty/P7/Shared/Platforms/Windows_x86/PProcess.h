@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -17,7 +17,6 @@
 //                                                                             /
 ////////////////////////////////////////////////////////////////////////////////
 #pragma once
-
 
 class CProc
 {
@@ -122,6 +121,26 @@ public:
 
 
     ////////////////////////////////////////////////////////////////////////////////
+    //Get_Process_Name
+    static tBOOL Get_Process_Name(tACHAR *o_pName, tINT32 i_iMax_Len)
+    {
+        const tINT32 l_iSize = 128;
+        tWCHAR       l_pName[l_iSize];
+
+        if (Get_Process_Name(l_pName, l_iSize))
+        {
+            Convert_UTF16_To_UTF8(l_pName, o_pName, (tUINT32)i_iMax_Len);
+        }
+        else
+        {
+            strcpy_s(o_pName, (rsize_t)i_iMax_Len, "Unknown:Error");
+        }
+
+        return true;
+    }//Get_Process_Name
+
+
+    ////////////////////////////////////////////////////////////////////////////////
     //Get_Process_Path
     static tBOOL Get_Process_Path(tXCHAR *o_pPath, size_t i_szName)
     {
@@ -175,7 +194,7 @@ public:
     //Get_Processor
     static __forceinline tUINT32 Get_Processor()
     {
-        #if defined(GTX64)
+        #if defined(GTX64) || !defined(_MSC_VER)
            //return 0xFFFF; //don't know how to get processor number ... yet.
            return GetCurrentProcessorNumber();
         #else

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -25,7 +25,7 @@ enum eMEvent_Type
 {
     EMEVENT_SINGLE_AUTO         = 0,
     EMEVENT_SINGLE_MANUAL          ,
-    EMEVENT_MULTI                  ,
+    EMEVENT_MULTI
 };
 
 

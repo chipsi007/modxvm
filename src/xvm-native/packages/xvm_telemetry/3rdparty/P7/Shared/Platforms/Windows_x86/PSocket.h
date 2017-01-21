@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -20,7 +20,7 @@
 
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <Mswsock.h>
+#include <mswsock.h>
 
 //256k
 #define CLIENT_RECV_BUFFER_SIZE                                        (0x40000) 
@@ -59,7 +59,7 @@ typedef addrinfoW   tADDR_INFO;
 
 ////////////////////////////////////////////////////////////////////////////////
 //WSA_Init
-static tBOOL WSA_Init()
+static inline tBOOL WSA_Init()
 {
     WSADATA l_tWSA;
     
@@ -73,7 +73,7 @@ static tBOOL WSA_Init()
 
 ////////////////////////////////////////////////////////////////////////////////
 //WSA_UnInit
-static void WSA_UnInit()
+static inline void WSA_UnInit()
 {
     WSACleanup();
 }//WSA_UnInit
@@ -121,18 +121,18 @@ static tBOOL Disable_PortUnreachable_ICMP(tSOCKET i_hSocket)
 {
     tUINT32  l_dwBytesReturned = 0;
     tBOOL    l_bNewBehavior    = FALSE;
-    tUINT32  l_dwStatus        = 0;
+    tINT32   l_iStatus         = 0;
     
     
-    l_dwStatus = WSAIoctl(i_hSocket, 
-                          SIO_UDP_CONNRESET,
-                          &l_bNewBehavior, 
-                          sizeof(l_bNewBehavior),
-                          NULL, 
-                          0,
-                          (LPDWORD)&l_dwBytesReturned,
-                          NULL,
-                          NULL
-                         );
-    return (SOCKET_ERROR == l_dwStatus) ? FALSE : TRUE;
+    l_iStatus = WSAIoctl(i_hSocket, 
+                         SIO_UDP_CONNRESET,
+                         &l_bNewBehavior, 
+                         sizeof(l_bNewBehavior),
+                         NULL, 
+                         0,
+                         (LPDWORD)&l_dwBytesReturned,
+                         NULL,
+                         NULL
+                        );
+    return (SOCKET_ERROR == l_iStatus) ? FALSE : TRUE;
 }//Disable_PortUnreachable_ICMP
