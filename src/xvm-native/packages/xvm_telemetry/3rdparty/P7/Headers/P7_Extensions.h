@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -42,19 +42,25 @@
 #define P7TRACE_INFO_FLAG_BIG_ENDIAN                                    (0x0001)
 #define P7TRACE_INFO_FLAG_UNSORTED                                      (0x0002)
 
-#define P7TRACE_ARG_TYPE_CHAR                                             (0x01)
-#define P7TRACE_ARG_TYPE_WCHAR                                            (0x02)
-#define P7TRACE_ARG_TYPE_INT16                                            (0x03)
-#define P7TRACE_ARG_TYPE_INT32                                            (0x04)
-#define P7TRACE_ARG_TYPE_INT64                                            (0x05)
-#define P7TRACE_ARG_TYPE_DOUBLE                                           (0x06)
-#define P7TRACE_ARG_TYPE_PVOID                                            (0x07)
-//unicode - UTF16 string
-#define P7TRACE_ARG_TYPE_WSTR                                             (0x08)
-//ASCII string
-#define P7TRACE_ARG_TYPE_ASTR                                             (0x09)
-//unicode - UTF8 string
-#define P7TRACE_ARG_TYPE_USTR                                             (0x0A)
+enum eTrace_Arg_Type
+{
+    P7TRACE_ARG_TYPE_UNK    = 0x00,
+    P7TRACE_ARG_TYPE_CHAR   = 0x01,
+    P7TRACE_ARG_TYPE_INT8   = 0x01,
+    P7TRACE_ARG_TYPE_CHAR16  ,//(0x02)
+    P7TRACE_ARG_TYPE_INT16   ,//(0x03)
+    P7TRACE_ARG_TYPE_INT32   ,//(0x04)
+    P7TRACE_ARG_TYPE_INT64   ,//(0x05)
+    P7TRACE_ARG_TYPE_DOUBLE  ,//(0x06)
+    P7TRACE_ARG_TYPE_PVOID   ,//(0x07)
+    P7TRACE_ARG_TYPE_USTR16  ,//(0x08) //unicode - UTF16 string 
+    P7TRACE_ARG_TYPE_STRA    ,//(0x09) //ASCII string           
+    P7TRACE_ARG_TYPE_USTR8   ,//(0x0A) //unicode - UTF8 string  
+    P7TRACE_ARG_TYPE_USTR32  ,//(0x0B) //unicode - UTF32 string  
+    P7TRACE_ARG_TYPE_CHAR32  ,//(0x0C)
+
+    P7TRACE_ARGS_COUNT
+};
 
 
 #if defined(GTX64)

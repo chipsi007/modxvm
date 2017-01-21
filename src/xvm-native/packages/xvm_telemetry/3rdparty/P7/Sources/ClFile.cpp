@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -46,7 +46,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 //CClFile()
 CClFile::CClFile(tXCHAR **i_pArgs, tINT32 i_iCount)
-    : CClient(i_pArgs, i_iCount)
+    : CClient(IP7_Client::eFileBin, i_pArgs, i_iCount)
     , m_lReject_Mem(0)
     , m_lReject_Con(0)
     , m_lReject_Int(0)
@@ -92,7 +92,6 @@ CClFile::CClFile(tXCHAR **i_pArgs, tINT32 i_iCount)
     {
         Init_Crash_Handler(i_pArgs, i_iCount);
     }
-
 }//CClFile()
 
 
@@ -159,7 +158,7 @@ eClient_Status CClFile::Init_Base(tXCHAR **i_pArgs,
                              );
     #else
         PStrCpy((tXCHAR*)m_cHeader.pProcess_Name,
-                LENGTH(m_cHeader.pProcess_Name), 
+                P7_DAMP_FILE_PROCESS_LENGTH, 
                 l_pArg_Value
                );
     #endif                             

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -428,23 +428,22 @@ public:
 
     ////////////////////////////////////////////////////////////////////////////////
     //Get_Process_Name
-    static tBOOL Get_Process_Name(tWCHAR *o_pName, tINT32 i_iMax_Len)
+    static tBOOL Get_Process_Name(tACHAR *o_pName, tINT32 i_iMax_Len)
     {
-        int   l_iLen    = 4096;
         int   l_iRead   = 0;
-        char *l_pBuffer = new char[l_iLen];
         char *l_pName   = NULL;
+        char *l_pDst    = o_pName;
         tBOOL l_bReturn = FALSE;
 
         if (    (NULL == o_pName)
             || (32   >= i_iMax_Len)
-            || (NULL == l_pBuffer)   
+            || (NULL == o_pName)
         )
         {
             goto l_lblExit;
         }
 
-        l_iRead = readlink("/proc/self/exe", l_pBuffer, i_iMax_Len - 1);
+        l_iRead = readlink("/proc/self/exe", o_pName, i_iMax_Len - 1);
         if (0 >= l_iRead) 
         {
             // I guess we're not running on the right version of unix
@@ -456,11 +455,11 @@ public:
             l_iRead = i_iMax_Len - 1;
         }
 
-        l_pBuffer[l_iRead] = '\0';
+        o_pName[l_iRead] = '\0';
 
-        l_pName = l_pBuffer + l_iRead;
+        l_pName = o_pName + l_iRead;
 
-        while (l_pName != l_pBuffer)
+        while (l_pName != o_pName)
         {
             if (    ('/' == *l_pName)
                 || ('\\' == *l_pName)   
@@ -475,24 +474,36 @@ public:
             }
         }
 
-        if (strlen(l_pName) >= (tUINT32)i_iMax_Len)
+        while (*l_pName)
         {
-            //not enough space in target buffer
-            goto l_lblExit;
+            *l_pDst++=*l_pName++;
         }
+        *l_pDst = 0;
 
         l_bReturn = TRUE;
 
     l_lblExit:
+        return l_bReturn;
+    }//Get_Process_Name
 
-        if (TRUE == l_bReturn)
+    ////////////////////////////////////////////////////////////////////////////////
+    //Get_Process_Name
+    static tBOOL Get_Process_Name(tWCHAR *o_pName, tINT32 i_iMax_Len)
         {
-            //strcpy(o_pName, l_pName);
-            Convert_UTF8_To_UTF16(l_pName, o_pName, i_iMax_Len);
+        int   l_iLen    = 4096;
+        char *l_pBuffer = new char[l_iLen];
+        tBOOL l_bReturn = FALSE;
+
+
+        if (    (l_pBuffer)
+             && (Get_Process_Name(l_pBuffer, l_iLen))
+           )
+        {
+            l_bReturn = TRUE;
+            Convert_UTF8_To_UTF16(l_pBuffer, o_pName, i_iMax_Len);
         }
         else
         {
-            //strcpy(o_pName, "Unknown");
             Convert_UTF8_To_UTF16("Unknown", o_pName, i_iMax_Len);
         }
     
@@ -503,25 +514,6 @@ public:
         }
 
         return l_bReturn;
-
-        //const tUINT32  l_dwMax_Len     = 32768;
-        //tXCHAR     *l_pProcess_Path = new tXCHAR[l_dwMax_Len];
-        //tXCHAR     *l_pProcess_Name = NULL;
-        //
-        //if (    (l_pProcess_Path)
-        //        && (GetModuleFileNameW(GetModuleHandleW(NULL), 
-        //                            l_pProcess_Path, 
-        //                            l_dwMax_Len)
-        //                            )
-        //    )
-        //{
-        //    if (    (l_pProcess_Name = wcsrchr(l_pProcess_Path, L'\\'))
-        //            || (l_pProcess_Name = wcsrchr(l_pProcess_Path, L'/'))
-        //        )
-        //    {
-        //        l_pProcess_Name ++;
-        //    }
-        //}
     }//Get_Process_Name
 
 

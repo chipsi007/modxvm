@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -33,7 +33,7 @@ class CShared
     {
         ETYPE_MUTEX   = 0,
         ETYPE_FILE       ,
-        ETYPE_MAX        ,
+        ETYPE_MAX        
     };
 
 public:
@@ -44,7 +44,7 @@ public:
         E_OK,
         E_TIMEOUT,
         E_ERROR,
-        E_NOT_EXISTS,
+        E_NOT_EXISTS
     };
 
     ////////////////////////////////////////////////////////////////////////////
@@ -197,11 +197,9 @@ public:
                      )
     {
         HANDLE   l_hMemory  = NULL;
-        HANDLE   l_hMutex   = NULL;
         tBOOL    l_bReturn  = TRUE;
         DWORD    l_dwLen    = 0;
         wchar_t *l_pName    = NULL;
-        BOOL     l_bRelease = FALSE;
         tUINT8  *l_pBuffer  = NULL;
 
         if (    (NULL == i_pName)
@@ -296,11 +294,9 @@ public:
                       )
     {
         HANDLE   l_hMemory  = NULL;
-        HANDLE   l_hMutex   = NULL;
         tBOOL    l_bReturn  = TRUE;
         DWORD    l_dwLen    = 0;
         wchar_t *l_pName    = NULL;
-        BOOL     l_bRelease = FALSE;
         tUINT8  *l_pBuffer  = NULL;
 
         if (    (NULL == i_pName)

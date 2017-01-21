@@ -9,6 +9,7 @@
     <ClCompile Include="ClNull.cpp" />
     <ClCompile Include="ClFile.cpp" />
     <ClCompile Include="Proxy.cpp" />
+    <ClCompile Include="ClText.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client.h">
@@ -65,6 +66,9 @@
     </ClInclude>
     <ClInclude Include="..\Headers\P7_Cproxy.h">
       <Filter>Interfaces</Filter>
+    </ClInclude>
+    <ClInclude Include="ClText.h">
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

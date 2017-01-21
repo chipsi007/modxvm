@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -38,7 +38,7 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Client_Create
-hP7_Client __cdecl P7_Client_Create(const tXCHAR *i_pName)
+P7_EXPORT hP7_Client __cdecl P7_Client_Create(const tXCHAR *i_pName)
 {
     return P7_Create_Client(i_pName);
 }//P7_Client_Create
@@ -46,7 +46,7 @@ hP7_Client __cdecl P7_Client_Create(const tXCHAR *i_pName)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Client_Get_Shared
-hP7_Client __cdecl P7_Client_Get_Shared(const tXCHAR *i_pName)
+P7_EXPORT hP7_Client __cdecl P7_Client_Get_Shared(const tXCHAR *i_pName)
 {
     return P7_Get_Shared(i_pName);
 }//P7_Client_Get_Shared
@@ -54,7 +54,7 @@ hP7_Client __cdecl P7_Client_Get_Shared(const tXCHAR *i_pName)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Client_Share
-tBOOL __cdecl P7_Client_Share(hP7_Client i_hClient, const tXCHAR *i_pName)
+P7_EXPORT tBOOL __cdecl P7_Client_Share(hP7_Client i_hClient, const tXCHAR *i_pName)
 {
     IP7_Client *l_pClient = static_cast<IP7_Client *>(i_hClient);
 
@@ -69,7 +69,7 @@ tBOOL __cdecl P7_Client_Share(hP7_Client i_hClient, const tXCHAR *i_pName)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Client_Add_Ref
-tINT32 __cdecl P7_Client_Add_Ref(hP7_Client i_hClient)
+P7_EXPORT tINT32 __cdecl P7_Client_Add_Ref(hP7_Client i_hClient)
 {
     IP7_Client *l_pClient = static_cast<IP7_Client *>(i_hClient);
 
@@ -84,7 +84,7 @@ tINT32 __cdecl P7_Client_Add_Ref(hP7_Client i_hClient)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Client_Release
-tINT32 __cdecl P7_Client_Release(hP7_Client i_hClient)
+P7_EXPORT tINT32 __cdecl P7_Client_Release(hP7_Client i_hClient)
 {
     IP7_Client *l_pClient = static_cast<IP7_Client *>(i_hClient);
 
@@ -110,10 +110,10 @@ tINT32 __cdecl P7_Client_Release(hP7_Client i_hClient)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Create
-hP7_Telemetry __cdecl P7_Telemetry_Create(hP7_Client              i_hClient,
-                                          const tXCHAR           *i_pName,
-                                          const stTelemetry_Conf *i_pConf
-                                          )
+P7_EXPORT hP7_Telemetry __cdecl P7_Telemetry_Create(hP7_Client              i_hClient,
+                                                    const tXCHAR           *i_pName,
+                                                    const stTelemetry_Conf *i_pConf
+                                                    )
 {
     return P7_Create_Telemetry(static_cast<IP7_Client *>(i_hClient), i_pName, i_pConf); 
 }//P7_Telemetry_Create
@@ -121,9 +121,9 @@ hP7_Telemetry __cdecl P7_Telemetry_Create(hP7_Client              i_hClient,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Share
-tBOOL __cdecl P7_Telemetry_Share(hP7_Telemetry i_hTelemetry, 
-                                 const tXCHAR *i_pName
-                                )
+P7_EXPORT tBOOL __cdecl P7_Telemetry_Share(hP7_Telemetry i_hTelemetry, 
+                                           const tXCHAR *i_pName
+                                          )
 {
     IP7_Telemetry *l_pTel = static_cast<IP7_Telemetry *>(i_hTelemetry);
     if (NULL == l_pTel)
@@ -137,7 +137,7 @@ tBOOL __cdecl P7_Telemetry_Share(hP7_Telemetry i_hTelemetry,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Get_Shared
-hP7_Telemetry __cdecl P7_Telemetry_Get_Shared(const tXCHAR *i_pName)
+P7_EXPORT hP7_Telemetry __cdecl P7_Telemetry_Get_Shared(const tXCHAR *i_pName)
 {
     return P7_Get_Shared_Telemetry(i_pName);
 }//P7_Telemetry_Get_Shared
@@ -145,14 +145,14 @@ hP7_Telemetry __cdecl P7_Telemetry_Get_Shared(const tXCHAR *i_pName)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Create_Counter
-tBOOL __cdecl P7_Telemetry_Create_Counter(hP7_Telemetry i_hTelemetry,
-                                          const tXCHAR *i_pName, 
-                                          tINT64        i_llMin,
-                                          tINT64        i_llMax,
-                                          tINT64        i_llAlarm,
-                                          tUINT8        i_bOn,
-                                          tUINT8       *o_pCounter_ID 
-                                         )
+P7_EXPORT tBOOL __cdecl P7_Telemetry_Create_Counter(hP7_Telemetry i_hTelemetry,
+                                                    const tXCHAR *i_pName, 
+                                                    tINT64        i_llMin,
+                                                    tINT64        i_llMax,
+                                                    tINT64        i_llAlarm,
+                                                    tUINT8        i_bOn,
+                                                    tUINT8       *o_pCounter_ID 
+                                                   )
 {
     IP7_Telemetry *l_pTel = static_cast<IP7_Telemetry *>(i_hTelemetry);
     if (NULL == l_pTel)
@@ -172,10 +172,10 @@ tBOOL __cdecl P7_Telemetry_Create_Counter(hP7_Telemetry i_hTelemetry,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Put_Value
-tBOOL __cdecl P7_Telemetry_Put_Value(hP7_Telemetry i_hTelemetry,
-                                     tUINT8        i_bCounter_ID,
-                                     tINT64        i_llValue
-                                     )
+P7_EXPORT tBOOL __cdecl P7_Telemetry_Put_Value(hP7_Telemetry i_hTelemetry,
+                                               tUINT8        i_bCounter_ID,
+                                               tINT64        i_llValue
+                                               )
 {
     IP7_Telemetry *l_pTel = static_cast<IP7_Telemetry *>(i_hTelemetry);
     if (NULL == l_pTel)
@@ -189,10 +189,10 @@ tBOOL __cdecl P7_Telemetry_Put_Value(hP7_Telemetry i_hTelemetry,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Find_Counter
-tBOOL __cdecl P7_Telemetry_Find_Counter(hP7_Telemetry i_hTelemetry,
-                                        const tXCHAR *i_pName,
-                                        tUINT8       *o_pCounter_ID
-                                       )
+P7_EXPORT tBOOL __cdecl P7_Telemetry_Find_Counter(hP7_Telemetry i_hTelemetry,
+                                                  const tXCHAR *i_pName,
+                                                  tUINT8       *o_pCounter_ID
+                                                 )
 {
     IP7_Telemetry *l_pTel = static_cast<IP7_Telemetry *>(i_hTelemetry);
     if (NULL == l_pTel)
@@ -206,7 +206,7 @@ tBOOL __cdecl P7_Telemetry_Find_Counter(hP7_Telemetry i_hTelemetry,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Add_Ref
-tINT32 __cdecl P7_Telemetry_Add_Ref(hP7_Telemetry i_hTelemetry)
+P7_EXPORT tINT32 __cdecl P7_Telemetry_Add_Ref(hP7_Telemetry i_hTelemetry)
 {
     IP7_Telemetry *l_pTel = static_cast<IP7_Telemetry *>(i_hTelemetry);
     if (NULL == l_pTel)
@@ -220,7 +220,7 @@ tINT32 __cdecl P7_Telemetry_Add_Ref(hP7_Telemetry i_hTelemetry)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Telemetry_Release
-tINT32 __cdecl P7_Telemetry_Release(hP7_Telemetry i_hTelemetry)
+P7_EXPORT tINT32 __cdecl P7_Telemetry_Release(hP7_Telemetry i_hTelemetry)
 {
     IP7_Telemetry *l_pTel = static_cast<IP7_Telemetry *>(i_hTelemetry);
     if (NULL == l_pTel)
@@ -245,9 +245,9 @@ tINT32 __cdecl P7_Telemetry_Release(hP7_Telemetry i_hTelemetry)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Create_Trace
-hP7_Trace __cdecl P7_Trace_Create(hP7_Client    i_hClient,
-                                  const tXCHAR *i_pName
-                                 )
+P7_EXPORT hP7_Trace __cdecl P7_Trace_Create(hP7_Client    i_hClient,
+                                            const tXCHAR *i_pName
+                                           )
 {
     return P7_Create_Trace(static_cast<IP7_Client *>(i_hClient), i_pName); 
 }//P7_Trace_Create_Trace
@@ -255,7 +255,7 @@ hP7_Trace __cdecl P7_Trace_Create(hP7_Client    i_hClient,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Get_Shared
-hP7_Trace __cdecl P7_Trace_Get_Shared(const tXCHAR *i_pName)
+P7_EXPORT hP7_Trace __cdecl P7_Trace_Get_Shared(const tXCHAR *i_pName)
 {
     return P7_Get_Shared_Trace(i_pName);
 }//P7_Trace_Get_Shared
@@ -263,9 +263,9 @@ hP7_Trace __cdecl P7_Trace_Get_Shared(const tXCHAR *i_pName)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Share
-tBOOL __cdecl P7_Trace_Share(hP7_Trace     i_hTrace, 
-                             const tXCHAR *i_pName
-                            )
+P7_EXPORT tBOOL __cdecl P7_Trace_Share(hP7_Trace     i_hTrace, 
+                                       const tXCHAR *i_pName
+                                      )
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -279,10 +279,10 @@ tBOOL __cdecl P7_Trace_Share(hP7_Trace     i_hTrace,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Set_Verbosity
-void __cdecl P7_Trace_Set_Verbosity(hP7_Trace        i_hTrace, 
-                                    hP7_Trace_Module i_hModule, 
-                                    tUINT32          i_dwLevel
-                                   )
+P7_EXPORT void __cdecl P7_Trace_Set_Verbosity(hP7_Trace        i_hTrace, 
+                                              hP7_Trace_Module i_hModule, 
+                                              tUINT32          i_dwLevel
+                                             )
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -297,10 +297,10 @@ void __cdecl P7_Trace_Set_Verbosity(hP7_Trace        i_hTrace,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Register_Thread
-tBOOL __cdecl P7_Trace_Register_Thread(hP7_Trace     i_hTrace, 
-                                       const tXCHAR *i_pName,
-                                       tUINT32       i_dwThreadId
-                                      )
+P7_EXPORT tBOOL __cdecl P7_Trace_Register_Thread(hP7_Trace     i_hTrace, 
+                                                 const tXCHAR *i_pName,
+                                                 tUINT32       i_dwThreadId
+                                                )
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -314,9 +314,9 @@ tBOOL __cdecl P7_Trace_Register_Thread(hP7_Trace     i_hTrace,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Unregister_Thread
-tBOOL __cdecl P7_Trace_Unregister_Thread(hP7_Trace  i_hTrace, 
-                                         tUINT32    i_dwThreadId
-                                        )
+P7_EXPORT tBOOL __cdecl P7_Trace_Unregister_Thread(hP7_Trace  i_hTrace, 
+                                                   tUINT32    i_dwThreadId
+                                                  )
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -330,9 +330,9 @@ tBOOL __cdecl P7_Trace_Unregister_Thread(hP7_Trace  i_hTrace,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Register_Module
-hP7_Trace_Module __cdecl P7_Trace_Register_Module(hP7_Trace     i_hTrace, 
-                                                  const tXCHAR *i_pName 
-                                                 )
+P7_EXPORT hP7_Trace_Module __cdecl P7_Trace_Register_Module(hP7_Trace     i_hTrace, 
+                                                            const tXCHAR *i_pName 
+                                                           )
 {
     IP7_Trace       *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     hP7_Trace_Module l_hMpodule = NULL;
@@ -353,16 +353,16 @@ hP7_Trace_Module __cdecl P7_Trace_Register_Module(hP7_Trace     i_hTrace,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Add
-tBOOL __cdecl P7_Trace_Add(hP7_Trace        i_hTrace,
-                           tUINT16          i_wTrace_ID,   
-                           tUINT32          i_dwLevel, 
-                           hP7_Trace_Module i_hModule,
-                           tUINT16          i_wLine,
-                           const char      *i_pFile,
-                           const char      *i_pFunction,
-                           const tXCHAR    *i_pFormat,
-                           ...
-                          )
+P7_EXPORT tBOOL __cdecl P7_Trace_Add(hP7_Trace        i_hTrace,
+                                     tUINT16          i_wTrace_ID,   
+                                     tUINT32          i_dwLevel, 
+                                     hP7_Trace_Module i_hModule,
+                                     tUINT16          i_wLine,
+                                     const char      *i_pFile,
+                                     const char      *i_pFunction,
+                                     const tXCHAR    *i_pFormat,
+                                     ...
+                                    )
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -370,6 +370,21 @@ tBOOL __cdecl P7_Trace_Add(hP7_Trace        i_hTrace,
         return FALSE;
     }
 
+#if defined(P7TRACE_NO_VA_ARG_OPTIMIZATION)
+    va_list l_pVl;
+    va_start(l_pVl, i_pFormat);
+    tBOOL l_bRet = l_pTrace->Trace_Embedded(i_wTrace_ID, 
+                                            (eP7Trace_Level)i_dwLevel, 
+                                            i_hModule,
+                                            i_wLine,
+                                            i_pFile,
+                                            i_pFunction,
+                                            &i_pFormat,
+                                            &l_pVl
+                                           );
+    va_end(l_pVl);
+    return l_bRet;
+#else
     return l_pTrace->Trace_Embedded(i_wTrace_ID, 
                                     (eP7Trace_Level)i_dwLevel, 
                                     i_hModule,
@@ -378,20 +393,22 @@ tBOOL __cdecl P7_Trace_Add(hP7_Trace        i_hTrace,
                                     i_pFunction,
                                     &i_pFormat
                                    );
+#endif
 }//P7_Trace_Add
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Embedded
-tBOOL __cdecl P7_Trace_Embedded(hP7_Trace        i_hTrace,
-                                tUINT16          i_wTrace_ID,   
-                                tUINT32          i_dwLevel, 
-                                hP7_Trace_Module i_hModule,
-                                tUINT16          i_wLine,
-                                const char      *i_pFile,
-                                const char      *i_pFunction,
-                                const tXCHAR   **i_ppFormat
-                               )
+P7_EXPORT tBOOL __cdecl P7_Trace_Embedded(hP7_Trace        i_hTrace,
+                                          tUINT16          i_wTrace_ID,   
+                                          tUINT32          i_dwLevel, 
+                                          hP7_Trace_Module i_hModule,
+                                          tUINT16          i_wLine,
+                                          const char      *i_pFile,
+                                          const char      *i_pFunction,
+                                          const tXCHAR   **i_ppFormat,
+                                          va_list         *i_pVa_List
+                                         )
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -405,22 +422,23 @@ tBOOL __cdecl P7_Trace_Embedded(hP7_Trace        i_hTrace,
                                     i_wLine,
                                     i_pFile,
                                     i_pFunction,
-                                    i_ppFormat
+                                    i_ppFormat,
+                                    i_pVa_List
                                    );
 }//P7_Trace_Embedded
 
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Managed
-extern tBOOL __cdecl P7_Trace_Managed(hP7_Trace        i_hTrace,
-                                      tUINT16          i_wTrace_ID,   
-                                      tUINT32          i_dwLevel,
-                                      hP7_Trace_Module i_hModule,
-                                      tUINT16          i_wLine,
-                                      const tXCHAR    *i_pFile,
-                                      const tXCHAR    *i_pFunction,
-                                      const tXCHAR    *i_pMessage
-                                     )
+P7_EXPORT extern tBOOL __cdecl P7_Trace_Managed(hP7_Trace        i_hTrace,
+                                                tUINT16          i_wTrace_ID,   
+                                                tUINT32          i_dwLevel,
+                                                hP7_Trace_Module i_hModule,
+                                                tUINT16          i_wLine,
+                                                const tXCHAR    *i_pFile,
+                                                const tXCHAR    *i_pFunction,
+                                                const tXCHAR    *i_pMessage
+                                               )
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -441,7 +459,7 @@ extern tBOOL __cdecl P7_Trace_Managed(hP7_Trace        i_hTrace,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Add_Ref
-tINT32 __cdecl P7_Trace_Add_Ref(hP7_Trace i_hTrace)
+P7_EXPORT tINT32 __cdecl P7_Trace_Add_Ref(hP7_Trace i_hTrace)
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)
@@ -455,7 +473,7 @@ tINT32 __cdecl P7_Trace_Add_Ref(hP7_Trace i_hTrace)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Trace_Release
-tINT32 __cdecl P7_Trace_Release(hP7_Trace i_hTrace)
+P7_EXPORT tINT32 __cdecl P7_Trace_Release(hP7_Trace i_hTrace)
 {
     IP7_Trace *l_pTrace = static_cast<IP7_Trace *>(i_hTrace);
     if (NULL == l_pTrace)

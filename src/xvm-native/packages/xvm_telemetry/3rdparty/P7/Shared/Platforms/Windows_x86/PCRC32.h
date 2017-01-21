@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -30,12 +30,15 @@ static tUINT32 Get_CRC32(tUINT8 *i_pData, size_t i_szCount)
     }
 
 
-#if defined(GTX64) || defined(__linux__)
+#if defined(GTX64) || defined(__linux__) || !defined(_MSC_VER)
 
     for (size_t l_szI = 0;  l_szI < i_szCount;  l_szI ++)
     {
         l_dwResult = g_pCRC32_Table[(l_dwResult  ^ i_pData[l_szI]) & 0xFF ] ^ (l_dwResult >> 8);
     }
+
+     //Suppress warning that this is not used
+    (void)g_ppCRC32_Table;
 
 #else
 

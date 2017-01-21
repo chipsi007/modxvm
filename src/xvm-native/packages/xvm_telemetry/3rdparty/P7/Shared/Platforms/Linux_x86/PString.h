@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -101,14 +101,14 @@ static __attribute__ ((unused)) tUINT32 PUStrLen(const tXCHAR *i_pText)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//PStrCpy
+//PUStrCpy
 static __attribute__ ((unused)) void PUStrCpy(tWCHAR       *i_pDst,
                                               tUINT32       i_dwMax_Len,
                                               const tXCHAR *i_pSrc)
 {
     Convert_UTF8_To_UTF16(i_pSrc, i_pDst, i_dwMax_Len);
     //wcscpy_s(i_pDst, i_dwMax_Len, i_pSrc);
-}//PStrCpy
+}//PUStrCpy
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -157,6 +157,26 @@ static const __attribute__ ((unused)) tXCHAR *PStrChr(const tXCHAR * i_pStr, tXC
 {
     return strchr(i_pStr, i_cCh);
 }//PStrChr
+
+
+///////////////////////////////////////////////////////////////////////////////
+//PStrrChr
+static const __attribute__ ((unused)) tXCHAR *PStrrChr(const tXCHAR * i_pStr, tXCHAR i_cCh)
+{
+    return strrchr(i_pStr, i_cCh);
+}//PStrrChr
+
+
+///////////////////////////////////////////////////////////////////////////////
+//PVsnprintf
+static __attribute__ ((unused)) int PVsnprintf(tXCHAR *o_pBuffer,
+                                               size_t  i_szBuffer, 
+                                               const tXCHAR *i_pFormat, 
+                                               va_list i_pArgs)
+{
+    return vsnprintf(o_pBuffer, i_szBuffer, i_pFormat, i_pArgs);
+}//PVsnprintf
+
 
 
 ///////////////////////////////////////////////////////////////////////////////

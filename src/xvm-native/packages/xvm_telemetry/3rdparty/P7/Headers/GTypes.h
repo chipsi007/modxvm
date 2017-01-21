@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -35,23 +35,23 @@
     #define GTX32  
 #endif
 
-
 ////////////////////////////////////////////////////////////////////////////////
 //WINDOWS specific definitions & types
 #if defined(_WIN32) || defined(_WIN64)
-    #define _WINSOCKAPI_
+    
+    #if !defined(_WINSOCKAPI_)
+        #include <winsock2.h>
+    #endif
     #include <windows.h>
 
     //Text marco, allow to use wchar_t automatically
     #define TM(i_pStr)         L##i_pStr
 
     #define XCHAR              wchar_t
+    typedef wchar_t            tWCHAR;
 
-    #define PRAGMA_PACK_ENTER(x)  __pragma(pack(push, x))
-    #define PRAGMA_PACK_EXIT()   __pragma(pack(pop))
+    #define P7_EXPORT __declspec(dllexport)
 
-    #define ATTR_PACK(x)
-    #define UNUSED_FUNC 
 ////////////////////////////////////////////////////////////////////////////////
 //LINUX specific definitions & types
 #elif defined(__linux__)
@@ -61,23 +61,34 @@
     #define TM(i_pStr)    i_pStr
 
     #define XCHAR         char
+    typedef short         tWCHAR;
 
     #define __stdcall
     #define __cdecl
 
-#if defined(GTX64) || defined(__PIC__)
-    #define __forceinline  
-#else
-    #define __forceinline  __attribute__((always_inline))
+    #ifndef __forceinline
+        #if defined(GTX64) || defined(__PIC__)
+            #define __forceinline  
+        #else
+            #define __forceinline  __attribute__((always_inline))
+        #endif
+    #endif
+
+    #define P7_EXPORT __attribute__ ((visibility ("default")))
+
 #endif
 
+#ifdef _MSC_VER
+    #define PRAGMA_PACK_ENTER(x)  __pragma(pack(push, x))
+    #define PRAGMA_PACK_EXIT()   __pragma(pack(pop))
+    #define ATTR_PACK(x)
+    #define UNUSED_FUNC 
+#else
     #define PRAGMA_PACK_ENTER(x) 
     #define PRAGMA_PACK_EXIT(x) 
-
     #define ATTR_PACK(x) __attribute__ ((aligned(x), packed))
     #define UNUSED_FUNC __attribute__ ((unused))
 #endif
-
 
 #define TRUE         1
 #define FALSE        0
@@ -97,7 +108,6 @@ typedef short                tINT16;
 typedef unsigned char        tUINT8;
 typedef char                 tINT8;
 typedef char                 tACHAR;
-typedef short                tWCHAR;
 //platfrorm specific char, Windows - wchar_t, Linix - char,
 //XCHAR defined in PTypes.hpp specific for each platform or project.
 #define tXCHAR               XCHAR  

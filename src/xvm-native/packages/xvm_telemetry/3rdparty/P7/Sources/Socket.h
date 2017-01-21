@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -36,7 +36,7 @@ enum eSocket_Status
     UDP_SOCKET_WRONG_PARAMETERS        ,
     UDP_SOCKET_NOT_INITIALIZED         ,
     UDP_SOCKET_BIND_ERROR              ,
-    UDP_SOCKET_NOT_READY               ,
+    UDP_SOCKET_NOT_READY
 };
 
 enum eFD_Type

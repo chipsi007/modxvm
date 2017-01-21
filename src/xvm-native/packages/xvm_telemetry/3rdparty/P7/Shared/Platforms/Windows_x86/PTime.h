@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -18,6 +18,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 #pragma once
 
+#define TIME_HRS_100NS                                            36000000000ull
+#define TIME_MIN_100NS                                              600000000ull
+#define TIME_SEC_100NS                                               10000000ull
+#define TIME_MSC_100NS                                                  10000ull
+
 ////////////////////////////////////////////////////////////////////////////////
 //GetTickCount - exist in OS
 //tUINT32 GetTickCount()
@@ -27,7 +32,7 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 //GetPerformanceCounter
-static tUINT64 GetPerformanceCounter()
+static inline tUINT64 GetPerformanceCounter()
 {
     LARGE_INTEGER l_qwValue;
     l_qwValue.QuadPart = 0;
@@ -38,7 +43,7 @@ static tUINT64 GetPerformanceCounter()
 
 ////////////////////////////////////////////////////////////////////////////////
 //GetPerformanceFrequency
-static tUINT64 GetPerformanceFrequency()
+static inline tUINT64 GetPerformanceFrequency()
 {
     LARGE_INTEGER l_qwValue;
     l_qwValue.QuadPart = 0;
@@ -50,7 +55,7 @@ static tUINT64 GetPerformanceFrequency()
 ////////////////////////////////////////////////////////////////////////////////
 //GetEpochTime
 //return a 64-bit value of 100-nanosecond intervals since January 1, 1601 (UTC).
-static void GetEpochTime(tUINT32 *o_pHi, tUINT32 *o_pLow)
+static inline void GetEpochTime(tUINT32 *o_pHi, tUINT32 *o_pLow)
 {
     SYSTEMTIME l_sSTime = {0};
     FILETIME   l_sFTime = {0};
@@ -70,9 +75,49 @@ static void GetEpochTime(tUINT32 *o_pHi, tUINT32 *o_pLow)
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//GetLocalTime
+//convert a 64-bit value of 100-nanosecond intervals since January 1, 1601 (UTC)
+//to readable form
+static inline void GetLocalTime(tUINT64  i_qwTime, 
+                                tUINT32 &o_rYear, 
+                                tUINT32 &o_rMonth,
+                                tUINT32 &o_rDay,
+                                tUINT32 &o_rHour,
+                                tUINT32 &o_rMinutes,
+                                tUINT32 &o_rSeconds,
+                                tUINT32 &o_rMilliseconds,
+                                tUINT32 &o_rMicroseconds,
+                                tUINT32 &o_rNanoseconds
+                               )
+{
+    tUINT32 l_dwReminder = i_qwTime % TIME_MSC_100NS; //micro & 100xNanoseconds
+    tUINT32 l_dwNano     = i_qwTime % 10;
+    tUINT32 l_dwMicro    = l_dwReminder / 10;
+
+    i_qwTime -= l_dwReminder;
+
+    SYSTEMTIME l_sTime      = {0};
+    FILETIME   l_sLocalTime = {0};
+
+    FileTimeToLocalFileTime((FILETIME*)&i_qwTime, &l_sLocalTime);
+    FileTimeToSystemTime(&l_sLocalTime, &l_sTime);
+
+    o_rYear         = l_sTime.wYear;
+    o_rMonth        = l_sTime.wMonth;
+    o_rDay          = l_sTime.wDay;
+    o_rHour         = l_sTime.wHour;
+    o_rMinutes      = l_sTime.wMinute;
+    o_rSeconds      = l_sTime.wSecond;
+    o_rMilliseconds = l_sTime.wMilliseconds;
+    o_rMicroseconds = l_dwMicro;
+    o_rNanoseconds  = l_dwNano;
+}//GetEpochTime
+
+
+////////////////////////////////////////////////////////////////////////////////
 //GetEpochTime
 //return a 64-bit value of 100-nanosecond intervals since January 1, 1601 (UTC).
-static tUINT64 GetEpochTime()
+static inline tUINT64 GetEpochTime()
 {
     SYSTEMTIME l_sSTime = {0};
     FILETIME   l_sFTime = {0};
@@ -87,7 +132,7 @@ static tUINT64 GetEpochTime()
 ////////////////////////////////////////////////////////////////////////////////
 //GetEpochLocalTime
 //return a 64-bit value of 100-nanosecond intervals since January 1, 1601 (UTC).
-static tUINT64 GetEpochLocalTime()
+static inline tUINT64 GetEpochLocalTime()
 {
     SYSTEMTIME l_sSTime = {0};
     FILETIME   l_sFTime = {0};

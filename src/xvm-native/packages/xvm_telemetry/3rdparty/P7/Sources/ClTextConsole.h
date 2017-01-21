@@ -16,30 +16,46 @@
 // License along with this library.                                            /
 //                                                                             /
 ////////////////////////////////////////////////////////////////////////////////
-#ifndef PLOCK_H
-#define PLOCK_H
+////////////////////////////////////////////////////////////////////////////////
+// This header file provide printing to console                                /
+////////////////////////////////////////////////////////////////////////////////
 
-#include <pthread.h>
+#ifndef CLTEXTCONSOLE_H
+#define CLTEXTCONSOLE_H
 
-///////////////////////////////////////////////////////////////////////////////
-typedef pthread_mutex_t           tLOCK;
+////////////////////////////////////////////////////////////////////////////////
+class CClTextConsole
+    : public CClTextSink
+{
+public:
+    CClTextConsole()
+    {
+
+    }
+    virtual ~CClTextConsole()
+    {
+
+    }
+
+    virtual eClient_Status Initialize(tXCHAR **i_pArgs, tINT32 i_iCount)
+    {
+        return ECLIENT_STATUS_OK;
+    }
+
+    virtual eClient_Status Log(const CClTextSink::sLog &i_rRawLog, 
+                               const tXCHAR            *i_pFmtLog, 
+                               size_t                   i_szFmtLog
+                              )
+    {
+    #ifdef UTF8_ENCODING
+        printf(i_pFmtLog, 0);
+    #else
+        wprintf(i_pFmtLog);
+    #endif                             
+        printf("\n");
+        return ECLIENT_STATUS_OK;
+    }
+};
 
 
-#define  LOCK_CREATE(i_Lock)       {\
-                                       pthread_mutexattr_t l_sAttr;\
-                                       memset(&l_sAttr, 0, sizeof(pthread_mutexattr_t));\
-                                       pthread_mutexattr_init(&l_sAttr);\
-                                       pthread_mutexattr_settype(&l_sAttr,\
-                                                                 PTHREAD_MUTEX_RECURSIVE);\
-                                       pthread_mutex_init(&i_Lock, &l_sAttr);\
-                                       pthread_mutexattr_destroy(&l_sAttr);\
-                                   }\
-
-
-#define  LOCK_DESTROY(i_Lock)      pthread_mutex_destroy(&i_Lock)
-
-#define  LOCK_ENTER(i_Lock)        pthread_mutex_lock(&i_Lock)
-#define  LOCK_EXIT(i_Lock)         pthread_mutex_unlock(&i_Lock)
-#define  LOCK_TRY(i_Lock)          ((0 == pthread_mutex_trylock(&i_Lock)) ? TRUE : FALSE)
-
-#endif //PLOCK_H
+#endif //CLTEXTCONSOLE_H

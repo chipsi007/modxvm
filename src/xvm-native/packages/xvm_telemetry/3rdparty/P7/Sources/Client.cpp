@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -21,9 +21,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #include "CommonClient.h"
+#include "PSignal.h"
 #include "Client.h"
 #include "ClBaical.h"
 #include "ClFile.h"
+#include "ClText.h"
 #include "ClNull.h"
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +52,7 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Create_Client
-IP7_Client * __cdecl P7_Create_Client(const tXCHAR *i_pArgs)
+P7_EXPORT IP7_Client * __cdecl P7_Create_Client(const tXCHAR *i_pArgs)
 {
     IP7_Client *l_pReturn   = NULL;
     int         l_iHC_ArgsC = 0;
@@ -99,7 +101,9 @@ IP7_Client * __cdecl P7_Create_Client(const tXCHAR *i_pArgs)
     {
         l_pReturn = static_cast<IP7_Client *>(new CClBaical(l_pArgs, l_iCount));
     }
-    else if (0 == PStrICmp(l_pSink, CLIENT_SINK_FILE))
+    else if (    (0 == PStrICmp(l_pSink, CLIENT_SINK_FILE_BIN))
+              || (0 == PStrICmp(l_pSink, CLIENT_SINK_FILE_BIN_LEGACY))
+            )
     {
         l_pReturn = static_cast<IP7_Client *>(new CClFile(l_pArgs, l_iCount));
     }
@@ -128,6 +132,13 @@ IP7_Client * __cdecl P7_Create_Client(const tXCHAR *i_pArgs)
     else if (0 == PStrICmp(l_pSink, CLIENT_SINK_NULL))
     {
         l_pReturn = static_cast<IP7_Client *>(new CClNull(l_pArgs, l_iCount));
+    }
+    else //all other sink are text one
+    //(0 == PStrICmp(l_pSink, CLIENT_SINK_FILE_TXT))
+    //(0 == PStrICmp(l_pSink, CLIENT_SINK_CONSOLE))
+    //(0 == PStrICmp(l_pSink, CLIENT_SINK_SYSLOG))
+    {
+        l_pReturn = static_cast<IP7_Client *>(new CClText(l_pArgs, l_iCount));
     }
 
     //if not initialized - remove
@@ -177,7 +188,7 @@ IP7_Client * __cdecl P7_Create_Client(const tXCHAR *i_pArgs)
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Get_Shared
-IP7_Client * __cdecl P7_Get_Shared(const tXCHAR *i_pName)
+P7_EXPORT IP7_Client * __cdecl P7_Get_Shared(const tXCHAR *i_pName)
 {
     IP7_Client *l_pReturn = NULL;
     tUINT32     l_dwLen1  = PStrLen(CLIENT_SHARED_PREFIX);
@@ -215,6 +226,30 @@ IP7_Client * __cdecl P7_Get_Shared(const tXCHAR *i_pName)
 
 
 ////////////////////////////////////////////////////////////////////////////////
+//cbCrashHandler
+void __cdecl cbCrashHandler(int i_iType, void *i_pContext)
+{
+    P7_Exceptional_Flush();
+}//cbCrashHandler
+
+
+////////////////////////////////////////////////////////////////////////////////
+//P7_Set_Crash_Handler
+P7_EXPORT void __cdecl P7_Set_Crash_Handler()
+{
+    ChInstall(&cbCrashHandler);
+}//P7_Set_Crash_Handler
+
+
+////////////////////////////////////////////////////////////////////////////////
+//P7_Clr_Crash_Handler
+P7_EXPORT void __cdecl P7_Clr_Crash_Handler()
+{
+    ChUnInstall();
+}//P7_Clr_Crash_Handler
+
+
+////////////////////////////////////////////////////////////////////////////////
 //P7_Exceptional_Flush
 //0) Lock crash memory
 //1) Read crash memory
@@ -228,7 +263,7 @@ IP7_Client * __cdecl P7_Get_Shared(const tXCHAR *i_pName)
 //9) unlock crash memory
 //10) release crash memory
 //11) leave function to execute def. handler
-void __cdecl P7_Exceptional_Flush()
+P7_EXPORT void __cdecl P7_Exceptional_Flush()
 {
     //tBOOL  l_bReturn = FALSE;
     tBOOL  l_bLock   = FALSE;
@@ -319,8 +354,9 @@ tXCHAR *Get_Argument_Text_Value(tXCHAR       **i_pArgs,
 //                              CClient
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-CClient::CClient(tXCHAR **i_pArgs,
-                 tINT32   i_iCount
+CClient::CClient(IP7_Client::eType i_eType,
+                 tXCHAR          **i_pArgs,
+                 tINT32            i_iCount
                 )
     : m_lReference(1)
     , m_eStatus(ECLIENT_STATUS_OK)
@@ -329,7 +365,7 @@ CClient::CClient(tXCHAR **i_pArgs,
     , m_pLog(NULL)
     , m_bConnected(TRUE)
     , m_dwConnection_Resets(0)
-
+    , m_eType(i_eType)
 {
     memset(m_pChannels, 0, sizeof(IP7C_Channel*)*USER_PACKET_CHANNEL_ID_MAX_SIZE);
     memset(&m_hCS,      0, sizeof(m_hCS));
@@ -382,6 +418,14 @@ tBOOL CClient::Get_Status(sP7C_Status *o_pStatus)
 
     return TRUE;
 }//Get_Status
+
+
+////////////////////////////////////////////////////////////////////////////////
+//Get_Type()
+IP7_Client::eType CClient::Get_Type()
+{
+    return m_eType;
+}//Get_Type()
 
 
 ////////////////////////////////////////////////////////////////////////////////

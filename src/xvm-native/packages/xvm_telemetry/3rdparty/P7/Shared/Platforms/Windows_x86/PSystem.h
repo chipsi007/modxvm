@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -36,6 +36,28 @@ public:
         DWORD l_dwMax_Len = (DWORD)i_szName;
         return GetComputerNameW((wchar_t*)o_pName, &l_dwMax_Len); 
     }//Get_Host_Name
+
+
+    ///////////////////////////////////////////////////////////////////////////////
+    //Get_Host_Name
+    static tBOOL Get_Host_Name(tACHAR *o_pName, size_t i_szName)
+    {
+        const size_t l_szName = 256;
+        DWORD        l_dwSize = (DWORD)l_szName;
+        wchar_t      l_pName[l_szName];
+
+        if (GetComputerNameW((wchar_t*)l_pName, &l_dwSize))
+        {
+            Convert_UTF16_To_UTF8(l_pName, o_pName, (tUINT32)i_szName);
+        }
+        else
+        {
+            strcpy_s(o_pName, i_szName, "Unknown:Error");
+        }
+        return TRUE;
+    }//Get_Host_Name
+
+
 
     ///////////////////////////////////////////////////////////////////////////////
     //Get_DateTime

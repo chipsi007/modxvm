@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -31,8 +31,8 @@ class CMEvent
 
     tUINT8   m_bCount;
     sMEvent *m_pEvents;
-    HANDLE  *m_pHandles;
     tBOOL    m_bInit;
+    HANDLE  *m_pHandles;
 public:
     ////////////////////////////////////////////////////////////////////////////
     //CMEvent
@@ -47,7 +47,7 @@ public:
 
     ////////////////////////////////////////////////////////////////////////////
     //~CMEvent
-    ~CMEvent()
+    virtual ~CMEvent()
     {
         Cleanup();
 
@@ -66,6 +66,9 @@ public:
             return FALSE;
         }
 
+        va_list l_pVA  = NULL;
+        tUINT8  l_bIDX = 0;
+
         m_pEvents = new sMEvent[i_bCount];
         if (NULL == m_pEvents)
         {
@@ -80,13 +83,10 @@ public:
 
         memset(m_pEvents, 0, sizeof(sMEvent) * i_bCount);
 
-        va_list l_pVA  = NULL;
-        tUINT8  l_bIDX = 0;
-
         va_start(l_pVA, i_bCount);
         while (l_bIDX < i_bCount)
         {
-            m_pEvents[l_bIDX].eType = va_arg(l_pVA, eMEvent_Type);
+            m_pEvents[l_bIDX].eType = (eMEvent_Type)va_arg(l_pVA, int); //Real type is "eMEvent_Type", MinGW warning
 
             if (EMEVENT_SINGLE_AUTO == m_pEvents[l_bIDX].eType)
             {

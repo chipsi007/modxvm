@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                             /
-// 2012-2016 (c) Baical                                                        /
+// 2012-2017 (c) Baical                                                        /
 //                                                                             /
 // This library is free software; you can redistribute it and/or               /
 // modify it under the terms of the GNU Lesser General Public                  /
@@ -28,7 +28,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 #include "CommonClient.h"
 #include "Trace.h"
-#include <stdarg.h> 
+#include <wchar.h>
 
 #define RESET_UNDEFINED                                           (0xFFFFFFFFUL)
 #define RESET_FLAG_CHANNEL                                        (0x1)
@@ -44,26 +44,26 @@
 #define ADD_ARG(i_bType, i_bSize, oResult)\
 {\
     oResult = FALSE;\
-    if (l_dwArgs_Len < l_dwArgs_Max)\
+    if (m_dwArgs_Count < l_dwArgs_Max)\
     {\
-        l_pArgs[l_dwArgs_Len].bType = i_bType;\
-        l_pArgs[l_dwArgs_Len].bSize = i_bSize;\
-        l_dwArgs_Len ++;\
+        l_pArgs[m_dwArgs_Count].bType = i_bType;\
+        l_pArgs[m_dwArgs_Count].bSize = i_bSize;\
+        m_dwArgs_Count ++;\
         oResult = TRUE;\
     }\
-    else if ( l_dwArgs_Len >= l_dwArgs_Max )\
+    else if ( m_dwArgs_Count >= l_dwArgs_Max )\
     {\
-        tUINT32       l_dwLength = l_dwArgs_Len + 16;\
+        tUINT32       l_dwLength = m_dwArgs_Count + 16;\
         sP7Trace_Arg *l_pTMP     = (sP7Trace_Arg*)i_rMemory.Reuse(CMemoryManager::eArguments,\
-                                                                    l_dwLength * sizeof(sP7Trace_Arg)\
-                                                                   );\
+                                                                  l_dwLength * sizeof(sP7Trace_Arg)\
+                                                                  );\
         if (l_pTMP)\
         {\
             l_pArgs      = l_pTMP;\
             l_dwArgs_Max = l_dwLength;\
-            l_pArgs[l_dwArgs_Len].bType = i_bType;\
-            l_pArgs[l_dwArgs_Len].bSize = i_bSize;\
-            l_dwArgs_Len ++;\
+            l_pArgs[m_dwArgs_Count].bType = i_bType;\
+            l_pArgs[m_dwArgs_Count].bSize = i_bSize;\
+            m_dwArgs_Count ++;\
             oResult = TRUE;\
         }\
     }\
@@ -74,9 +74,9 @@ extern "C"
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Create_Client
-IP7_Trace * __cdecl P7_Create_Trace(IP7_Client   *i_pClient, 
-                                    const tXCHAR *i_pName
-                                   )
+P7_EXPORT IP7_Trace * __cdecl P7_Create_Trace(IP7_Client   *i_pClient, 
+                                              const tXCHAR *i_pName
+                                              )
 {
     CP7Trace *l_pReturn = new CP7Trace(i_pClient, i_pName);
 
@@ -95,7 +95,7 @@ IP7_Trace * __cdecl P7_Create_Trace(IP7_Client   *i_pClient,
 
 ////////////////////////////////////////////////////////////////////////////////
 //P7_Get_Shared_Trace
-IP7_Trace * __cdecl P7_Get_Shared_Trace(const tXCHAR *i_pName)
+P7_EXPORT IP7_Trace * __cdecl P7_Get_Shared_Trace(const tXCHAR *i_pName)
 {
     IP7_Trace *l_pReturn = NULL;
     tUINT32    l_dwLen1  = PStrLen(TRACE_SHARED_PREFIX);
@@ -142,10 +142,11 @@ enum ePrefix_Type
     EPREFIX_TYPE_I32      ,
     EPREFIX_TYPE_LL       ,
     EPREFIX_TYPE_L        ,
+    EPREFIX_TYPE_HH       ,
     EPREFIX_TYPE_H        ,
     EPREFIX_TYPE_I        ,
     EPREFIX_TYPE_W        ,
-    EPREFIX_TYPE_UNKNOWN  ,
+    EPREFIX_TYPE_UNKNOWN  
 };
 
 struct sPrefix_Desc
@@ -161,11 +162,14 @@ struct sPrefix_Desc
 static const sPrefix_Desc g_pPrefixes[] = { {TM("I64"), 3, EPREFIX_TYPE_I64    }, 
                                             {TM("I32"), 3, EPREFIX_TYPE_I32    },
                                             {TM("ll"),  2, EPREFIX_TYPE_LL     },
-                                            {TM("l"),   1, EPREFIX_TYPE_L      },
+                                            {TM("hh"),  2, EPREFIX_TYPE_HH     },
                                             {TM("h"),   1, EPREFIX_TYPE_H      },
+                                            {TM("l"),   1, EPREFIX_TYPE_L      },
                                             {TM("I"),   1, EPREFIX_TYPE_I      },
+                                            {TM("z"),   1, EPREFIX_TYPE_I      },
+                                            {TM("t"),   1, EPREFIX_TYPE_I      },
                                             {TM("w"),   1, EPREFIX_TYPE_W      },
-                                            //{TM(""),    0, EPREFIX_TYPE_UNKNOWN}
+                                            {TM("?"),   0, EPREFIX_TYPE_UNKNOWN}
                                           };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -209,6 +213,8 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
 
     , m_pBlocks(NULL)
     , m_dwBlocks_Count(0)
+    , m_pArgs(NULL)
+    , m_dwArgs_Count(0)
    
     , m_bInitialized(TRUE)
 {
@@ -216,9 +222,7 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
     tUINT32       l_dwFunc_Size  = 0;
     tUINT32       l_dwForm_Size  = 0;
     const tXCHAR *l_pFormat      = *i_pFormat;
-    tBOOL         l_bAlignment64 = (i_dwFlags & P7TRACE_FLAG_STACK_64BITS_ALIGNMENT) ? TRUE : FALSE;
     sP7Trace_Arg *l_pArgs        = NULL;  
-    tUINT32       l_dwArgs_Len   = 0;
     tUINT32       l_dwArgs_Max   = 0;
     
     m_bInitialized = (NULL != l_pFormat);
@@ -249,10 +253,19 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
             {
                 switch (*l_pIterator)
                 {
+                    case TM('*'):
+                    {
+                        ADD_ARG(P7TRACE_ARG_TYPE_INT32, 
+                                SIZE_OF_ARG(tUINT32),
+                                m_bInitialized);
+                        break;
+                    }
                     case TM('I'):
                     case TM('l'):
                     case TM('h'):
                     case TM('w'):
+                    case TM('z'):
+                    case TM('t'):
                     {
                         const sPrefix_Desc *l_pPrefix = Get_Prefix(l_pIterator);
                         if (l_pPrefix)
@@ -266,64 +279,15 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
                         }
                         break;
                     }
-                    case TM('c'):
-                    case TM('C'):
-                    {
-
-                        if (EPREFIX_TYPE_H == l_ePrefix)
-                        {
-                            //1 bytes character
-                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR, 
-                                    SIZE_OF_ARG(char),
-                                    m_bInitialized
-                                   );
-                        }
-                        else if (EPREFIX_TYPE_L == l_ePrefix)
-                        {
-                            //2 byte character
-                            ADD_ARG(P7TRACE_ARG_TYPE_WCHAR, 
-                                    SIZE_OF_ARG(tXCHAR),
-                                    m_bInitialized
-                                   );
-                        }
-                        else if (TM('c') == (*l_pIterator))
-                        {
-                            //2 bytes character
-                            ADD_ARG(P7TRACE_ARG_TYPE_WCHAR, 
-                                    SIZE_OF_ARG(tXCHAR),
-                                    m_bInitialized
-                                   );
-                        }
-                        else
-                        {
-                            //1 bytes character
-                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR, 
-                                    SIZE_OF_ARG(char),
-                                    m_bInitialized
-                                   );
-                        }
-
-                        l_bPercent = FALSE;
-                        break;
-                    }
                     case TM('d'):
+                    case TM('b'):
                     case TM('i'):
                     case TM('o'):
                     case TM('u'):
                     case TM('x'):
                     case TM('X'):
                     {
-                        if (EPREFIX_TYPE_H == l_ePrefix)
-                        {
-                            //2 bytes integer
-                            ADD_ARG(P7TRACE_ARG_TYPE_INT16, 
-                                    SIZE_OF_ARG(tUINT16),
-                                    m_bInitialized
-                                   );
-                        }
-                        else if (    (EPREFIX_TYPE_L   == l_ePrefix)
-                                  || (EPREFIX_TYPE_I32 == l_ePrefix)
-                                )
+                        if (EPREFIX_TYPE_UNKNOWN == l_ePrefix)
                         {
                             //4 bytes integer
                             ADD_ARG(P7TRACE_ARG_TYPE_INT32, 
@@ -338,6 +302,32 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
                             //8 bytes integer
                             ADD_ARG(P7TRACE_ARG_TYPE_INT64, 
                                     SIZE_OF_ARG(tUINT64),
+                                    m_bInitialized
+                                   );
+                        }
+                        else if (EPREFIX_TYPE_H == l_ePrefix)
+                        {
+                            //2 bytes integer
+                            ADD_ARG(P7TRACE_ARG_TYPE_INT16, 
+                                    SIZE_OF_ARG(tUINT16),
+                                    m_bInitialized
+                                   );
+                        }
+                        else if (EPREFIX_TYPE_HH == l_ePrefix)
+                        {
+                            //1 bytes integer
+                            ADD_ARG(P7TRACE_ARG_TYPE_INT8, 
+                                    SIZE_OF_ARG(tUINT8),
+                                    m_bInitialized
+                                   );
+                        }
+                        else if (    (EPREFIX_TYPE_L   == l_ePrefix)
+                                  || (EPREFIX_TYPE_I32 == l_ePrefix)
+                                )
+                        {
+                            //4 bytes integer
+                            ADD_ARG(P7TRACE_ARG_TYPE_INT32, 
+                                    SIZE_OF_ARG(tUINT32),
                                     m_bInitialized
                                    );
                         }
@@ -367,6 +357,54 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
                         l_bPercent = FALSE;
                         break;
                     }
+                    case TM('s'):
+                    case TM('S'):
+                    {
+                        if (EPREFIX_TYPE_H == l_ePrefix)
+                        {
+                            ADD_ARG(P7TRACE_ARG_TYPE_STRA, 0, m_bInitialized); //SIZE_OF_ARG(char*)    
+                        }
+#ifdef UTF8_ENCODING    //%S NOT PORTABLE, DO NOT USE IT!, use %ls or %hs 
+                        else if (TM('S') == (*l_pIterator))
+                        {
+                            ADD_ARG(P7TRACE_ARG_TYPE_USTR32, 0, m_bInitialized); //SIZE_OF_ARG(char*)    
+                        }
+#else
+                        else if (TM('S') == (*l_pIterator))
+                        {
+                            ADD_ARG(P7TRACE_ARG_TYPE_STRA, 0, m_bInitialized); //SIZE_OF_ARG(char*)    
+                        }
+#endif                             
+                        else if (EPREFIX_TYPE_L == l_ePrefix)
+                        {
+#ifdef UTF8_ENCODING
+                            ADD_ARG(P7TRACE_ARG_TYPE_USTR32, 0, m_bInitialized); //SIZE_OF_ARG(char*)     
+#else
+                            ADD_ARG(P7TRACE_ARG_TYPE_USTR16, 0, m_bInitialized); //SIZE_OF_ARG(wchar_t*)     
+#endif                             
+                        }
+                        else
+                        {
+#ifdef UTF8_ENCODING
+                            ADD_ARG(P7TRACE_ARG_TYPE_USTR8, 0, m_bInitialized); //SIZE_OF_ARG(char*)     
+#else
+                            ADD_ARG(P7TRACE_ARG_TYPE_USTR16, 0, m_bInitialized); //SIZE_OF_ARG(wchar_t*)     
+#endif                             
+                        }
+
+                        l_bPercent = FALSE;
+                        break;
+                    }
+                    //case TM('n'): ignored, not supported
+                    case TM('p'):
+                    {
+                        ADD_ARG(P7TRACE_ARG_TYPE_PVOID, 
+                                SIZE_OF_ARG(void*),
+                                m_bInitialized
+                               );
+                        l_bPercent = FALSE;
+                        break;
+                    }
                     case TM('e'):
                     case TM('E'):
                     case TM('f'):
@@ -383,44 +421,40 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
                         l_bPercent = FALSE;
                         break;
                     }
-                    case TM('n'):
-                    case TM('p'):
-                    {
-                        ADD_ARG(P7TRACE_ARG_TYPE_PVOID, 
-                                SIZE_OF_ARG(void*),
-                                m_bInitialized
-                               );
-                        l_bPercent = FALSE;
-                        break;
-                    }
-                    case TM('s'):
-                    case TM('S'):
+                    case TM('c'):
+                    case TM('C'):
                     {
                         if (EPREFIX_TYPE_H == l_ePrefix)
                         {
-                            ADD_ARG(P7TRACE_ARG_TYPE_ASTR, 0, m_bInitialized); //SIZE_OF_ARG(char*)    
+                            //1 bytes character
+                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR, 
+                                    SIZE_OF_ARG(char),
+                                    m_bInitialized
+                                   );
                         }
-                        else if (    (EPREFIX_TYPE_L == l_ePrefix)
-                                  || (TM('s') == (*l_pIterator))
-                                )
+                        else if (EPREFIX_TYPE_L == l_ePrefix)
                         {
 #ifdef UTF8_ENCODING
-                            ADD_ARG(P7TRACE_ARG_TYPE_USTR, 0, m_bInitialized); //SIZE_OF_ARG(char*)     
+                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR32, SIZE_OF_ARG(wchar_t), m_bInitialized); 
 #else
-                            ADD_ARG(P7TRACE_ARG_TYPE_WSTR, 0, m_bInitialized); //SIZE_OF_ARG(wchar_t*)     
+                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR16, SIZE_OF_ARG(wchar_t), m_bInitialized); 
 #endif                             
                         }
-                        else if (TM('S') == (*l_pIterator))
+                        else if (TM('c') == (*l_pIterator))
                         {
-                            ADD_ARG(P7TRACE_ARG_TYPE_ASTR, 0, m_bInitialized); //SIZE_OF_ARG(char*)
+#ifdef UTF8_ENCODING
+                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR, SIZE_OF_ARG(char), m_bInitialized); 
+#else
+                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR16, SIZE_OF_ARG(wchar_t), m_bInitialized); 
+#endif                             
                         }
                         else
                         {
-#ifdef UTF8_ENCODING
-                            ADD_ARG(P7TRACE_ARG_TYPE_USTR, 0, m_bInitialized); //SIZE_OF_ARG(char*)     
-#else
-                            ADD_ARG(P7TRACE_ARG_TYPE_WSTR, 0, m_bInitialized); //SIZE_OF_ARG(wchar_t*)     
-#endif                             
+                            //1 bytes character
+                            ADD_ARG(P7TRACE_ARG_TYPE_CHAR, 
+                                    SIZE_OF_ARG(char),
+                                    m_bInitialized
+                                   );
                         }
 
                         l_bPercent = FALSE;
@@ -439,7 +473,7 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
 
         //if (FALSE == m_bInitialized)
         //{
-        //    l_dwArgs_Len = 0;
+        //    m_dwArgs_Count = 0;
         //    l_pFormat    = TM("WRONG TRACE ARGUMENTS !");
         //}
     } //if (m_bInitialized)
@@ -450,7 +484,7 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
                    
         if (l_pArgs)
         {
-            m_dwSize += sizeof(sP7Trace_Arg) * l_dwArgs_Len;
+            m_dwSize += sizeof(sP7Trace_Arg) * m_dwArgs_Count;
         }
 
         if (i_pFile)
@@ -487,7 +521,7 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
         l_pHeader_Desc->sCommon.dwType     = EP7USER_TYPE_TRACE;
         l_pHeader_Desc->sCommon.dwSubType  = EP7TRACE_TYPE_DESC;
 
-        l_pHeader_Desc->wArgs_Len          = (tUINT16)l_dwArgs_Len;
+        l_pHeader_Desc->wArgs_Len          = (tUINT16)m_dwArgs_Count;
         l_pHeader_Desc->wID                = i_wID;
         l_pHeader_Desc->wLine              = i_wLine;
         l_pHeader_Desc->wModuleID          = i_wModuleID;
@@ -498,9 +532,10 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
         {
             memcpy(m_pBuffer + l_dwOffset, 
                    l_pArgs,
-                   sizeof(sP7Trace_Arg) * l_dwArgs_Len
+                   sizeof(sP7Trace_Arg) * m_dwArgs_Count
                   );
-            l_dwOffset += sizeof(sP7Trace_Arg) * l_dwArgs_Len;
+            m_pArgs = (sP7Trace_Arg*)(m_pBuffer + l_dwOffset);
+            l_dwOffset += sizeof(sP7Trace_Arg) * m_dwArgs_Count;
         }
 
         //we do not verify address of l_pFormat because we do it before
@@ -541,37 +576,33 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
 
         //allocate blocks for every variable
         m_dwBlocks_Count = 0;
-        m_pBlocks        = (tINT32*)i_rMemory.Alloc(sizeof(tINT32) * l_dwArgs_Len);
+        m_pBlocks        = (tINT32*)i_rMemory.Alloc(sizeof(tINT32) * m_dwArgs_Count);
         
         if (m_pBlocks) //fill the blocks
         {
-            memset(m_pBlocks, 0, sizeof(tINT32) * l_dwArgs_Len);
+            memset(m_pBlocks, 0, sizeof(tINT32) * m_dwArgs_Count);
             l_bCumulative = FALSE;
 
-            for (tUINT32 l_dwI = 0; l_dwI < l_dwArgs_Len; l_dwI++)
+            for (tUINT32 l_dwI = 0; l_dwI < m_dwArgs_Count; l_dwI++)
             {
-                if (P7TRACE_ARG_TYPE_WSTR == l_pArgs[l_dwI].bType)
+                if (P7TRACE_ARG_TYPE_USTR16 == l_pArgs[l_dwI].bType)
                 {
                     m_dwBlocks_Count ++;
-                    m_pBlocks[m_dwBlocks_Count - 1] = P7TRACE_ITEM_BLOCK_WSTRING;
+                    m_pBlocks[m_dwBlocks_Count - 1] = P7TRACE_ITEM_BLOCK_USTRING16;
                     l_bCumulative = FALSE;
                 }
-                else if (    (P7TRACE_ARG_TYPE_ASTR == l_pArgs[l_dwI].bType)
-                          || (P7TRACE_ARG_TYPE_USTR == l_pArgs[l_dwI].bType)
+                else if (P7TRACE_ARG_TYPE_USTR32 == l_pArgs[l_dwI].bType)
+                {
+                    m_dwBlocks_Count ++;
+                    m_pBlocks[m_dwBlocks_Count - 1] = P7TRACE_ITEM_BLOCK_USTRING32;
+                    l_bCumulative = FALSE;
+                }
+                else if (    (P7TRACE_ARG_TYPE_STRA == l_pArgs[l_dwI].bType)
+                          || (P7TRACE_ARG_TYPE_USTR8 == l_pArgs[l_dwI].bType)
                         )
                 {
                     m_dwBlocks_Count ++;
-                    //P7TRACE_ITEM_BLOCK_USTRING will be processed as ASCII
                     m_pBlocks[m_dwBlocks_Count - 1] = P7TRACE_ITEM_BLOCK_ASTRING;
-                    l_bCumulative = FALSE;
-                }
-                else if  (    (l_bAlignment64)
-                           && (8 == l_pArgs[l_dwI].bSize)
-                         )
-                {
-                    m_dwBlocks_Count ++;
-                    //special stack variable alignment 
-                    m_pBlocks[m_dwBlocks_Count - 1] = P7TRACE_ITEM_BLOCK_12BYTES;
                     l_bCumulative = FALSE;
                 }
                 else
@@ -613,6 +644,7 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
 
     , m_pBlocks(NULL)
     , m_dwBlocks_Count(0)
+    , m_dwArgs_Count(0)
    
     , m_bInitialized(TRUE)
 {
@@ -623,7 +655,6 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
     char         *l_pFile       = NULL;  
     char         *l_pFunction   = NULL;  
     sP7Trace_Arg *l_pArgs       = NULL;  
-    tUINT32       l_dwArgs_Len  = 0;
     tUINT32       l_dwArgs_Max  = 0;
 
     if (i_pKeys)
@@ -640,9 +671,9 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
     if (m_bInitialized)
     {
         #ifdef UTF8_ENCODING
-            ADD_ARG(P7TRACE_ARG_TYPE_USTR, 0, m_bInitialized); //SIZE_OF_ARG(char*)     
+            ADD_ARG(P7TRACE_ARG_TYPE_USTR8, 0, m_bInitialized); //SIZE_OF_ARG(char*)     
         #else
-            ADD_ARG(P7TRACE_ARG_TYPE_WSTR, 0, m_bInitialized); //SIZE_OF_ARG(wchar_t*)     
+            ADD_ARG(P7TRACE_ARG_TYPE_USTR16, 0, m_bInitialized); //SIZE_OF_ARG(wchar_t*)     
         #endif                             
     } //if (m_bInitialized)
 
@@ -652,7 +683,7 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
                    
         if (l_pArgs)
         {
-            m_dwSize += sizeof(sP7Trace_Arg) * l_dwArgs_Len;
+            m_dwSize += sizeof(sP7Trace_Arg) * m_dwArgs_Count;
         }
 
         if (i_pFile)
@@ -708,7 +739,7 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
         l_pHeader_Desc->sCommon.dwType     = EP7USER_TYPE_TRACE;
         l_pHeader_Desc->sCommon.dwSubType  = EP7TRACE_TYPE_DESC;
 
-        l_pHeader_Desc->wArgs_Len          = (tUINT16)l_dwArgs_Len;
+        l_pHeader_Desc->wArgs_Len          = (tUINT16)m_dwArgs_Count;
         l_pHeader_Desc->wID                = i_wID;
         l_pHeader_Desc->wLine              = i_wLine;
         l_pHeader_Desc->wModuleID          = i_wModuleID;
@@ -718,9 +749,9 @@ CP7Trace_Desc::CP7Trace_Desc(CMemoryManager &i_rMemory,
         {
             memcpy(m_pBuffer + l_dwOffset, 
                    l_pArgs,
-                   sizeof(sP7Trace_Arg) * l_dwArgs_Len
+                   sizeof(sP7Trace_Arg) * m_dwArgs_Count
                   );
-            l_dwOffset += sizeof(sP7Trace_Arg) * l_dwArgs_Len;
+            l_dwOffset += sizeof(sP7Trace_Arg) * m_dwArgs_Count;
         }
 
         //I don't verify address of l_pFormat because I did it before
@@ -807,6 +838,22 @@ tUINT32 CP7Trace_Desc::Get_Resets()
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// Get_Arguments_Count
+tUINT32 CP7Trace_Desc::Get_Arguments_Count()
+{
+    return m_dwArgs_Count;
+}// Get_Arguments_Count
+
+////////////////////////////////////////////////////////////////////////////////
+// Get_Arguments
+const sP7Trace_Arg *CP7Trace_Desc::Get_Arguments(tUINT32 &o_rCount)
+{
+    o_rCount = m_dwArgs_Count;
+    return m_pArgs;
+}// Get_Arguments
+
+
+////////////////////////////////////////////////////////////////////////////////
 // Is_Equal                  
 GASSERT(P7TRACE_KEY_LENGTH == 2);
 tBOOL CP7Trace_Desc::Is_Equal(tKeyType *i_pKey)
@@ -863,6 +910,8 @@ CP7Trace::CP7Trace(IP7_Client *i_pClient, const tXCHAR *i_pName)
     , m_wLast_ModuleID(1)
     , m_hShared(NULL)
     , m_cMemory(10240)
+    , m_pVargs(NULL)
+    , m_szVargs(0)
 {
     memset(&m_sCS, 0, sizeof(m_sCS));
     
@@ -1000,27 +1049,55 @@ CP7Trace::CP7Trace(IP7_Client *i_pClient, const tXCHAR *i_pName)
         m_bInitialized = m_bIs_Channel;
     }
 
-#if defined(GTX32)
-    //check 8 bytes variables alignment on stack for x86 architecture
+#if defined(P7TRACE_NO_VA_ARG_OPTIMIZATION)
     if (m_bInitialized)
     {
-        sStack_Desc l_sDesc1;
-        sStack_Desc l_sDesc2;
-        tUINT64     l_qwPattern = 0xABCDEF1234567890ull;
+        m_szVargs = 256;
+        m_pVargs  = (tUINT8*)m_cMemory.Reuse(CMemoryManager::eVaValues, m_szVargs);
+    }
+#else
+    if (m_bInitialized)
+    {
+        CP7Trace::sStack_Desc l_pDesc[6];
+        l_pDesc[0].uValue.dw32 = 0xDEADBEEFu; 
+        l_pDesc[0].eType       = CP7Trace::sStack_Desc::eTypeU32;
+        l_pDesc[0].bLast       = FALSE;
 
-        l_sDesc1.szOffset  = 4;
-        l_sDesc1.szPattern = 8;
-        memcpy(l_sDesc1.pPattern, &l_qwPattern, 8);
+        l_pDesc[1].uValue.dw64 = 0x99ABCDEF12345678ull; 
+        l_pDesc[1].eType       = CP7Trace::sStack_Desc::eTypeU64;
+        l_pDesc[1].bLast       = FALSE;
 
-        l_sDesc2.szOffset  = 8;
-        l_sDesc2.szPattern = 8;
-        memcpy(l_sDesc2.pPattern, &l_qwPattern, 8);
+        l_pDesc[2].uValue.dw32 = 0xABBADEFEu; 
+        l_pDesc[2].eType       = CP7Trace::sStack_Desc::eTypeU32;
+        l_pDesc[2].bLast       = FALSE;
 
-        if (    (8 == Get_Stack_Alignment(&l_sDesc1, l_qwPattern, 0xFFFFFFFFul))
-             || (8 == Get_Stack_Alignment(&l_sDesc2, 0xFFFFFFFFul, l_qwPattern, 0xFFFFFFFFul))
+        l_pDesc[3].uValue.dw32 = 0x98765432u; 
+        l_pDesc[3].eType       = CP7Trace::sStack_Desc::eTypeU32;
+        l_pDesc[3].bLast       = FALSE;
+
+        l_pDesc[4].uValue.db64 = (tDOUBLE)362764.9; 
+        l_pDesc[4].eType       = CP7Trace::sStack_Desc::eTypeD64;
+        l_pDesc[4].bLast       = FALSE;
+
+        l_pDesc[5].uValue.dw64 = 0x791A90204E0b4C6Dull; 
+        l_pDesc[5].eType       = CP7Trace::sStack_Desc::eTypeU64;
+        l_pDesc[5].bLast       = TRUE;
+
+        if (!Is_VarArgs(l_pDesc, 
+                        l_pDesc[0].uValue.dw32, 
+                        l_pDesc[1].uValue.dw64,
+                        l_pDesc[2].uValue.dw32,
+                        l_pDesc[3].uValue.dw32,
+                        l_pDesc[4].uValue.db64,
+                        l_pDesc[5].uValue.dw64
+                       )
            )
         {
-            m_dwFlags |= P7TRACE_FLAG_STACK_64BITS_ALIGNMENT;
+            printf("ERROR: P7.Trace  detects  that  current  architecture/compiler\n");
+            printf("       doesn't support location of variadic arguments on stack\n");
+            printf("       to make library works properly  please  activate  macro\n");
+            printf("       \"P7TRACE_NO_VA_ARG_OPTIMIZATION\"  in file  \"P7_Trace.h\"\n");
+            printf("       Sorry for inconvenience and have a nice day!\n");
         }
     }
 #endif
@@ -1049,13 +1126,6 @@ CP7Trace::~CP7Trace()
 
     //memory used from pool, not necessary to return
     memset(m_pDesc_Array, 0, sizeof(m_pDesc_Array));
-    // for (tUINT32 l_dwI = 0; l_dwI < P7_TRACE_DESC_HARDCODED_COUNT; l_dwI++)
-    // {
-    //     if (m_pDesc_Array[l_dwI])
-    //     {
-    //         m_pDesc_Array[l_dwI] = NULL; 
-    //     }
-    // }
 
     m_cThreadsR.Clear(TRUE);
     m_cThreadsS.Clear(TRUE);
@@ -1078,6 +1148,9 @@ CP7Trace::~CP7Trace()
 
     m_pChk_Curs   = NULL;
     m_dwChk_Count = 0;
+
+    m_pVargs  = NULL;
+    m_szVargs = 0;
 
     LOCK_DESTROY(m_sCS);
 }// ~CP7Trace                                      
@@ -1744,6 +1817,7 @@ tBOOL CP7Trace::Trace(tUINT16            i_wTrace_ID,
                       ...
                      )
 {
+#if !defined(P7TRACE_NO_VA_ARG_OPTIMIZATION)
     return Trace_Raw(i_wTrace_ID, 
                      i_eLevel, 
                      i_hModule, 
@@ -1751,8 +1825,25 @@ tBOOL CP7Trace::Trace(tUINT16            i_wTrace_ID,
                      i_pFile, 
                      i_pFunction, 
                      (tKeyType*)&i_pFunction,
-                     &i_pFormat
+                     &i_pFormat,
+                     NULL
                     );
+#else
+    va_list l_pVl;
+    va_start(l_pVl, i_pFormat);
+    tBOOL l_bRet = Trace_Raw(i_wTrace_ID, 
+                             i_eLevel, 
+                             i_hModule, 
+                             i_wLine, 
+                             i_pFile, 
+                             i_pFunction, 
+                             (tKeyType*)&i_pFunction,
+                             &i_pFormat,
+                             &l_pVl
+                            );
+    va_end(l_pVl);
+    return l_bRet;
+#endif
 }// Trace                                      
 
 
@@ -1839,6 +1930,7 @@ tBOOL CP7Trace::Trace_Embedded(tUINT16            i_wTrace_ID,
                                const tXCHAR     **i_ppFormat
                               )
 {
+#if !defined(P7TRACE_NO_VA_ARG_OPTIMIZATION)
     tKeyType l_pKey[P7TRACE_KEY_LENGTH] = {(tKeyType)i_pFunction, (tKeyType)*i_ppFormat};
 
     return Trace_Raw(i_wTrace_ID, 
@@ -1848,10 +1940,46 @@ tBOOL CP7Trace::Trace_Embedded(tUINT16            i_wTrace_ID,
                      i_pFile, 
                      i_pFunction, 
                      l_pKey,
-                     i_ppFormat
+                     i_ppFormat,
+                     NULL
                     );
-
+#else
+    static tBOOL g_bVaArgError = FALSE;
+    if (!g_bVaArgError)
+    {
+        g_bVaArgError = TRUE;
+        printf("P7 TRACE ERROR: Trace_Embedded function is obsolete!\n");
+    }
+    return FALSE;
+#endif
 }// Trace_Embedded
+
+
+////////////////////////////////////////////////////////////////////////////////
+// Trace_Embedded                                      
+tBOOL CP7Trace::Trace_Embedded(tUINT16            i_wTrace_ID,   
+                               eP7Trace_Level     i_eLevel, 
+                               IP7_Trace::hModule i_hModule,
+                               tUINT16            i_wLine,
+                               const char        *i_pFile,
+                               const char        *i_pFunction,
+                               const tXCHAR     **i_ppFormat,
+                               va_list           *i_pVa_List
+                              )
+{
+    tKeyType l_pKey[P7TRACE_KEY_LENGTH] = {(tKeyType)i_pFunction, (tKeyType)*i_ppFormat};
+
+    return Trace_Raw(i_wTrace_ID, 
+                     i_eLevel, 
+                     i_hModule, 
+                     i_wLine, 
+                     i_pFile, 
+                     i_pFunction, 
+                     l_pKey,
+                     i_ppFormat,
+                     i_pVa_List
+                    );
+}
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2071,7 +2199,8 @@ __forceinline tBOOL CP7Trace::Trace_Raw(tUINT16            i_wTrace_ID,
                                         const char        *i_pFile,
                                         const char        *i_pFunction,
                                         tKeyType          *i_pKey,
-                                        const tXCHAR     **i_ppFormat
+                                        const tXCHAR     **i_ppFormat,
+                                        va_list           *i_pVa_List
                                        )
 {
     tBOOL            l_bReturn  = TRUE;
@@ -2118,6 +2247,14 @@ __forceinline tBOOL CP7Trace::Trace_Raw(tUINT16            i_wTrace_ID,
                                         m_dwFlags
                                        );
             m_pDesc_Array[i_wTrace_ID] = l_pDesc;
+
+        #if defined(P7TRACE_NO_VA_ARG_OPTIMIZATION)
+            if ((l_pDesc->Get_Arguments_Count() * 16) > m_szVargs)
+            {
+                m_szVargs = l_pDesc->Get_Arguments_Count() * 16;
+                m_pVargs  = (tUINT8*)m_cMemory.Reuse(CMemoryManager::eVaValues, m_szVargs);
+            }
+        #endif
         }
     }
     else //if we should use map to find it
@@ -2149,6 +2286,14 @@ __forceinline tBOOL CP7Trace::Trace_Raw(tUINT16            i_wTrace_ID,
                                        );
             //in stack we have pointer of the function and then format, 2 values
             m_cDescU_Tree.Push(l_pDesc, i_pKey);
+
+        #if defined(P7TRACE_NO_VA_ARG_OPTIMIZATION)
+            if ((l_pDesc->Get_Arguments_Count() * 16) > m_szVargs)
+            {
+                m_szVargs = l_pDesc->Get_Arguments_Count() * 16;
+                m_pVargs  = (tUINT8*)m_cMemory.Reuse(CMemoryManager::eVaValues, m_szVargs);
+            }
+        #endif
         }
     }
 
@@ -2203,6 +2348,62 @@ __forceinline tBOOL CP7Trace::Trace_Raw(tUINT16            i_wTrace_ID,
 
     l_pChunk ++;
 
+    //case for platforms where variadic arguments located in stack in specific order
+    //or using general purposes registers
+    #if defined(P7TRACE_NO_VA_ARG_OPTIMIZATION)
+    {
+        tUINT32 l_dwArgC;
+        const sP7Trace_Arg *l_pArgV = l_pDesc->Get_Arguments(l_dwArgC);
+        l_pVArgs = m_pVargs;
+        while (l_dwArgC--)
+        {
+        #if defined (GTX32)
+            if (4 == l_pArgV->bSize) //most probable case
+            {
+                *(tUINT32*)l_pVArgs = va_arg(*i_pVa_List, tUINT32);
+            }
+            else
+        #endif
+            if (8 == l_pArgV->bSize)
+            {
+                //GCC sometimes optimizes storing of double values and access to it requires
+                //specific case, "bardak i razruha v golovah"
+                if (P7TRACE_ARG_TYPE_DOUBLE != l_pArgV->bType)
+                {
+                //in some platforms access to 64 not aligned variable is illegal, if it 
+                //the case, please active the macro P7TRACE_64BITS_ALIGNED_ACCESS
+                #if defined(P7TRACE_64BITS_ALIGNED_ACCESS)
+                    tUINT64 l_qwVal = va_arg(*i_pVa_List, tUINT64);
+                    memcpy(l_pVArgs, &l_qwVal, sizeof(tUINT64));
+                #else
+                    *(tUINT64*)l_pVArgs = va_arg(*i_pVa_List, tUINT64);
+                #endif
+                }
+                else
+                {
+                    //in some platforms access to 64 not aligned variable is illegal, if it
+                    //the case, please active the macro P7TRACE_64BITS_ALIGNED_ACCESS
+                    #if defined(P7TRACE_64BITS_ALIGNED_ACCESS)
+                        double l_qwVal = va_arg(*i_pVa_List, double);
+                        memcpy(l_pVArgs, &l_qwVal, sizeof(double));
+                    #else
+                        *(double*)l_pVArgs = va_arg(*i_pVa_List, double);
+                    #endif
+                }
+            }
+            else //if (0 == l_pArgV->bSize) 
+            {
+                *(void**)l_pVArgs = va_arg(*i_pVa_List, void*);
+                l_pVArgs += SIZE_OF_ARG(void*); //String has 0 size (0 == l_pArgV->bSize)
+            }
+
+            l_pVArgs += l_pArgV->bSize;
+            l_pArgV++;
+        }
+        l_pVArgs = m_pVargs;
+    }
+    #endif
+
     while (l_dwBCount --)
     {
         if (0 <= (*l_pBlocks))
@@ -2228,7 +2429,7 @@ __forceinline tBOOL CP7Trace::Trace_Raw(tUINT16            i_wTrace_ID,
             l_pVArgs += sizeof(char*);
         }
 #ifndef UTF8_ENCODING
-        else if (P7TRACE_ITEM_BLOCK_WSTRING == (*l_pBlocks))
+        else if (P7TRACE_ITEM_BLOCK_USTRING16 == (*l_pBlocks))
         {
             l_pChunk->pData = *(wchar_t**)l_pVArgs;
 
@@ -2238,24 +2439,30 @@ __forceinline tBOOL CP7Trace::Trace_Raw(tUINT16            i_wTrace_ID,
             }
             else
             {
-                l_pChunk->pData  = L"(NULL)";
+                l_pChunk->pData  = const_cast<wchar_t*>(L"(NULL)");
                 l_pChunk->dwSize = sizeof(wchar_t) * 7u;
             }
 
             l_pVArgs += sizeof(wchar_t*);
         }
-#endif   
-        else if (P7TRACE_ITEM_BLOCK_12BYTES == (*l_pBlocks))
+#else   
+        else if (P7TRACE_ITEM_BLOCK_USTRING32 == (*l_pBlocks))
         {
-            if ((size_t)l_pVArgs % (size_t)8)
+            l_pChunk->pData = *(wchar_t**)l_pVArgs;
+
+            if (l_pChunk->pData)
             {
-                l_pVArgs += 4; //shift for good alignment
+                l_pChunk->dwSize = (tUINT32)((wcslen(*(wchar_t**)l_pVArgs) + 1) * sizeof(wchar_t));
+            }
+            else
+            {
+                l_pChunk->pData  = const_cast<wchar_t*>(L"(NULL)");
+                l_pChunk->dwSize = sizeof(wchar_t) * 7u;
             }
 
-            l_pChunk->dwSize = 8;
-            l_pChunk->pData  = l_pVArgs;
-            l_pVArgs += 8; 
+            l_pVArgs += sizeof(wchar_t*);
         }
+#endif
 
         m_sHeader_Data.sCommon.dwSize += l_pChunk->dwSize;
 
@@ -2319,34 +2526,61 @@ __forceinline tBOOL CP7Trace::Inc_Chunks(tUINT32 i_dwInc)
 
 
 ////////////////////////////////////////////////////////////////////////////////
-//Get_Stack_Alignment()
+//Is_VarArgs()
 //Some processors have funny stack alignment rules, for example arm under 32 bits
-//for 64 bits variables request 64 bit address stack alignment
-tUINT32 CP7Trace::Get_Stack_Alignment(const CP7Trace::sStack_Desc *i_pDesc, ...)
+//for 64 bits variables request 64 bit address stack alignment, some uses gen.
+//registers, some changes order, etc.
+tBOOL CP7Trace::Is_VarArgs(const CP7Trace::sStack_Desc *i_pDesc, ...)
 {
-    const tUINT8 *l_pData    = (const tUINT8 *)&i_pDesc + i_pDesc->szOffset;
-    tUINT32       l_dwReturn = 0;
+    const tUINT8 *l_pData   = (const tUINT8 *)&i_pDesc + sizeof(void*);
+    tBOOL         l_bReturn = TRUE;
     va_list       l_pVal;
 
-    ////////////////////////////////////////////////////////////////////////////
-    //This is protection against GCC optimization, some versions do not fill the
-    //var. arg. functions stack if inside var. args. macro aren't used
     va_start(l_pVal, i_pDesc);
-    l_dwReturn=va_arg(l_pVal, tUINT32);
+    while (1)
+    {
+        if (CP7Trace::sStack_Desc::eTypeU32 == i_pDesc->eType)
+        {
+            if (*(tUINT32*)l_pData != va_arg(l_pVal, tUINT32))
+            {
+                l_bReturn = FALSE;
+                break;
+            }
+
+            l_pData += SIZE_OF_ARG(tUINT32);
+        }
+        else if (CP7Trace::sStack_Desc::eTypeU64 == i_pDesc->eType)
+        {
+            if (*(tUINT64*)l_pData != va_arg(l_pVal, tUINT64))
+            {
+                l_bReturn = FALSE;
+                break;
+            }
+
+            l_pData += SIZE_OF_ARG(tUINT64);
+        }
+        else if (CP7Trace::sStack_Desc::eTypeD64 == i_pDesc->eType)
+        {
+            if (*(tDOUBLE*)l_pData != va_arg(l_pVal, tDOUBLE))
+            {
+                l_bReturn = FALSE;
+                break;
+            }
+
+            l_pData += SIZE_OF_ARG(tUINT64);
+        }
+
+        if (i_pDesc->bLast)
+        {
+            break;
+        }
+        else
+        {
+            i_pDesc++;
+        }
+    }
+
     va_end(l_pVal);
-    //protection end
-    ////////////////////////////////////////////////////////////////////////////
 
-    l_dwReturn = 0;
-
-    if (0 == memcmp(l_pData, i_pDesc->pPattern, i_pDesc->szPattern))
-    {
-        l_dwReturn = 4;
-    }
-    else if (0 == memcmp(l_pData + 4, i_pDesc->pPattern, i_pDesc->szPattern))
-    {
-        l_dwReturn = 8;
-    }
-
-    return l_dwReturn;
+    return l_bReturn;
 }
