@@ -14,6 +14,8 @@
 #include "P7/Headers/P7_Trace.h"
 #include "P7/Headers/P7_Telemetry.h"
 
+#include "xvmnativetelemetry_export.h"
+
 struct TraceChannel
 {
 	std::wstring name;
@@ -26,13 +28,13 @@ struct TelemetryChannel
 	IP7_Telemetry* object;
 };
 
-class Logger
+class XVMNATIVETELEMETRY_EXPORT Logger
 {
 private:
 	IP7_Client* client = nullptr;
 
-	std::vector<TelemetryChannel> telemetry;
-	std::vector<TraceChannel> trace;
+	std::vector<TelemetryChannel>* telemetry;
+	std::vector<TraceChannel>* trace;
 
 protected:
 	Logger();

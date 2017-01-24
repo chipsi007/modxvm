@@ -8,7 +8,10 @@
 #include <Windows.h>
 #include <cstdint>
 
-class Timer
+#include "xvmnativetelemetry_export.h"
+
+
+class XVMNATIVETELEMETRY_EXPORT Timer
 {
 private:
 	static LARGE_INTEGER Frequency;

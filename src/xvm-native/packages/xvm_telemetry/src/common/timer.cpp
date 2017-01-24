@@ -4,7 +4,6 @@
 */
 
 #include "timer.h"
-
 LARGE_INTEGER Timer::Frequency;
 
 void Timer::Initialize()
