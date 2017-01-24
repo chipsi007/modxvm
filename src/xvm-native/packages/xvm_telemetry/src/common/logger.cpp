@@ -7,12 +7,16 @@
 
 Logger::Logger()
 {
+	telemetry = new std::vector<TelemetryChannel>();
+	trace = new std::vector<TraceChannel>();
 	Initialize();
 }
 
 Logger::~Logger()
 {
 	Finalize();
+	delete telemetry;
+	delete trace;
 }
 
 Logger & Logger::Instance()
@@ -33,16 +37,16 @@ void Logger::Initialize()
 
 void Logger::Finalize()
 {
-	for (auto it = telemetry.cbegin(); it != telemetry.cend();)
+	for (auto it = telemetry->cbegin(); it != telemetry->cend();)
 	{
 		it->object->Release();
-	    it = telemetry.erase(it);
+	    it = telemetry->erase(it);
 	}
 	
-	for (auto it = trace.cbegin(); it != trace.cend();)
+	for (auto it = trace->cbegin(); it != trace->cend();)
 	{
 		it->object->Release();
-		it = trace.erase(it);
+		it = trace->erase(it);
 	}
 
 	if (client)
@@ -54,23 +58,32 @@ void Logger::Finalize()
 
 IP7_Telemetry* Logger::CreateTelemetryChannel(std::wstring channelName)
 {
+	if (client == nullptr)
+		return nullptr;
+	
+	if (telemetry == nullptr)
+		return nullptr;
+
 	IP7_Telemetry* l_pTelemetry = P7_Create_Telemetry(client, channelName.c_str(), nullptr);
 	
-	if (nullptr == l_pTelemetry)
+	if (l_pTelemetry == nullptr)
 		return nullptr;
 
 	TelemetryChannel tc;
 	tc.name = channelName;
 	tc.object = l_pTelemetry;
 
-	telemetry.push_back(tc);
+	telemetry->push_back(tc);
 
 	return l_pTelemetry;
 }
 
 IP7_Telemetry* Logger::FindTelemetryChannel(std::wstring channelName)
 {
-	for (auto it = telemetry.begin(); it != telemetry.end(); ++it)
+	if (telemetry == nullptr)
+		return nullptr;
+
+	for (auto it = telemetry->begin(); it != telemetry->end(); ++it)
 	{
 		if (it->name == channelName)
 		{
@@ -83,7 +96,10 @@ IP7_Telemetry* Logger::FindTelemetryChannel(std::wstring channelName)
 
 IP7_Telemetry* Logger::FindOrCreateTelemetryChannel(std::wstring channelName)
 {
-	for (auto it = telemetry.begin(); it != telemetry.end(); ++it)
+	if (telemetry == nullptr)
+		return nullptr;
+
+	for (auto it = telemetry->begin(); it != telemetry->end(); ++it)
 	{
 		if (it->name == channelName)
 		{
@@ -97,12 +113,15 @@ IP7_Telemetry* Logger::FindOrCreateTelemetryChannel(std::wstring channelName)
 
 bool Logger::DeleteTelemetryChannel(std::wstring channelName)
 {
-	for (auto it = telemetry.begin(); it != telemetry.end(); ++it) 
+	if (telemetry == nullptr)
+		return nullptr;
+
+	for (auto it = telemetry->begin(); it != telemetry->end(); ++it)
 	{
 		if (it->name == channelName)
 		{
 			it->object->Release();
-			it = telemetry.erase(it);
+			it = telemetry->erase(it);
 			return true;
 		}
 	}
