@@ -1,0 +1,5 @@
+Name        : P7
+Version     : 4.1
+License     : LGPL v3
+Description : P7 is open source and cross-platform library for high-speed sending telemetry & trace data from your application with minimal usage of CPU and memory. 
+URL         : http://baical.net/p7.html
