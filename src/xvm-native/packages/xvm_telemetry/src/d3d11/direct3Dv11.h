@@ -15,7 +15,6 @@ class D3D11
 {
 private:
 	//DXGISwapChain
-	static bool initD3D();
 	static DWORD* VTableDXGISwapChain;
 
 	//DXGISwapChain::Present
@@ -35,6 +34,7 @@ public:
 	static bool Initialize();
 	static bool Finalize();
 
+	static bool Connect();
 
 	static bool Hook();
 	static bool Unhook();

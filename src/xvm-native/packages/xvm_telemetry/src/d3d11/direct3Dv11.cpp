@@ -28,7 +28,10 @@ HRESULT __stdcall D3D11::DXGISwapChain_Present_detour(IDXGISwapChain* pSwapChain
 	}
 	else
 	{
-		D3D11::telemetry_channel->Add(D3D11::telemetry_counter, Timer::GetDelta(D3D11::TimerTick));
+		if (D3D11::telemetry_channel != nullptr)
+		{
+			D3D11::telemetry_channel->Add(D3D11::telemetry_counter, Timer::GetDelta(D3D11::TimerTick));
+		}
 	}
 
 	return D3D11::DXGISwapChain_Present_trampoline(pSwapChain, SyncInterval, Flags);
@@ -37,20 +40,13 @@ HRESULT __stdcall D3D11::DXGISwapChain_Present_detour(IDXGISwapChain* pSwapChain
 //Intiailization
 bool D3D11::Initialize() 
 {
-	//initialize logger
+	//logger
 	D3D11::Logger = &(Logger::Instance());
-	D3D11::telemetry_channel = D3D11::Logger->FindOrCreateTelemetryChannel(L"Telemetry");
-	D3D11::telemetry_channel->Create(TM("Performance/Timeframe (D3D11)"), 0, 60000, 30000, 1, &(D3D11::telemetry_counter));
 
-	//initialize timer
+	//timer
 	D3D11::TimerTick.QuadPart = 0;
-	
-	//initialize D3D
-	return initD3D();
-}
 
-bool D3D11::initD3D()
-{
+	//d3d
 	HWND hWnd = GetForegroundWindow();
 
 	ID3D11Device *pDevice = NULL;
@@ -91,6 +87,15 @@ bool D3D11::Finalize()
 	D3D11::Logger = nullptr;
 
 	return true;
+}
+
+bool D3D11::Connect()
+{
+	D3D11::telemetry_channel = D3D11::Logger->FindOrCreateTelemetryChannel(L"Telemetry");
+	if (D3D11::telemetry_channel == nullptr)
+		return false;
+
+	return (D3D11::telemetry_channel->Create(TM("Performance/Timeframe (D3D11)"), 0, 60000, 30000, 1, &(D3D11::telemetry_counter)) != FALSE);
 }
 
 bool D3D11::Hook() {

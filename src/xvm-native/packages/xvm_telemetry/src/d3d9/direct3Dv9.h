@@ -15,7 +15,6 @@ class D3D9
 {
 private:
 	//IDirect3DDevice9
-	static bool initD3D();
 	static DWORD* VTableIDirect3DDevice9;
 	
 	//IDirect3DDevice9::EndScene
@@ -33,6 +32,9 @@ private:
 public:
 	static bool Initialize();
 	static bool Finalize();
+
+	static bool Connect();
+
 	static bool Hook();
 	static bool Unhook();
 };

@@ -7,16 +7,12 @@
 
 Logger::Logger()
 {
-	telemetry = new std::vector<TelemetryChannel>();
-	trace = new std::vector<TraceChannel>();
 	Initialize();
 }
 
 Logger::~Logger()
 {
 	Finalize();
-	delete telemetry;
-	delete trace;
 }
 
 Logger & Logger::Instance()
@@ -27,12 +23,8 @@ Logger & Logger::Instance()
 
 void Logger::Initialize()
 {
-	if (client != nullptr)
-	{
-		return;
-	}
-
-	client = P7_Create_Client(TM("/P7.Sink=Auto /P7.Name=WoT /P7.Addr=127.0.0.1 /P7.Port=9009"));
+	telemetry = new std::vector<TelemetryChannel>();
+	trace = new std::vector<TraceChannel>();
 }
 
 void Logger::Finalize()
@@ -54,7 +46,30 @@ void Logger::Finalize()
 		client->Release();
 		client = nullptr;
 	}
+
+	delete telemetry;
+	delete trace;
 }
+
+bool Logger::Connect(wchar_t* connectionString)
+{
+	if (client != nullptr)
+	{
+		return false;
+	}
+
+	client = P7_Create_Client(connectionString);
+
+	if (client == nullptr)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 
 IP7_Telemetry* Logger::CreateTelemetryChannel(std::wstring channelName)
 {

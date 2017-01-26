@@ -28,7 +28,10 @@ HRESULT WINAPI D3D9::Direct3DDevice9_EndScene_detour(LPDIRECT3DDEVICE9 pDevice)
 	}
 	else
 	{
-		D3D9::telemetry_channel->Add(D3D9::telemetry_counter, Timer::GetDelta(D3D9::TimerTick));
+		if (D3D9::telemetry_channel != nullptr)
+		{
+			D3D9::telemetry_channel->Add(D3D9::telemetry_counter, Timer::GetDelta(D3D9::TimerTick));
+		}
 	}
 
 	return D3D9::Direct3DDevice9_EndScene_trampoline(pDevice);
@@ -37,20 +40,13 @@ HRESULT WINAPI D3D9::Direct3DDevice9_EndScene_detour(LPDIRECT3DDEVICE9 pDevice)
 //intiialization
 bool D3D9::Initialize()
 {
-	//initialize logger
+	//logger
 	D3D9::Logger = &(Logger::Instance());
-	D3D9::telemetry_channel = D3D9::Logger->FindOrCreateTelemetryChannel(L"Telemetry");
-	D3D9::telemetry_channel->Create(TM("Performance/Timeframe (D3D9)"), 0, 60000, 30000, 1, &(D3D9::telemetry_counter));
 
-	//initialize timer
+	//timer
 	D3D9::TimerTick.QuadPart = 0;
 
-	//initialize D3D
-	return initD3D();
-}
-
-bool D3D9::initD3D()
-{
+	//D3D9
 	IDirect3DDevice9* pD3D9Device = nullptr;
 	IDirect3D9* pD3D9 = nullptr;
 
@@ -109,6 +105,14 @@ bool D3D9::Finalize()
 	return true;
 }
 
+bool D3D9::Connect()
+{
+	D3D9::telemetry_channel = D3D9::Logger->FindOrCreateTelemetryChannel(L"Telemetry");
+	if (D3D9::telemetry_channel == nullptr)
+		return false;
+
+	return (D3D9::telemetry_channel->Create(TM("Performance/Timeframe (D3D9)"), 0, 60000, 30000, 1, &(D3D9::telemetry_counter)) != FALSE);
+}
 
 bool D3D9::Hook()
 {

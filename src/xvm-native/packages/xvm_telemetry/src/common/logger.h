@@ -52,6 +52,8 @@ public:
 	void Initialize();
 	void Finalize();
 
+	bool Logger::Connect(wchar_t* connectionString);
+
 	IP7_Telemetry* CreateTelemetryChannel(std::wstring channelName);
 	IP7_Telemetry* FindTelemetryChannel(std::wstring channelName);
 	IP7_Telemetry* FindOrCreateTelemetryChannel(std::wstring channelName);
