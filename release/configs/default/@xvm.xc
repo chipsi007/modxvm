@@ -183,5 +183,9 @@
 
   // XMQP services settings
   // Настройки сервисов XMQP
-  "xmqp": ${"xmqp.xc":"xmqp"}
+  "xmqp": ${"xmqp.xc":"xmqp"},
+
+  // Extended logging and telemetry settings
+  // Настройки расширенного логгирования и телеметрии данных
+  "telemetry": ${"telemetry.xc":"telemetry"}
 }
