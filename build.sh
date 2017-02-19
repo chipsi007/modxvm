@@ -37,6 +37,7 @@ create_directories(){
     mkdir -p ~output/~ver/scripts
     mkdir -p ~output/configs/xvm
     mkdir -p ~output/mods/xfw/actionscript
+    mkdir -p ~output/mods/xfw/native
     mkdir -p ~output/mods/xfw/python
     mkdir -p ~output/mods/shared_resources/xvm/
     popd > /dev/null
@@ -91,6 +92,14 @@ build_xfw(){
     cp -rf src/xfw/~output/python/mods/* ~output/mods/
     cp -rf src/xfw/~output/python/scripts/* ~output/~ver/scripts/
     cp -rf src/xfw/~output/swf/*.swf ~output/mods/xfw/actionscript/
+    cp -rf src/xfw/~output/native/* ~output/mods/xfw/native/
+    popd >/dev/null
+}
+
+build_xfw_fixversion()
+{
+    pushd "$XVMBUILD_ROOT_PATH" >/dev/null
+    mv "src/xfw/~output_package/res_mods/~ver/" "src/xfw/~output_package/res_mods/$XVMBUILD_WOT_VERSION/"
     popd >/dev/null
 }
 
@@ -113,7 +122,10 @@ build_native()
     echo "Building C Python modules"
 
     pushd "$XVMBUILD_ROOT_PATH"/src/xvm-native/ >/dev/null
-    ./build.sh || exit $?
+   
+    mkdir -p "../../~output/mods/packages/"
+    cp -rf "./release/packages/" "../../~output/mods/"
+
     popd >/dev/null
 }
 
@@ -201,6 +213,7 @@ clean_repodir
 create_directories
 
 build_xfw
+build_xfw_fixversion
 build_xpm
 build_as3
 build_native

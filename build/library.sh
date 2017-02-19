@@ -274,8 +274,8 @@ load_repositorystats(){
     popd > /dev/null
 }
 
-#Cleaners
-
+#used in: /build.sh
+#used in: /build/ci/ci_deploy.sh
 clean_repodir(){
     pushd "$XVMBUILD_ROOT_PATH" > /dev/null
 
@@ -286,6 +286,8 @@ clean_repodir(){
     rm -rf src/xfw/src/actionscript/output/*
     rm -rf ~output/
     rm -rf src/xfw/~output/
+    rm -rf src/xfw/~output_package/
+    rm -rf src/xfw/~output_wotmod/
 
     rm -rf xvminst/
 
