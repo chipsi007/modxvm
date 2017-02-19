@@ -59,7 +59,7 @@ void initXVMNativeTelemetry_CPP()
 
 PyMODINIT_FUNC initXVMNativeTelemetry(void)
 {	
-	MessageBox(NULL, "Attach", "Attach", MB_OK);
+	//MessageBox(NULL, "Attach", "Attach", MB_OK);
 
 	Py_InitModule("XVMNativeTelemetry", XVMNativeTelemetryMethods);
 	initXVMNativeTelemetry_CPP();

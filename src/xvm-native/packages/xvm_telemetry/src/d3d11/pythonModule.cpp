@@ -61,7 +61,7 @@ void initXVMNativeTelemetry_CPP()
 
 PyMODINIT_FUNC initXVMNativeTelemetry_d3d11(void)
 {	
-	MessageBox(NULL, "Attach: d3d11", "Attach: d3d11", MB_OK);
+	//MessageBox(NULL, "Attach: d3d11", "Attach: d3d11", MB_OK);
 
 	Py_InitModule("XVMNativeTelemetry_d3d11", XVMNativeTelemetryMethods);
 	initXVMNativeTelemetry_CPP();
