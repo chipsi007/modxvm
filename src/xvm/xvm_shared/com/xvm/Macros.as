@@ -314,24 +314,37 @@ package com.xvm
         private const CACHE_MASK_PLAYER:uint =       0x0008;
         private const CACHE_MASK_TEAMKILLER:uint =   0x0010;
         private const CACHE_MASK_SQUAD:uint =        0x0020;
-        private const CACHE_MASK_POSITION:uint =     0x0040;
-        private const CACHE_MASK_MARKSONGUN:uint =   0x0080;
-        private const CACHE_MASK_X_ENABLED:uint =    0x0100;
-        private const CACHE_MASK_X_SPOTTED:uint =    0x0200;
-        private const CACHE_MASK_X_FIRE:uint =       0x0400;
-        private const CACHE_MASK_X_OVERTURNED:uint = 0x0800;
-        private const CACHE_MASK_X_DROWNING:uint =   0x1000;
-        private const CACHE_MASK_SIZE:uint =         0x2000;
+        private const CACHE_MASK_PERSONAL_SQ:uint =  0x0040;
+        private const CACHE_MASK_POSITION:uint =     0x0080;
+        private const CACHE_MASK_MARKSONGUN:uint =   0x0100;
+        private const CACHE_MASK_X_ENABLED:uint =    0x0200;
+        private const CACHE_MASK_X_SPOTTED:uint =    0x0400;
+        private const CACHE_MASK_X_FIRE:uint =       0x0800;
+        private const CACHE_MASK_X_OVERTURNED:uint = 0x1000;
+        private const CACHE_MASK_X_DROWNING:uint =   0x2000;
+        private const CACHE_MASK_SIZE:uint =         0x4000;
 
         // special case for dynamic macros converted to static
         private const HYBRID_MACROS:Vector.<String> = new <String>["alive", "ready", "selected", "player", "tk",
-            "squad", "squad-num", "position", "sys-color-key", "c:system", "marksOnGun",
+            "squad", "squad-num", "position", "sys-color-key", "c:system", "marksOnGun", "my-alive",
             "x-enabled", "x-sense-on", "x-spotted", "x-fire", "x-overturned", "x-drowning"];
+
+        private const STAT_MACROS:Vector.<String> = new <String>[
+            "xvm-user", "flag", "clanrank", "topclan", "region", "comment", "avglvl", "xte", "xeff", "xwn6",
+            "xwn8", "xwn", "xwgr", "eff", "wn6", "wn8", "wn", "wgr", "r", "xr", "winrate", "rating", "battles",
+            "wins", "kb", "t-winrate", "t-rating", "t-battles", "t-wins", "t-kb", "t-hb", "tdb", "xtdb", "tdv",
+            "tfb", "tsb", "c:xte", "c:xeff", "c:xwn6", "c:xwn8", "c:xwn", "c:xwgr", "c:eff", "c:wn6", "c:wn8",
+            "c:wn", "c:wgr", "c:r", "c:xr", "c:winrate", "c:rating", "c:kb", "c:avglvl", "c:t-winrate",
+            "c:t-rating", "c:t-battles", "c:tdb", "c:xtdb", "c:tdv", "c:tfb", "c:tsb", "a:xte", "a:xeff",
+            "a:xwn6", "a:xwn8", "a:xwn", "a:xwgr", "a:eff", "a:wn6", "a:wn8", "a:wn", "a:wgr", "a:r", "a:xr",
+            "a:winrate", "a:rating", "a:kb", "a:avglvl", "a:t-winrate", "a:t-rating", "a:t-battles", "a:tdb",
+            "a:xtdb", "a:tdv", "a:tfb", "a:tsb", "top_tankers_rank", "top_tankers_emblem", "chancesStatic",
+            "chancesLive", "allyStrengthStatic", "enemyStrengthStatic", "allyStrengthLive", "enemyStrengthLive"];
 
         private var m_globals:Object;
         private var m_players:Object; // { PLAYERNAME1: { macro1: func || value, macro2:... }, PLAYERNAME2: {...} }
         private var m_macros_cache_globals:Object;
-        private var m_macros_cache_players:Vector.<Object>;
+        private var m_macros_cache_players:Array; // Sparse array
         private var m_macros_cache_players_hybrid:Object;
         private var m_macro_parts_cache:Object;
         private var m_format_macro_fmt_suf_cache:Object;
@@ -344,16 +357,22 @@ package com.xvm
             _clear();
         }
 
+        private const nullFunc:Function = function():* { return null; }
+
         private function _clear():void
         {
             m_globals = { };
             m_players = { };
             m_macros_cache_globals = { };
-            m_macros_cache_players = new Vector.<Object>(CACHE_MASK_SIZE, true);
+            m_macros_cache_players = [];
             m_macros_cache_players_hybrid = { };
             m_macro_parts_cache = { };
             m_format_macro_fmt_suf_cache = { };
             m_prepare_value_cache = { };
+            for each (var macros:String in STAT_MACROS)
+            {
+                m_globals[macros] = nullFunc;
+            }
         }
 
         private function _getPlayerCache(options:IVOMacrosOptions):Object
@@ -371,6 +390,8 @@ package com.xvm
                 idx |= CACHE_MASK_TEAMKILLER;
             if (options.squadIndex)
                 idx |= CACHE_MASK_SQUAD;
+            if (options.isSquadPersonal)
+                idx |= CACHE_MASK_PERSONAL_SQ;
             if (isNaN(options.position))
                 idx |= CACHE_MASK_POSITION;
             if (isNaN(options.marksOnGun))
@@ -595,6 +616,7 @@ package com.xvm
                 else
                 {
                     __out.isStaticMacro = false;
+                    value = macroName;
                 }
             }
 

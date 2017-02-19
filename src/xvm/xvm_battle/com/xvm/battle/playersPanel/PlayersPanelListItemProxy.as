@@ -112,8 +112,6 @@ package com.xvm.battle.playersPanel
             _normalHolder = this;
             _topHolder = ui.addChild(new Sprite()) as Sprite;
 
-            setup();
-
             DEFAULT_BG_ALPHA = ui.bg.alpha;
             DEFAULT_SELFBG_ALPHA = ui.selfBg.alpha;
             DEFAULT_DEADBG_ALPHA = ui.deadBg.alpha;
@@ -122,6 +120,8 @@ package com.xvm.battle.playersPanel
             DEFAULT_FRAGS_WIDTH = ui.fragsTF.width;
             DEFAULT_VEHICLE_WIDTH = ui.vehicleTF.width;
             DEFAULT_PLAYERNAMECUT_WIDTH = ui.playerNameCutTF.width;
+
+            setup();
         }
 
         override protected function onDispose():void
@@ -191,7 +191,7 @@ package com.xvm.battle.playersPanel
             {
                 super.draw();
 
-                if (mcfg == null || _userProps == null)
+                if (!xvm_enabled || mcfg == null || _userProps == null)
                     return;
 
                 if (isInvalid(INVALIDATE_PLAYER_STATE))
@@ -285,7 +285,7 @@ package com.xvm.battle.playersPanel
                 //Logger.add("PlayersPanelListItemProxy.onConfigLoaded()");
                 bcfg = Config.config.battle;
                 pcfg = Config.config.playersPanel;
-                mcfg = pcfg[UI_PlayersPanel.PLAYERS_PANEL_STATE_NAMES[ui.xfw_state == PLAYERS_PANEL_STATE.HIDEN ? PLAYERS_PANEL_STATE.LONG : ui.xfw_state]];
+                mcfg = pcfg[UI_PlayersPanel.PLAYERS_PANEL_STATE_NAMES[(ui.xfw_state == -1 || ui.xfw_state == PLAYERS_PANEL_STATE.HIDEN) ? PLAYERS_PANEL_STATE.LONG : ui.xfw_state]];
                 ncfg = pcfg.none;
 
                 // revert mirrored icon and X offset
@@ -317,7 +317,7 @@ package com.xvm.battle.playersPanel
                     ui.selfBg.alpha = DEFAULT_SELFBG_ALPHA;
                     ui.deadBg.alpha = DEFAULT_DEADBG_ALPHA;
                     ui.fragsTF.width = DEFAULT_FRAGS_WIDTH;
-                    ui.vehicleIcon.width = DEFAULT_VEHICLE_WIDTH;
+                    ui.vehicleTF.width = DEFAULT_VEHICLE_WIDTH;
                     ui.dynamicSquad.squadIcon.alpha = 1;
                     ui.playerNameCutTF.width = DEFAULT_PLAYERNAMECUT_WIDTH;
                 }
@@ -334,7 +334,7 @@ package com.xvm.battle.playersPanel
         {
             if (extraFieldsHidden)
             {
-                extraFieldsHidden.visible = e.value && (ui.xfw_state == PLAYERS_PANEL_STATE.HIDEN);
+                extraFieldsHidden.visible = e.value && (ui.xfw_state == -1 || ui.xfw_state == PLAYERS_PANEL_STATE.HIDEN);
             }
         }
 
@@ -356,7 +356,10 @@ package com.xvm.battle.playersPanel
 
         private function onAtlasLoaded(e:Event):void
         {
-            setVehicleIcon(_vehicleImage);
+            if (xvm_enabled)
+            {
+                setVehicleIcon(_vehicleImage);
+            }
         }
 
         private function onClanIconLoaded(vehicleID:Number, playerName:String):void
@@ -367,7 +370,7 @@ package com.xvm.battle.playersPanel
             }
         }
 
-        public function applyState():void
+        private function applyState():void
         {
             //Logger.add("applyState: " + ui.xfw_state);
             BattleState.playersPanelMode = ui.xfw_state;
@@ -404,6 +407,7 @@ package com.xvm.battle.playersPanel
                     }
                     break;
                 case PLAYERS_PANEL_STATE.HIDEN:
+                case -1:
                     BattleState.playersPanelWidthLeft = 0;
                     BattleState.playersPanelWidthRight = 0;
                     ui.visible = false;
@@ -436,7 +440,7 @@ package com.xvm.battle.playersPanel
         private function updateStandardFields():void
         {
             //Logger.add("update: " + ui.xfw_state);
-            if (ui.xfw_state != PLAYERS_PANEL_STATE.HIDEN)
+            if (ui.xfw_state != -1 && ui.xfw_state != PLAYERS_PANEL_STATE.HIDEN)
             {
                 if (ui.fragsTF.visible)
                 {
@@ -501,7 +505,7 @@ package com.xvm.battle.playersPanel
 
         private function updatePositions():void
         {
-            if (ui.xfw_state != PLAYERS_PANEL_STATE.HIDEN)
+            if (ui.xfw_state != -1 && ui.xfw_state != PLAYERS_PANEL_STATE.HIDEN)
             {
                 if (mcfg.standardFields)
                 {
@@ -815,6 +819,7 @@ package com.xvm.battle.playersPanel
             var bindToIconOffset:int = ui.vehicleIcon.x - x + (isLeftPanel || bcfg.mirroredVehicleIcons ? 0 : ICONS_AREA_WIDTH);
             switch (ui.xfw_state)
             {
+                case -1:
                 case PLAYERS_PANEL_STATE.HIDEN:
                     if (extraFieldsHidden)
                     {
