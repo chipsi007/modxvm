@@ -1,6 +1,7 @@
 """ XVM (c) www.modxvm.com 2013-2017 """
 
-# PUBLIC
+#####################################################################
+# public
 
 def start():
     _g_fps.start()
@@ -8,19 +9,27 @@ def start():
 def stop():
     _g_fps.stop()
 
-# PRIVATE
+#####################################################################
+# imports
 
 import os
 import datetime
 import traceback
 
 import BigWorld
+from Avatar import PlayerAvatar
 from BattleReplay import g_replayCtrl
 from debug_utils import *
 
 from xfw import *
-from xvm_main.python.logger import *
-import xvm_main.python.config as config
+
+config=None
+try:
+    from xvm_main.python.logger import *
+    import xvm_main.python.config as config
+
+#####################################################################
+# private
 
 class _Fps():
 
@@ -87,9 +96,25 @@ class _Fps():
         self.values.append({'period': period, 'time': time, 'fps': fps})
         pass
 
+#####################################################################
+# handlers and initialization
 
 _g_fps = None
-def _init():
-    global _g_fps
-    _g_fps = _Fps()
-BigWorld.callback(0, _init)
+
+if config is not None:
+    if config.get('export/fps/enabled'):    
+        def _init():
+            global _g_fps
+            _g_fps = _Fps()
+        BigWorld.callback(0, _init)
+
+        # on map load (battle loading)
+        @registerEvent(PlayerAvatar, 'onEnterWorld')
+        def PlayerAvatar_onEnterWorld(self, *args):
+            fps.start()
+
+
+        # on map close
+        @registerEvent(PlayerAvatar, 'onLeaveWorld')
+        def PlayerAvatar_onLeaveWorld(self, *args):
+            fps.stop()
