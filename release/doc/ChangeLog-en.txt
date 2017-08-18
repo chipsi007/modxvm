@@ -1,4 +1,12 @@
-﻿XVM-6.8.2:
+﻿XVM-6.9.0-dev:
+  [GENERAL]
+  * World of Tanks 9.20
+  * updated capture bar
+
+  [MARKERS]
+  * options iconset/vehicleMarkerAllyAtlas and iconset/vehicleMarkerEnemyAtlas are implemented
+
+XVM-6.8.2:
   [GENERAL]
   * World of Tanks 9.19.1 micropatch 2
 
@@ -39,7 +47,7 @@ XVM-6.8.0:
   [KNOWN ISSUES]
   * bootcamp does not work
   * crash to desktop on battle loading if user OS is Microsoft Windows XP.
-  
+
   [GENERAL]
   * World of Tanks 9.19.1
 

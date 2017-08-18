@@ -283,7 +283,7 @@ class Data(object):
                     self.data['xwn8'] = stats.get('xwn8', None)
                     self.data['wn6'] = stats.get('wn6', None)
                     self.data['xwn6'] = stats.get('xwn6', None)
-                    self.data['eff'] = stats.get('e', None)
+                    self.data['eff'] = stats.get('eff', None)
                     self.data['xeff'] = stats.get('xeff', None)
                     self.data['wgr'] = stats.get('wgr', None)
                     self.data['xwgr'] = stats.get('xwgr', None)
@@ -304,7 +304,6 @@ class Data(object):
             arenaDP = self.sessionProvider.getArenaDP()
             if arenaDP is not None:
                 vInfo = arenaDP.getVehicleInfo(vID=attackerID)
-                self.squadnum = vInfo.squadIndex
                 self.data['squadnum'] = vInfo.squadIndex if vInfo.squadIndex != 0 else None
         else:
             self.data['teamDmg'] = 'unknown'
@@ -315,7 +314,6 @@ class Data(object):
             self.data['level'] = None
             self.data['clanicon'] = None
             self.data['squadnum'] = None
-            self.data['marksOnGun'] = None
         self.updateLabels()
 
 
@@ -331,12 +329,12 @@ class Data(object):
             self.data['caliber'] = None
             self.data['costShell'] = 'unknown'
             return
-        for shell in attacker['vehicleType'].gun['shots']:
-            _shell = shell['shell']
-            if effectsIndex == _shell['effectsIndex']:
-                self.data['shellKind'] = str(_shell['kind']).lower()
-                self.data['caliber'] = _shell['caliber']
-                _id = _shell['id']
+        for shot in attacker['vehicleType'].gun.shots:
+            _shell = shot.shell
+            if effectsIndex == _shell.effectsIndex:
+                self.data['shellKind'] = str(_shell.kind).lower()
+                self.data['caliber'] = _shell.caliber
+                _id = _shell.id
                 nation = nations.NAMES[_id[0]]
                 self.data['costShell'] = 'gold-shell' if _id[1] in self.shells[nation] else 'silver-shell'
                 self.data['shells_stunning'] = _id[1] in self.shells_stunning[nation]
@@ -348,10 +346,10 @@ class Data(object):
             attacker = player.arena.vehicles.get(attackerID)
             vehicleType = attacker['vehicleType']
             if (attacker is not None) and (vehicleType):
-                reload_orig = vehicleType.gun['reloadTime']
+                reload_orig = vehicleType.gun.reloadTime
                 _miscAttrs = vehicleType.miscAttrs
                 crew = 0.94 if _miscAttrs['crewLevelIncrease'] != 0 else 1.0
-                if (vehicleType.gun['clip'][0] == 1) and (_miscAttrs['gunReloadTimeFactor'] != 0.0):
+                if (vehicleType.gun.clip[0] == 1) and (_miscAttrs['gunReloadTimeFactor'] != 0.0):
                     rammer = _miscAttrs['gunReloadTimeFactor']
                 else:
                     rammer = 1
@@ -639,10 +637,11 @@ class DamageLog(_Base):
             self.listLog.insert(0, parser(config.get(self.S_FORMAT_HISTORY)))
         else:
             self.listLog[numberLine] = parser(config.get(self.S_FORMAT_HISTORY))
-        if not config.get(self.S_MOVE_IN_BATTLE):
-            self.x = parser(config.get(self.S_X))
-            self.y = parser(config.get(self.S_Y))
-        self.shadow = shadow_value(self.section)
+        if (self.section == SECTION_LOG) or (self.section == SECTION_LOG_ALT):
+            if not config.get(self.S_MOVE_IN_BATTLE):
+                self.x = parser(config.get(self.S_X))
+                self.y = parser(config.get(self.S_Y))
+            self.shadow = shadow_value(self.section)
 
     def addLine(self, attackerID, attackReasonID):
         if not (attackerID is None or attackReasonID is None):
@@ -817,12 +816,29 @@ def DamageLogPanel_as_summaryStatsS(base, self, damage, blocked, assist, stun):
         return base(self, damage, blocked, assist, stun)
 
 
-@overrideMethod(DamageLogPanel, '_onTotalEfficiencyUpdated')
-def DamageLogPanel_onTotalEfficiencyUpdated(base, self, diff):
-    if config.get('damageLog/disabledSummaryStats') and config.get(DAMAGE_LOG_ENABLED):
-        return
-    else:
-        return base(self, diff)
+
+@overrideMethod(DamageLogPanel, 'as_updateSummaryDamageValueS')
+def as_updateSummaryDamageValueS(base, self, value):
+    if not (config.get('damageLog/disabledSummaryStats') and config.get(DAMAGE_LOG_ENABLED)):
+        return base(self, value)
+
+
+@overrideMethod(DamageLogPanel, 'as_updateSummaryBlockedValueS')
+def as_updateSummaryBlockedValueS(base, self, value):
+    if not (config.get('damageLog/disabledSummaryStats') and config.get(DAMAGE_LOG_ENABLED)):
+        return base(self, value)
+
+
+@overrideMethod(DamageLogPanel, 'as_updateSummaryAssistValueS')
+def as_updateSummaryAssistValueS(base, self, value):
+    if not (config.get('damageLog/disabledSummaryStats') and config.get(DAMAGE_LOG_ENABLED)):
+        return base(self, value)
+
+
+@overrideMethod(DamageLogPanel, 'as_updateSummaryStunValueS')
+def as_updateSummaryStunValueS(base, self, value):
+    if not (config.get('damageLog/disabledSummaryStats') and config.get(DAMAGE_LOG_ENABLED)):
+        return base(self, value)
 
 
 @registerEvent(Vehicle, 'onHealthChanged')
