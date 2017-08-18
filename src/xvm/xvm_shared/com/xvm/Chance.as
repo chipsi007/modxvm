@@ -167,9 +167,9 @@ package com.xvm
             var Tmin:Number = stat.v.data.tierLo;
             var Tmax:Number = stat.v.data.tierHi;
             var Ea:Number = isNaN(stat.xwn8) ? Config.config.consts.AVG_XVMSCALE : stat.xwn8;
-            var Ean:Number = Ea + (Ea * (((stat.lvl || T) - T) * 0.05));
+            var Ean:Number = Ea + (Ea * (((stat.avglvl || T) - T) * 0.05));
             var Ra:Number = stat.winrate || Config.config.consts.AVG_GWR;
-            var Ba:Number = stat.b || Config.config.consts.AVG_BATTLES;
+            var Ba:Number = stat.battles || Config.config.consts.AVG_BATTLES;
 
             // 1
             var Klvl:Number = (Tmax + Tmin) / 2 - T;
@@ -208,9 +208,9 @@ package com.xvm
             var Et:Number = Bt >= 50 && stat.v.xte ? stat.v.xte : 0;
             var AvgW:Number = stat.v.data.avgR || Config.config.consts.AVG_GWR;
             var Ea:Number = isNaN(stat.xwn8) ? Config.config.consts.AVG_XVMSCALE : stat.xwn8;
-            var Ean:Number = Ea + (Ea * (((stat.lvl || T) - T) * 0.05));
+            var Ean:Number = Ea + (Ea * (((stat.avglvl || T) - T) * 0.05));
             var Ra:Number = stat.winrate || Config.config.consts.AVG_GWR;
-            var Ba:Number = stat.b || Config.config.consts.AVG_BATTLES;
+            var Ba:Number = stat.battles || Config.config.consts.AVG_BATTLES;
 
             // 1
             var Klvl:Number = (Tmax + Tmin) / 2 - T;
