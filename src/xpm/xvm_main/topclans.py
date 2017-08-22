@@ -1,0 +1,48 @@
+""" XVM (c) www.modxvm.com 2013-2017 """
+
+import config
+from logger import *
+
+# PUBLIC
+
+def getClanInfo(clanAbbrev):
+    def _get(clanAbbrev):
+        global _clansInfo
+        if not _clansInfo:
+            return None
+        top = _clansInfo['top'].get(clanAbbrev, None)
+        if top:
+            rank = int(top.get('rank', None))
+            if rank:
+                if 0 < rank <= config.networkServicesSettings.topClansCount:
+                    return top
+        return _clansInfo['persist'].get(clanAbbrev, None)
+
+    res = _get(clanAbbrev)
+    if res:
+        # TODO: rename cid to clan_id in XVM API
+        res['clan_id'] = res['cid']
+        del res['cid']
+        ###
+        res['rank'] = int(res['rank'])
+        res['clan_id'] = int(res['clan_id'])
+    return res
+
+def clear():
+    global _clansInfo
+    _clansInfo = None
+
+def update(data={}):
+    if data is None:
+        data = {}
+    global _clansInfo
+    _clansInfo = {
+        'top': data.get('topClans', {}),
+        'persist': data.get('persistClans', {})}
+
+    # DEBUG
+    #log(clans)
+    # clans['persist']['FOREX'] = {"rank":0,"clan_id":38503,"emblem":"http://stat.modxvm.com/emblems/persist/{size}/38503.png"}
+    # /DEBUG
+
+_clansInfo = None
