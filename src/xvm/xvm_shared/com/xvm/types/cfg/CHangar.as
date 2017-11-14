@@ -1,0 +1,44 @@
+/**
+ * XVM: eXtended Visualization Mod for World of Tanks.
+ * https://modxvm.com/
+ */
+package com.xvm.types.cfg
+{
+    import com.xfw.*;
+
+    public dynamic class CHangar implements ICloneable
+    {
+        public var hangarType:*;
+        public var enableGoldLocker:*;
+        public var enableFreeXpLocker:*;
+        public var defaultBoughtForCredits:*;
+        public var hidePricesInTechTree:*;
+        public var masteryMarkInTechTree:*;
+        public var allowExchangeXPInTechTree:*;
+        public var enableCrewAutoReturn:*;
+        public var crewReturnByDefault:*;
+        public var crewMaxPerksCount:*;
+        public var barracksShowFlags:*;
+        public var barracksShowSkills:*;
+        public var enableEquipAutoReturn:*;
+        public var blockVehicleIfLowAmmo:*;
+        public var lowAmmoPercentage:*;
+        public var pingServers:CPingServers;
+        public var onlineServers:COnlineServers;
+        public var serverInfo:CHangarElement;
+        public var commonQuests: CHangarElement;
+        public var personalQuests: CHangarElement;
+        public var vehicleName: CHangarElement;
+        public var showBuyPremiumButton:*;
+        public var showPremiumShopButton:*;
+        public var notificationsButtonType:String;
+        public var carousel:CCarousel;
+        public var widgets:Array;
+        public var camera:CHangarCamera;
+
+        public function clone():*
+        {
+            throw new Error("clone() method is not implemented");
+        }
+    }
+}
