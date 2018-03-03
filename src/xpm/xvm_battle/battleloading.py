@@ -1,0 +1,46 @@
+""" XVM (c) https://modxvm.com 2013-2018 """
+
+#####################################################################
+# imports
+
+import cgi
+import re
+
+from gui.Scaleform.daapi.view.battle.shared.battle_loading import BattleLoading
+
+from xfw import *
+
+from xvm_main.python.logger import *
+import xvm_main.python.config as config
+
+
+#####################################################################
+# handlers
+
+@overrideMethod(BattleLoading, 'as_setTipTitleS')
+def BattleLoading_as_setTipTitleS(base, self, title):
+    title = cgi.escape('XVM v{}     {}'.format(config.get('__xvmVersion'), config.get('__xvmIntro')))
+    stateInfo = config.get('__stateInfo')
+    if 'error' in stateInfo:
+        title = '<font color="#FF4040">{}</font>'.format(title)
+    elif 'warning' in stateInfo:
+        title = '<font color="#FFD040">{}</font>'.format(title)
+    title = '<p align="left"><font size="16">{}</font></p>'.format(title)
+    return base(self, title)
+
+@overrideMethod(BattleLoading, 'as_setTipS')
+def BattleLoading_as_setTipS(base, self, val):
+    stateInfo = config.get('__stateInfo')
+    if 'error' in stateInfo and stateInfo['error']:
+        val = getTipText(stateInfo['error'], True)
+    elif 'warning' in stateInfo and stateInfo['warning']:
+        val = getTipText(stateInfo['warning'])
+    return base(self, val)
+
+def getTipText(text, isError=False):
+    text = cgi.escape(text)
+    if isError:
+        text = re.sub(r'(line #\d+)', r'<font color="#FF4040">\1</font>', text)
+        text = re.sub(r'([^/\\]+\.xc)', r'<font color="#FF4040">\1</font>', text)
+        text = '<textformat leading="0"><p align="left"><font size="12">{}</font></p></textformat>'.format(text)
+    return text
