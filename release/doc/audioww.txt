@@ -1,0 +1,18 @@
+﻿List of sound events in the sound bank res_mods/X.Y.Z/audioww/xvm.bnk:
+  "emptyEvent"            - empty event for silent sound
+  "xvm_sixthSense"        - sixthSense perk
+  "xvm_sixthSenseVoice"   - sixthSense perk with voice alert
+  "xvm_sixthSenseRudy"    - sixthSense perk for vehicle Т-34-85 Rudy
+  "xvm_fireAlert"         - fire alert
+  "xvm_ammoBay"           - ammo bay damage alert
+  "xvm_gunReloaded"       - sound of the end of recharging the gun
+  "xvm_enemySighted"      - enemy detection
+  "xvm_enemySightedVoice" - enemy detection with voice alert
+
+  Notifications informing about the imminent end of the battle:
+  "xvm_battleEnd_5_min"   - 5 minutes before the end of the battle
+  "xvm_battleEnd_3_min"   - 3 minutes before the end of the battle
+  "xvm_battleEnd_2_min"   - 2 minutes before the end of the battle
+  "xvm_battleEnd_1_min"   - 1 minute before the end of the battle
+  "xvm_battleEnd_30_sec"  - 30 seconds before the end of the battle
+  "xvm_battleEnd_5_sec"   - 5 second before the end of the battle
